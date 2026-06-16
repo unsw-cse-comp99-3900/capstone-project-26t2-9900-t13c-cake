@@ -85,7 +85,7 @@ See `docs/Project_07_Proposal_Draft.docx` and wireframes in `docs/wireframes/` f
 
 - `main`: stable branch for final and reviewed code
 - `dev`: development integration branch
-- `feature/*`: feature branches for individual tasks
+- `feat/*`: feature branches for individual tasks
 
 ## Team members
 
