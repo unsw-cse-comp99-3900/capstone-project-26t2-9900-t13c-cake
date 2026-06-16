@@ -28,5 +28,7 @@ model EvidenceRecord {
   updatedAt                DateTime  @updatedAt
   deletedAt                DateTime?
 
+  @@index([deletedAt])
+  @@index([context, engagementLevel])
   @@map("evidence_records")
 }
