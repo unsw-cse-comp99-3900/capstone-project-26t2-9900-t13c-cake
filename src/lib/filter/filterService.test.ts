@@ -70,6 +70,41 @@ test("uses OR logic across selected jurisdictions", () => {
   );
 });
 
+test("ignores duplicate and blank selected jurisdictions", () => {
+  const records = [
+    evidence("nsw", { jurisdictions: "NSW" }),
+    evidence("vic", { jurisdictions: "VIC" }),
+    evidence("national", { jurisdictions: "National" }),
+  ];
+
+  const result = filterEvidence(records, {
+    ...baseFilters,
+    jurisdictions: [" ", "NSW", " nsw ", ""],
+  });
+
+  assert.deepEqual(
+    result.map((record) => record.id),
+    ["nsw", "national"],
+  );
+});
+
+test("returns National records when National is selected directly", () => {
+  const records = [
+    evidence("national", { jurisdictions: "National" }),
+    evidence("nsw", { jurisdictions: "NSW" }),
+  ];
+
+  const result = filterEvidence(records, {
+    ...baseFilters,
+    jurisdictions: ["National"],
+  });
+
+  assert.deepEqual(
+    result.map((record) => record.id),
+    ["national"],
+  );
+});
+
 test("supports records that apply to multiple jurisdictions", () => {
   const records = [
     evidence("multi", { jurisdictions: "ACT, NSW" }),
@@ -77,6 +112,23 @@ test("supports records that apply to multiple jurisdictions", () => {
   ];
 
   const result = filterEvidence(records, baseFilters);
+
+  assert.deepEqual(
+    result.map((record) => record.id),
+    ["multi", "national"],
+  );
+});
+
+test("returns a multi-jurisdiction record only once when multiple selected jurisdictions match", () => {
+  const records = [
+    evidence("multi", { jurisdictions: "NSW, VIC" }),
+    evidence("national", { jurisdictions: "National" }),
+  ];
+
+  const result = filterEvidence(records, {
+    ...baseFilters,
+    jurisdictions: ["NSW", "VIC"],
+  });
 
   assert.deepEqual(
     result.map((record) => record.id),
@@ -106,6 +158,23 @@ test("applies context, sub-category, and engagement filters with AND logic", () 
   assert.deepEqual(
     result.map((record) => record.id),
     ["match"],
+  );
+});
+
+test("matches sub-category values after trimming whitespace and normalizing case", () => {
+  const records = [
+    evidence("normalized", { subCategory: " suicide " }),
+    evidence("wrong-sub-category", { subCategory: "Carers" }),
+  ];
+
+  const result = filterEvidence(records, {
+    ...baseFilters,
+    subCategory: " SUICIDE ",
+  });
+
+  assert.deepEqual(
+    result.map((record) => record.id),
+    ["normalized"],
   );
 });
 
