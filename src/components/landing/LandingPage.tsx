@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CitationCopyButton } from "./CitationCopyButton";
 
 const instructions = [
@@ -39,15 +40,15 @@ export function LandingPage() {
             <p className="mt-4 w-full leading-7 text-slate-300">
               This decision tool is designed for researchers to seek guidance regarding the remuneration of consumer representatives across diverse populations and locations.
             </p>
-            <a
-              href="#questionnaire"
+            <Link
+              href="/questionnaire"
               className="mt-8 inline-flex min-h-12 items-center justify-center rounded-lg bg-teal-300 px-6 py-3 font-bold text-[#082f3b] shadow-lg shadow-black/15 transition hover:bg-teal-200 focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-white"
             >
               Start the questionnaire
               <span aria-hidden="true" className="ml-2">
                 &rarr;
               </span>
-            </a>
+            </Link>
         </div>
       </section>
 
