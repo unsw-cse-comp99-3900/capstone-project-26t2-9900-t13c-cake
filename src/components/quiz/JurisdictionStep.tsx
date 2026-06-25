@@ -5,26 +5,29 @@ import { useQuizState } from "@/contexts/QuizStateContext";
 
 /** CAKE-3 — JurisdictionStep */
 export function JurisdictionStep() {
-  const { answers, toggleJurisdiction, clearJurisdictions } = useQuizState();
+  const { answers, toggleJurisdiction, clearJurisdictions, setCurrentStep } = useQuizState();
   const hasSelection = answers.jurisdictions.length > 0;
 
   return (
     <section
       aria-labelledby="jurisdiction-heading"
-      className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:p-10"
+      className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-6"
     >
       <div className="max-w-3xl">
         <h2
           id="jurisdiction-heading"
-          className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl"
+          className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl"
         >
-          Which jurisdiction should the guidance apply to?
+          Which locations apply to your project?
         </h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          Select all locations that apply to your project.
+        </p>
       </div>
 
-      <fieldset className="mt-8">
+      <fieldset className="mt-5">
         <legend className="sr-only">Select jurisdictions</legend>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {JURISDICTIONS.map((jurisdiction) => {
             const optionId = `jurisdiction-${jurisdiction.value.toLowerCase()}`;
             const isSelected = answers.jurisdictions.includes(jurisdiction.value);
@@ -34,7 +37,7 @@ export function JurisdictionStep() {
                 key={jurisdiction.value}
                 htmlFor={optionId}
                 className={[
-                  "group cursor-pointer rounded-2xl border p-5 transition",
+                  "group cursor-pointer rounded-xl border p-4 transition",
                   "focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-teal-700",
                   isSelected
                     ? "border-teal-600 bg-teal-50 shadow-sm"
@@ -62,7 +65,7 @@ export function JurisdictionStep() {
         </div>
       </fieldset>
 
-      <div className="mt-8 flex flex-col gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm leading-6 text-slate-600" aria-live="polite">
           {hasSelection
             ? `${answers.jurisdictions.length} jurisdiction${answers.jurisdictions.length > 1 ? "s" : ""} selected`
@@ -74,14 +77,15 @@ export function JurisdictionStep() {
             type="button"
             onClick={clearJurisdictions}
             disabled={!hasSelection}
-            className="min-h-11 rounded-lg border border-slate-300 px-5 py-2.5 font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-45"
+            className="min-h-10 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-45"
           >
             Clear selection
           </button>
           <button
             type="button"
+            onClick={() => setCurrentStep(2)}
             disabled={!hasSelection}
-            className="min-h-11 rounded-lg bg-teal-700 px-5 py-2.5 font-bold text-white shadow-sm transition hover:bg-teal-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600 disabled:shadow-none"
+            className="min-h-10 rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600 disabled:shadow-none"
           >
             Continue
           </button>

@@ -1,101 +1,108 @@
 # Capstone Project 26T2 T13C Cake
 
-Interactive decision tool to support remuneration for health consumer representatives in Australia (COMP9900 / COMP3900 Project 07).
-
-This repository contains a **blank starter scaffold** only — layered folder structure, route stubs, and Prisma schema aligned to `docs/architecture.drawio`. Feature implementation is left to each sprint.
-
-## Tech stack
-
-- **Frontend:** Next.js 15, React 19, TypeScript, Tailwind CSS
-- **Backend:** Next.js Route Handlers (Controller layer)
-- **Data:** Prisma ORM, SQLite (local dev), PostgreSQL (production)
-- **Architecture:** Presentation → Controller → Service → Repository → Database
-
 ## Quick start
 
 ```bash
 npm install
 cp .env.example .env
-npx prisma db push
+npx prisma migrate dev
+npm run db:seed
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+- App: [http://localhost:3000](http://localhost:3000)
+- Evidence API: [http://localhost:3000/api/evidence](http://localhost:3000/api/evidence)
 
-## Project structure
+## CAKE-2: Evidence table (database)
+
+**Contributors:** Yihui Liu, Zeyu Yang
+
+### Schema
+
+The `evidence_records` table mirrors the supervisor evidence-table columns:
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `publisher` | string | Publishing organisation |
+| `title` | string | Framework title |
+| `year` | int? | Publication year |
+| `link` | string? | Source document URL |
+| `jurisdictions` | string | Jurisdiction code (e.g. `NSW`, `National`) |
+| `context` | string | Health/research context |
+| `subCategory` | string? | Optional sub-category |
+| `engagementLevel` | string | Consumer engagement level |
+| `minHourlyRate` / `maxHourlyRate` | float? | Indicative hourly rate range (AUD) |
+| `reimbursementGuidance` | boolean | Reimbursement guidance included |
+| `unpaidEngagementGuidance` | boolean | Unpaid engagement guidance included |
+| `exampleOrganisations` | string? | Example adopting organisations |
+| `createdAt` / `updatedAt` | datetime | Audit timestamps |
+| `deletedAt` | datetime? | Soft delete |
+
+### Seed data
+
+- **Source:** `prisma/seed-data.json` (71 records)
+- **Runner:** `prisma/seed.ts` — imports all rows on an empty database; skips if records already exist
+- **Validation:** `prisma/seed-data.validation.ts` — checks required fields and rate ranges before insert
+
+Regenerate seed JSON from an updated Excel file:
+
+```bash
+npm run db:import-excel
+npm run db:seed
+```
+
+### Public API
 
 ```
-src/
-  app/
-    page.tsx                  # Public home (placeholder)
-    admin/page.tsx            # Admin shell (Sprint 2)
-    api/
-      evidence/route.ts       # GET /api/evidence
-      evidence/import/route.ts
-      evidence/export/route.ts
-      auth/login/route.ts
-  components/
-    landing/                  # CAKE-1 stubs
-    quiz/                     # CAKE-3 stubs
-    results/                  # CAKE-5 stubs
-    admin/                    # CAKE-10–12 stubs
-    layout/
-  contexts/                   # QuizStateContext stub
-  lib/
-    api/                      # EvidenceApiClient stub
-    filter/                   # FilterService stub (CAKE-4)
-    quiz/
-    constants/
-  server/
-    services/                 # EvidenceService, AuthService, etc.
-    repositories/             # EvidenceRepository
-    middleware/               # AuthMiddleware
-    db/                       # Prisma client
-prisma/
-  schema.prisma               # evidence_records table
-  seed.ts                     # empty seed runner
-  seed-data.json              # add Excel export here (CAKE-2)
-docs/                         # proposal, wireframes, architecture
+GET /api/evidence
 ```
 
-## User story mapping
+Returns all non-deleted evidence records as JSON.
 
-| Layer / path | Sprint stories |
-|--------------|----------------|
-| `components/landing` | CAKE-1 |
-| `prisma/`, `api/evidence` | CAKE-2 |
-| `components/quiz`, `contexts/` | CAKE-3 |
-| `lib/filter/` | CAKE-4 |
-| `components/results` | CAKE-5 |
-| `components/admin`, `api/auth`, import/export | CAKE-10–12 |
+**Example response shape:**
 
-See `docs/Project_07_Proposal_Draft.docx` and wireframes in `docs/wireframes/` for requirements.
+```json
+[
+  {
+    "id": "clx…",
+    "publisher": "Canberra Health Services",
+    "title": "Consumer, carer and community representative reimbursement",
+    "year": 2025,
+    "link": "https://…",
+    "jurisdictions": "ACT",
+    "context": "General Public",
+    "subCategory": null,
+    "engagementLevel": "Inform",
+    "minHourlyRate": 50,
+    "maxHourlyRate": 100,
+    "reimbursementGuidance": true,
+    "unpaidEngagementGuidance": false,
+    "exampleOrganisations": null,
+    "createdAt": "…",
+    "updatedAt": "…"
+  }
+]
+```
+
+### Tests
+
+```bash
+npm test
+```
+
+Covers seed JSON integrity (row count, required fields, jurisdiction codes, rate ranges) and database seeding behaviour (record count, soft delete, audit timestamps).
 
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start dev server |
+| `npm run dev` | Start development server |
 | `npm run build` | Production build |
-| `npm run lint` | ESLint |
-| `npm run db:seed` | Run seed script (no-op until data added) |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm test` | Run unit tests |
+| `npm run db:migrate` | Create / apply Prisma migrations |
+| `npm run db:seed` | Seed evidence table from `seed-data.json` |
+| `npm run db:import-excel` | Regenerate `seed-data.json` from Excel |
 | `npm run db:studio` | Open Prisma Studio |
-
-## Branch strategy
-
-- `main`: stable branch for final and reviewed code
-- `dev`: development integration branch
-- `feat/*`: feature branches for individual tasks
-
-## Team members
-
-- Yihui Liu
-- Xixi Wei
-- Jiawei Dai
-- Jialun Li
-- Zhengqian Zhang
-- Zeyu Yang
-
-## Client
-
-Deborah Johnston & Loc Nguyen (i2i, UNSW Population Health)
+| `npm run reset:next` | Clear Next.js build cache |

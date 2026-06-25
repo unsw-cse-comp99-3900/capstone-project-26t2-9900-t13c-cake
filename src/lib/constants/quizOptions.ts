@@ -40,5 +40,3 @@ export const JURISDICTIONS = [
   },
 ] as const;
 
-export const CONTEXTS = [] as const;
-export const ENGAGEMENT_LEVELS = [] as const;

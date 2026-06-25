@@ -27,18 +27,23 @@ export const evidenceRepository = {
   },
 
   async create(_data: unknown): Promise<EvidenceRecordDTO> {
+    void _data;
     throw new Error("Not implemented");
   },
 
   async update(_id: string, _data: unknown): Promise<EvidenceRecordDTO> {
+    void _id;
+    void _data;
     throw new Error("Not implemented");
   },
 
   async softDelete(_id: string): Promise<void> {
+    void _id;
     throw new Error("Not implemented");
   },
 
   async bulkUpsert(_rows: unknown[]): Promise<void> {
+    void _rows;
     throw new Error("Not implemented");
   },
 };
