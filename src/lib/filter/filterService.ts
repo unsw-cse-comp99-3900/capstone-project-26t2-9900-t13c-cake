@@ -7,6 +7,11 @@ export type QuizFilters = {
   engagementLevel: string;
 };
 
+export type SubCategoryOptionFilters = Pick<
+  QuizFilters,
+  "jurisdictions" | "context"
+>;
+
 const NATIONAL = "national";
 
 function normalize(value: string): string {
@@ -34,14 +39,51 @@ function compareText(left: string, right: string): number {
   return left < right ? -1 : 1;
 }
 
+function toSelectedJurisdictionSet(jurisdictions: string[]): Set<string> {
+  return new Set(jurisdictions.map(normalize).filter(Boolean));
+}
+
+function recordMatchesSelectedJurisdictions(
+  record: EvidenceRecordDTO,
+  selectedJurisdictions: Set<string>,
+): boolean {
+  return recordJurisdictions(record).some(
+    (jurisdiction) =>
+      jurisdiction === NATIONAL || selectedJurisdictions.has(jurisdiction),
+  );
+}
+
+export function getAvailableSubCategories(
+  records: EvidenceRecordDTO[],
+  filters: SubCategoryOptionFilters,
+): string[] {
+  const selectedJurisdictions = toSelectedJurisdictionSet(filters.jurisdictions);
+  const context = normalize(filters.context);
+
+  if (selectedJurisdictions.size === 0 || !context) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      records
+        .filter(
+          (record) =>
+            recordMatchesSelectedJurisdictions(record, selectedJurisdictions) &&
+            normalize(record.context) === context,
+        )
+        .map((record) => record.subCategory?.trim() ?? "")
+        .filter(Boolean),
+    ),
+  ).sort(compareText);
+}
+
 /** CAKE-4 — client-side filter engine */
 export function filterEvidence(
   records: EvidenceRecordDTO[],
   filters: QuizFilters,
 ): EvidenceRecordDTO[] {
-  const selectedJurisdictions = new Set(
-    filters.jurisdictions.map(normalize).filter(Boolean),
-  );
+  const selectedJurisdictions = toSelectedJurisdictionSet(filters.jurisdictions);
   const context = normalize(filters.context);
   const subCategory = filters.subCategory
     ? normalize(filters.subCategory)
@@ -53,10 +95,9 @@ export function filterEvidence(
   }
 
   const matches = records.filter((record) => {
-    const jurisdictions = recordJurisdictions(record);
-    const matchesJurisdiction = jurisdictions.some(
-      (jurisdiction) =>
-        jurisdiction === NATIONAL || selectedJurisdictions.has(jurisdiction),
+    const matchesJurisdiction = recordMatchesSelectedJurisdictions(
+      record,
+      selectedJurisdictions,
     );
 
     return (
