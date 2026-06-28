@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Evidence-table row mirroring supervisor Excel columns (CAKE-2).
+model EvidenceRecord {
+  id                       String    @id @default(cuid())
+  publisher                String
+  title                    String
+  year                     Int?
+  link                     String?
+  /// Comma-separated jurisdictions, e.g. "National,NSW"
+  jurisdictions            String
+  context                  String
+  subCategory              String?
+  engagementLevel          String
+  minHourlyRate            Float?
+  maxHourlyRate            Float?
+  reimbursementGuidance    Boolean   @default(false)
+  unpaidEngagementGuidance Boolean   @default(false)
+  exampleOrganisations     String?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+  deletedAt                DateTime?
+
+  @@index([deletedAt])
+  @@index([context, engagementLevel])
+  @@map("evidence_records")
+}
