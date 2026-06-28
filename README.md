@@ -236,11 +236,11 @@ Shows filtered remuneration guidance inline below the questionnaire on `/questio
 
 | Name | Role |
 |------|------|
-| Xixi Wei | Project Manager / Client Liaison |
-| Zeyu Yang | Technical Lead |
-| Yihui Liu | Frontend Developer |
-| Jiawei Dai | Backend / Data Engineer |
-| Jialun Li | UI/UX Designer |
-| Zhengqian Zhang | QA / Documentation |
+| Xixi Wei | Project Owner |
+| Zeyu Yang | Scrum Master |
+| Yihui Liu | Test Engineer |
+| Jiawei Dai | Frontend Engineer |
+| Jialun Li | Backend Engineer |
+| Zhengqian Zhang | UI/UX Engineer |
 
 **Client:** Deborah Johnston & Loc Nguyen (i2i, UNSW Population Health)
