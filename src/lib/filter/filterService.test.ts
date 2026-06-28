@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { performance } from "node:perf_hooks";
 import { test } from "vitest";
 import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
-import { filterEvidence, type QuizFilters } from "./filterService";
+import {
+  filterEvidence,
+  getAvailableSubCategories,
+  type QuizFilters,
+} from "./filterService";
 
 const baseFilters: QuizFilters = {
   jurisdictions: ["NSW"],
@@ -189,6 +193,68 @@ test("does not require a record sub-category when the filter is omitted", () => 
   assert.deepEqual(
     result.map((record) => record.id),
     ["general", "specific"],
+  );
+});
+
+test("gets available sub-categories for the selected jurisdiction and context", () => {
+  const records = [
+    evidence("nsw-cancer", {
+      jurisdictions: "NSW",
+      context: "Medical Conditions",
+      subCategory: "Cancer",
+    }),
+    evidence("national-allergies", {
+      jurisdictions: "National",
+      context: "Medical Conditions",
+      subCategory: "Allergies",
+    }),
+    evidence("vic-asthma", {
+      jurisdictions: "VIC",
+      context: "Medical Conditions",
+      subCategory: "Asthma",
+    }),
+    evidence("nsw-general", {
+      jurisdictions: "NSW",
+      context: "Medical Conditions",
+      subCategory: null,
+    }),
+    evidence("wrong-context", {
+      jurisdictions: "NSW",
+      context: "Mental Health",
+      subCategory: "Suicide",
+    }),
+  ];
+
+  const result = getAvailableSubCategories(records, {
+    jurisdictions: ["NSW"],
+    context: "Medical Conditions",
+  });
+
+  assert.deepEqual(result, ["Allergies", "Cancer"]);
+});
+
+test("returns no sub-category options until required option filters are selected", () => {
+  const records = [
+    evidence("nsw-cancer", {
+      jurisdictions: "NSW",
+      context: "Medical Conditions",
+      subCategory: "Cancer",
+    }),
+  ];
+
+  assert.deepEqual(
+    getAvailableSubCategories(records, {
+      jurisdictions: [],
+      context: "Medical Conditions",
+    }),
+    [],
+  );
+  assert.deepEqual(
+    getAvailableSubCategories(records, {
+      jurisdictions: ["NSW"],
+      context: " ",
+    }),
+    [],
   );
 });
 
