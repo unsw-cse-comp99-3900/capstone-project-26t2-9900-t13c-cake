@@ -203,6 +203,41 @@ Shows filtered remuneration guidance inline below the questionnaire on `/questio
 
 ---
 
+## CAKE-10: Admin authentication
+
+**Route:** `/admin`  
+**API:** `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/session`, `POST /api/auth/reset-password`  
+**Key files:** `src/components/admin/AdminLoginGate.tsx`, `src/components/admin/AdminLayout.tsx`, `src/components/admin/ForgotPasswordForm.tsx`, `src/server/services/authService.ts`, `src/server/middleware/authMiddleware.ts`
+
+Protected maintenance area for supervisors and i2i staff. Public users access the questionnaire without an account.
+
+**Implemented:**
+- Session-based admin sign-in using `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `SESSION_SECRET` from `.env`
+- Signed httpOnly session cookie (`admin_session`, 8-hour expiry)
+- `AdminLoginGate` — login form for guests; renders child content when authenticated
+- `AdminLayout` — maintenance header with **Back to public tool** and **Sign out**
+- **Account centre** at `/admin` with navigation to administrator tools
+- **Account settings** at `/admin/account` with `POST /api/auth/change-username` and `POST /api/auth/change-password` (persists to `admin_account` table)
+- **Forgot password** at `/admin/forgot-password` with `POST /api/auth/reset-password` (requires `ADMIN_RECOVERY_CODE`; resets username and password)
+- Sub-page scaffolds: `/admin/records` (includes Excel import/export), `/admin/analytics`, `/admin/surveys`
+- `requireAdmin()` middleware for protected write routes (wired on import/export stubs)
+- Low-emphasis **Administrator account centre** link in the landing page footer
+
+**Configure locally:**
+
+```bash
+cp .env.example .env
+# Set ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_SECRET, and ADMIN_RECOVERY_CODE
+```
+
+**Tests:**
+
+```bash
+npm test
+```
+
+---
+
 ## Scripts
 
 | Command | Description |

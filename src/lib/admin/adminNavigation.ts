@@ -1,0 +1,55 @@
+export type AdminNavStatus = "available" | "coming_soon";
+
+export type AdminNavItem = {
+  id: string;
+  title: string;
+  description: string;
+  href: string;
+  status: AdminNavStatus;
+  story?: string;
+};
+
+export const ADMIN_HOME_PATH = "/admin";
+export const ADMIN_FORGOT_PASSWORD_PATH = "/admin/forgot-password";
+export const ADMIN_RESET_MESSAGE_KEY = "admin-account-reset-message";
+
+export const ADMIN_PUBLIC_PATHS = [ADMIN_FORGOT_PASSWORD_PATH] as const;
+
+export const adminNavigation: AdminNavItem[] = [
+  {
+    id: "records",
+    title: "Evidence records",
+    description:
+      "Browse, create, edit, and soft-delete remuneration guidance records. Import and export the evidence table via Excel from the same workspace.",
+    href: "/admin/records",
+    status: "coming_soon",
+  },
+  {
+    id: "account",
+    title: "Account settings",
+    description:
+      "Update your administrator username and password to keep maintenance access secure.",
+    href: "/admin/account",
+    status: "available",
+  },
+  {
+    id: "analytics",
+    title: "Website usage",
+    description:
+      "View anonymised traffic trends such as page visits, questionnaire starts, and completion rates.",
+    href: "/admin/analytics",
+    status: "coming_soon",
+  },
+  {
+    id: "surveys",
+    title: "Anonymous survey data",
+    description:
+      "Review aggregated, de-identified questionnaire selections to understand how the tool is being used.",
+    href: "/admin/surveys",
+    status: "coming_soon",
+  },
+];
+
+export function getAdminNavItem(pathname: string): AdminNavItem | undefined {
+  return adminNavigation.find((item) => item.href === pathname);
+}

@@ -137,7 +137,15 @@ export function LandingPage() {
       <footer className="bg-slate-950 text-slate-300">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-3 text-base sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
           <p>&copy; 2026 T13C Cake</p>
-          <p>Developed with i2i, UNSW Population Health</p>
+          <div className="flex flex-col gap-1 md:items-end">
+            <p>Developed with i2i, UNSW Population Health</p>
+            <Link
+              href="/admin"
+              className="text-sm text-slate-400 transition hover:text-slate-200"
+            >
+              Administrator account centre
+            </Link>
+          </div>
         </div>
       </footer>
     </main>
