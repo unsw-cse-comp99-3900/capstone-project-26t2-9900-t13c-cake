@@ -13,6 +13,7 @@ npm run dev
 - Landing page: [http://localhost:3000](http://localhost:3000)
 - Questionnaire: [http://localhost:3000/questionnaire](http://localhost:3000/questionnaire)
 - Evidence API: [http://localhost:3000/api/evidence](http://localhost:3000/api/evidence)
+- Admin account centre: [http://localhost:3000/admin](http://localhost:3000/admin)
 
 ## Contributors
 
@@ -23,6 +24,7 @@ npm run dev
 | CAKE-3 Quiz wizard | Jiawei Dai |
 | CAKE-4 Filter engine | Jialun Li, Zhengqian Zhang |
 | CAKE-5 Results display | Jiawei Dai |
+| CAKE-10 Admin authentication | Zeyu Yang |
 
 ---
 
@@ -205,36 +207,97 @@ Shows filtered remuneration guidance inline below the questionnaire on `/questio
 
 ## CAKE-10: Admin authentication
 
-**Route:** `/admin`  
-**API:** `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/session`, `POST /api/auth/reset-password`  
-**Key files:** `src/components/admin/AdminLoginGate.tsx`, `src/components/admin/AdminLayout.tsx`, `src/components/admin/ForgotPasswordForm.tsx`, `src/server/services/authService.ts`, `src/server/middleware/authMiddleware.ts`
+**Routes:** `/admin`, `/admin/account`, `/admin/forgot-password`  
+**API:** `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/session`, `POST /api/auth/change-username`, `POST /api/auth/change-password`, `POST /api/auth/reset-password`  
+**Key files:** `src/components/admin/`, `src/lib/admin/adminNavigation.ts`, `src/server/services/authService.ts`, `src/server/services/sessionService.ts`, `src/server/repositories/adminAccountRepository.ts`, `src/server/middleware/authMiddleware.ts`
 
-Protected maintenance area for supervisors and i2i staff. Public users access the questionnaire without an account.
+Protected maintenance area for supervisors and i2i staff. Public users access the questionnaire without an account. The entry point is a low-emphasis **Administrator account centre** link in the landing page footer.
 
-**Implemented:**
-- Session-based admin sign-in using `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `SESSION_SECRET` from `.env`
-- Signed httpOnly session cookie (`admin_session`, 8-hour expiry)
-- `AdminLoginGate` — login form for guests; renders child content when authenticated
-- `AdminLayout` — maintenance header with **Back to public tool** and **Sign out**
-- **Account centre** at `/admin` with navigation to administrator tools
-- **Account settings** at `/admin/account` with `POST /api/auth/change-username` and `POST /api/auth/change-password` (persists to `admin_account` table)
-- **Forgot password** at `/admin/forgot-password` with `POST /api/auth/reset-password` (requires `ADMIN_RECOVERY_CODE`; resets username and password)
-- Sub-page scaffolds: `/admin/records` (includes Excel import/export), `/admin/analytics`, `/admin/surveys`
-- `requireAdmin()` middleware for protected write routes (wired on import/export stubs)
-- Low-emphasis **Administrator account centre** link in the landing page footer
+### Admin routes
+
+| Route | Access | Purpose |
+|-------|--------|---------|
+| `/admin` | Guest or signed in | Login form, then account centre hub |
+| `/admin/account` | Signed in | Change username and password |
+| `/admin/forgot-password` | Guest | Reset username and password with recovery code |
+| `/admin/records` | Signed in | Evidence CRUD workspace scaffold (CAKE-11 / CAKE-12) |
+| `/admin/analytics` | Signed in | Website usage scaffold |
+| `/admin/surveys` | Signed in | Anonymous survey data scaffold |
+
+Legacy paths `/admin/username` and `/admin/password` redirect to `/admin/account`. `/admin/import-export` redirects to `/admin/records`.
+
+### Authentication
+
+- Session-based sign-in using a signed **httpOnly** cookie (`admin_session`, 8-hour expiry)
+- Credentials stored in the `admin_account` SQLite table after first bootstrap
+- `.env` values `ADMIN_USERNAME` and `ADMIN_PASSWORD` are used only when the table is empty
+- `AdminLoginGate` shows the login form for guests and protects child routes when authenticated
+- **Sign out** and successful **sign in** redirect to `/admin`
+- Successful **account recovery** also redirects to `/admin` with a one-time success message
+
+### Account centre
+
+Signed-in administrators land on `/admin` and can open:
+
+- **Account settings** — update username or password (requires current password)
+- **Evidence records** — future CRUD + Excel import/export workspace
+- **Website usage** — future anonymised traffic insights
+- **Anonymous survey data** — future aggregated questionnaire usage
+
+### Account recovery
+
+If an administrator forgets their credentials:
+
+1. Open **Forgot password?** on the login form
+2. Enter `ADMIN_RECOVERY_CODE` from `.env`
+3. Set a new username and password
+4. Return to `/admin` and sign in with the new credentials
+
+Recovery resets **both** username and password. It does not automatically revert the username to `admin`.
+
+### AdminAccount schema
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | string | Singleton row (`default`) |
+| `username` | string | Unique administrator username |
+| `passwordHash` | string | scrypt hash |
+| `createdAt` / `updatedAt` | datetime | Audit timestamps |
+
+### Environment variables
+
+| Variable | Purpose |
+|----------|---------|
+| `ADMIN_USERNAME` | Bootstrap username when `admin_account` is empty |
+| `ADMIN_PASSWORD` | Bootstrap password when `admin_account` is empty |
+| `SESSION_SECRET` | Signs admin session cookies |
+| `ADMIN_RECOVERY_CODE` | Supervisor recovery code for `/admin/forgot-password` |
 
 **Configure locally:**
 
 ```bash
 cp .env.example .env
-# Set ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_SECRET, and ADMIN_RECOVERY_CODE
+# Edit ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_SECRET, and ADMIN_RECOVERY_CODE
+npx prisma migrate dev
+npm run dev
 ```
 
-**Tests:**
+Default local sign-in after bootstrap: `admin` / `change-me`
+
+### Protected APIs
+
+`requireAdmin()` guards admin write routes. Import/export endpoints return `401` when unsigned:
+
+- `POST /api/evidence/import` (CAKE-12 stub)
+- `GET /api/evidence/export` (CAKE-12 stub)
+
+### Tests
 
 ```bash
 npm test
 ```
+
+Covers session signing, credential verification, username/password changes, recovery-code validation, and `admin_account` repository behaviour.
 
 ---
 
@@ -258,7 +321,7 @@ npm test
 
 - `main` — stable, reviewed code
 - `dev` — integration branch
-- `feat/*` — feature branches (e.g. `feat/database` for CAKE-2)
+- `feat/*` — feature branches (e.g. `feat/database` for CAKE-2, `feat/admin-auth` for CAKE-10)
 
 ### Workflow
 
