@@ -153,6 +153,12 @@ export function LandingPage() {
             >
               Anonymous feedback
             </Link>
+            <Link
+              href="/admin"
+              className="font-semibold text-slate-400 transition hover:text-slate-200 focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-teal-200"
+            >
+              Administrator account centre
+            </Link>
           </nav>
         </div>
       </footer>

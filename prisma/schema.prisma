@@ -46,3 +46,14 @@ model AnonymousFeedback {
   @@index([createdAt])
   @@map("anonymous_feedback")
 }
+
+/// Singleton administrator credentials (CAKE-10).
+model AdminAccount {
+  id           String   @id @default("default")
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("admin_account")
+}
