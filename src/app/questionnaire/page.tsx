@@ -5,7 +5,7 @@ import { QuizStateProvider } from "@/contexts/QuizStateContext";
 export default function QuestionnairePage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="border-b border-slate-200 bg-white">
+      <div className="no-print border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <Link
             href="/"

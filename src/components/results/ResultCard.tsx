@@ -1,34 +1,17 @@
 import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
+import { formatBooleanGuidance, formatRateRange } from "@/lib/results/resultFormatters";
 
 type ResultCardProps = {
   record: EvidenceRecordDTO;
 };
 
-function formatRateRange(record: EvidenceRecordDTO): string {
-  if (record.minHourlyRate === null && record.maxHourlyRate === null) {
-    return "Not specified";
-  }
-
-  if (record.minHourlyRate === record.maxHourlyRate) {
-    return `$${record.minHourlyRate}/hr`;
-  }
-
-  return `$${record.minHourlyRate ?? "?"}-$${record.maxHourlyRate ?? "?"}/hr`;
-}
-
-function formatBoolean(value: boolean): string {
-  return value ? "Included" : "Not included";
-}
-
 /** CAKE-5 - ResultCard */
 export function ResultCard({ record }: ResultCardProps) {
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <article className="result-card-print rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
         <div className="min-w-0">
-          <p className="text-sm font-bold text-teal-800">
-            {record.publisher}
-          </p>
+          <p className="text-sm font-bold text-teal-800">{record.publisher}</p>
           <h3 className="mt-1 text-lg font-bold leading-6 text-slate-950">{record.title}</h3>
         </div>
         <div className="flex shrink-0 flex-wrap justify-start gap-2 text-sm font-semibold text-slate-700 sm:w-48 sm:justify-end">
@@ -51,15 +34,15 @@ export function ResultCard({ record }: ResultCardProps) {
             Reimbursement guidance
           </dt>
           <dd className="mt-1 text-base font-semibold text-slate-800">
-            {formatBoolean(record.reimbursementGuidance)}
+            {formatBooleanGuidance(record.reimbursementGuidance)}
           </dd>
         </div>
         <div>
           <dt className="text-xs font-bold uppercase tracking-wide text-slate-500">
-            Unpaid consumer engagement guidance 
+            Unpaid consumer engagement guidance
           </dt>
           <dd className="mt-1 text-base font-semibold text-slate-800">
-            {formatBoolean(record.unpaidEngagementGuidance)}
+            {formatBooleanGuidance(record.unpaidEngagementGuidance)}
           </dd>
         </div>
       </dl>
@@ -78,7 +61,7 @@ export function ResultCard({ record }: ResultCardProps) {
               href={record.link}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-9 items-center justify-center rounded-lg border border-teal-700 px-3 py-1.5 text-sm font-bold text-teal-800 transition hover:bg-teal-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+              className="result-card-link inline-flex min-h-9 items-center justify-center rounded-lg border border-teal-700 px-3 py-1.5 text-sm font-bold text-teal-800 transition hover:bg-teal-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
             >
               Open source
             </a>

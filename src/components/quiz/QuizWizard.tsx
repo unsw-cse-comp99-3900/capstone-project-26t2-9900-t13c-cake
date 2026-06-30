@@ -187,8 +187,8 @@ export function QuizWizard() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-      <div className="rounded-2xl bg-slate-100 p-3 sm:p-4 lg:p-5">
+    <div className="quiz-shell mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <div className="quiz-shell-inner rounded-2xl bg-slate-100 p-3 sm:p-4 lg:p-5">
         {submittedFilters && results !== null ? (
           <ResultsPanel
             filters={submittedFilters}
