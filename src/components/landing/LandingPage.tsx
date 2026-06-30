@@ -135,9 +135,25 @@ export function LandingPage() {
       </section>
 
       <footer className="bg-slate-950 text-slate-300">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-3 text-base sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
-          <p>&copy; 2026 T13C Cake</p>
-          <p>Developed with i2i, UNSW Population Health</p>
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-4 text-base sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
+          <div>
+            <p>&copy; 2026 T13C Cake</p>
+            <p className="mt-1 text-sm text-slate-400">Developed with i2i, UNSW Population Health</p>
+          </div>
+          <nav aria-label="Footer navigation" className="flex flex-wrap gap-x-4 gap-y-2">
+            <Link
+              href="/privacy"
+              className="font-semibold text-teal-200 transition hover:text-white focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-teal-200"
+            >
+              Privacy/Data Scope
+            </Link>
+            <Link
+              href="/feedback"
+              className="font-semibold text-teal-200 transition hover:text-white focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-teal-200"
+            >
+              Anonymous feedback
+            </Link>
+          </nav>
         </div>
       </footer>
     </main>

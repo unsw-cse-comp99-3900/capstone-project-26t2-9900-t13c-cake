@@ -23,6 +23,8 @@ npm run dev
 | CAKE-3 Quiz wizard | Jiawei Dai |
 | CAKE-4 Filter engine | Jialun Li, Zhengqian Zhang |
 | CAKE-5 Results display | Jiawei Dai |
+| CAKE-9 Privacy notice and data scope | Zhengqian Zhang |
+| CAKE-15 Anonymous feedback survey | Zhengqian Zhang |
 
 ---
 
@@ -200,6 +202,38 @@ Shows filtered remuneration guidance inline below the questionnaire on `/questio
 - Empty state with suggestions when no records match
 
 **Planned (not yet active):** Print results, Export PDF, Compare side by side (buttons shown as disabled placeholders).
+
+---
+
+## CAKE-9: Privacy notice and data scope
+
+**Route:** `/privacy`
+**Key files:** `src/components/privacy/PrivacyNoticePage.tsx`, `src/components/landing/LandingPage.tsx`
+
+Explains what the public tool does and does not store.
+
+**Implemented:**
+- Footer link from the landing page to the privacy/data scope page
+- Clear data scope for questionnaire answers, evidence records, administrator areas, and anonymous feedback
+- Disclaimer that the tool is indicative guidance only and should be checked against current source policies
+- Link from the privacy page to the anonymous feedback survey
+
+---
+
+## CAKE-15: Anonymous feedback survey
+
+**Routes:** `/feedback`, `/admin/anonymous-survey`
+**API:** `POST /api/feedback`
+**Key files:** `src/components/feedback/`, `src/app/api/feedback/route.ts`, `src/server/services/feedbackService.ts`, `src/server/repositories/feedbackRepository.ts`
+
+Stores optional anonymous feedback without asking for contact or identity information.
+
+**Implemented:**
+- Public feedback form with a 1-5 usefulness rating, tool-area selector, and two optional comment fields
+- Required confirmation that the response is anonymous and should not include contact details
+- Server-side validation for rating, known tool areas, text length, and obvious contact details
+- Prisma `AnonymousFeedback` table with a migration
+- Administrator review page showing total responses, average rating, rating spread, and recent comments
 
 ---
 
