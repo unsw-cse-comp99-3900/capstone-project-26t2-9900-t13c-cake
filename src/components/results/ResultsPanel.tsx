@@ -1,37 +1,43 @@
-import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
-import type { QuizFilters } from "@/lib/filter/filterService";
+import type {
+  FilteredEvidenceGroup,
+  MultiQuizFilters,
+} from "@/lib/filter/filterService";
 import { DisclaimerBanner } from "./DisclaimerBanner";
 import { ResultCard } from "./ResultCard";
 
 type ResultsPanelProps = {
-  filters: QuizFilters;
-  records: EvidenceRecordDTO[];
+  filters: MultiQuizFilters;
+  records: FilteredEvidenceGroup[];
   error: string | null;
   onRetry: () => void;
   onStartOver: () => void;
 };
 
-function formatResultSummary(count: number): string {
+function formatResultSummary(count: number, groupCount: number): string {
   const resultWord = count === 1 ? "result" : "results";
   const matchWord = count === 1 ? "matches" : "match";
 
-  return `${count} ${resultWord} best ${matchWord} your selections`;
+  return `${count} ${resultWord} best ${matchWord} your ${groupCount} selection${groupCount === 1 ? "" : "s"}`;
 }
 
 const plannedActions = ["Print results", "Export PDF", "Compare side by side"] as const;
 
 /** CAKE-5 - ResultsPanel */
 export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: ResultsPanelProps) {
+  const totalRecords = records.reduce((total, group) => total + group.records.length, 0);
+
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-6">
       <div>
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-            {error ? "Unable to load results" : formatResultSummary(records.length)}
+            {error
+              ? "Unable to load results"
+              : formatResultSummary(totalRecords, records.length)}
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-            {filters.jurisdictions.join(", ")} / {filters.context} /{" "}
-            {filters.subCategory ?? "No sub-category"} / {filters.engagementLevel}
+            {filters.jurisdictions.join(", ")} / {filters.selections.length} research
+            context selection{filters.selections.length === 1 ? "" : "s"}
           </p>
         </div>
       </div>
@@ -69,18 +75,47 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
             Try again
           </button>
         </div>
-      ) : records.length === 0 ? (
-        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <h3 className="text-xl font-bold text-slate-950">No exact matches found</h3>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-            Try broadening the jurisdiction, removing the sub-category, or selecting a more general
-            engagement context.
-          </p>
-        </div>
       ) : (
-        <div className="mt-4 grid gap-3">
-          {records.map((record) => (
-            <ResultCard key={record.id} record={record} />
+        <div className="mt-4 space-y-5">
+          {totalRecords === 0 ? (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <h3 className="text-xl font-bold text-slate-950">No exact matches found</h3>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                Try broadening the jurisdiction, removing a sub-category, or selecting a more
+                general engagement context.
+              </p>
+            </div>
+          ) : null}
+
+          {records.map((group) => (
+            <section
+              key={`${group.selection.context}-${group.selection.subCategory ?? "none"}-${group.selection.engagementLevel}`}
+              className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+            >
+              <div>
+                <h3 className="text-lg font-bold text-slate-950">
+                  {group.selection.context}
+                </h3>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  {group.selection.subCategory ?? "No sub-category"} /{" "}
+                  {group.selection.engagementLevel} / {group.records.length}{" "}
+                  result{group.records.length === 1 ? "" : "s"}
+                </p>
+              </div>
+
+              {group.records.length === 0 ? (
+                <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-950">
+                  No exact matches are currently available for this selected
+                  combination.
+                </div>
+              ) : (
+                <div className="mt-3 grid gap-3">
+                  {group.records.map((record) => (
+                    <ResultCard key={record.id} record={record} />
+                  ))}
+                </div>
+              )}
+            </section>
           ))}
         </div>
       )}

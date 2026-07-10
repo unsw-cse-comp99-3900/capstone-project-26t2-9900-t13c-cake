@@ -19,6 +19,36 @@ const instructions = [
   },
 ];
 
+const reasons = [
+  {
+    title: "Make remuneration decisions with confidence",
+    description:
+      "Use evidence-informed guidance instead of relying on guesswork or inconsistent past practice.",
+  },
+  {
+    title: "Support fair consumer involvement",
+    description:
+      "Recognise the time, expertise, preparation and lived experience that consumer representatives contribute.",
+  },
+  {
+    title: "Save time when planning projects",
+    description:
+      "Quickly narrow broad remuneration evidence into guidance that matches your research context.",
+  },
+];
+
+const supportAreas = [
+  "Selecting remuneration guidance for different jurisdictions and engagement contexts.",
+  "Preparing transparent budget justifications for grants, governance reviews and ethics applications.",
+  "Reducing uncertainty when consumer representatives are involved across diverse populations and locations.",
+];
+
+const values = [
+  "Clearer and more defensible remuneration planning.",
+  "More consistent decisions across projects and teams.",
+  "Stronger support for respectful, inclusive consumer partnerships.",
+];
+
 const citation =
   "Johnston, D., Nguyen, L., Liu, Y., Wei, X., Dai, J., Li, J., Zhang, Z., & Yang, Z. (2026). Consumer Rep Remuneration Tool [Web application]. i2i, UNSW Population Health and UNSW COMP9900/3900 Team T13C.";
 
@@ -49,6 +79,74 @@ export function LandingPage() {
                 &rarr;
               </span>
             </Link>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="why-heading"
+        className="mx-auto w-full max-w-6xl px-4 py-7 sm:px-6 sm:py-8 lg:px-8"
+      >
+        <div className="max-w-4xl">
+          <h2
+            id="why-heading"
+            className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
+          >
+            Why use this tool?
+          </h2>
+          <p className="mt-2 text-lg leading-8 text-slate-600">
+            It helps research teams make fair, transparent and evidence-informed
+            remuneration decisions for health consumer representatives.
+          </p>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          {reasons.map((reason) => (
+            <article
+              key={reason.title}
+              className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
+            >
+              <h3 className="text-lg font-bold text-slate-900">
+                {reason.title}
+              </h3>
+              <p className="mt-2 text-base leading-7 text-slate-600">
+                {reason.description}
+              </p>
+            </article>
+          ))}
+        </div>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <div className="rounded-xl border border-teal-200 bg-teal-50 p-4">
+            <h3 className="text-lg font-bold text-slate-900">
+              Problems it helps solve
+            </h3>
+            <ul className="mt-3 space-y-2 text-base leading-7 text-slate-700">
+              {supportAreas.map((area) => (
+                <li key={area} className="flex gap-2">
+                  <span aria-hidden="true" className="text-teal-700">
+                    -
+                  </span>
+                  <span>{area}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900">
+              Value you gain
+            </h3>
+            <ul className="mt-3 space-y-2 text-base leading-7 text-slate-700">
+              {values.map((value) => (
+                <li key={value} className="flex gap-2">
+                  <span aria-hidden="true" className="text-teal-700">
+                    -
+                  </span>
+                  <span>{value}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -135,9 +233,33 @@ export function LandingPage() {
       </section>
 
       <footer className="bg-slate-950 text-slate-300">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-3 text-base sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
-          <p>&copy; 2026 T13C Cake</p>
-          <div className="flex flex-col gap-1 md:items-end">
+        <div className="mx-auto grid w-full max-w-6xl gap-5 px-4 py-5 text-base sm:px-6 md:grid-cols-[1.2fr_1fr] md:items-start lg:px-8">
+          <div>
+            <p className="font-bold text-slate-100">Contact us</p>
+            <div className="mt-2 space-y-1 leading-7">
+              <p>Availability: Mon, Tue, Wed - Implementation to Impact (i2i)</p>
+              <p>School of Population Health - Faculty of Medicine and Health</p>
+              <p>L5 Health Translation Hub (C29) - UNSW Sydney NSW 2052</p>
+              <p>
+                E:{" "}
+                <a
+                  href="mailto:deborah.johnston@unsw.edu.au"
+                  className="transition hover:text-slate-100"
+                >
+                  deborah.johnston@unsw.edu.au
+                </a>{" "}
+                T:{" "}
+                <a
+                  href="tel:+610290659414"
+                  className="transition hover:text-slate-100"
+                >
+                  +61 (02) 9065 9414
+                </a>
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-1 md:items-end md:text-right">
+            <p>&copy; 2026 T13C Cake</p>
             <p>Developed with i2i, UNSW Population Health</p>
             <Link
               href="/admin"

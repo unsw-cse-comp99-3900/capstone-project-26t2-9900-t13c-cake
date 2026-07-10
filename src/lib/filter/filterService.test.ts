@@ -4,6 +4,7 @@ import { test } from "vitest";
 import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
 import {
   filterEvidence,
+  filterEvidenceGroups,
   getAvailableSubCategories,
   type QuizFilters,
 } from "./filterService";
@@ -193,6 +194,43 @@ test("does not require a record sub-category when the filter is omitted", () => 
   assert.deepEqual(
     result.map((record) => record.id),
     ["general", "specific"],
+  );
+});
+
+test("filters multiple research context selections independently", () => {
+  const records = [
+    evidence("mental-consult"),
+    evidence("cancer-involve", {
+      context: "Medical Conditions",
+      subCategory: "Cancer",
+      engagementLevel: "Involve",
+    }),
+    evidence("cancer-consult", {
+      context: "Medical Conditions",
+      subCategory: "Cancer",
+      engagementLevel: "Consult",
+    }),
+  ];
+
+  const result = filterEvidenceGroups(records, {
+    jurisdictions: ["NSW"],
+    selections: [
+      {
+        context: "Mental Health",
+        subCategory: null,
+        engagementLevel: "Consult",
+      },
+      {
+        context: "Medical Conditions",
+        subCategory: "Cancer",
+        engagementLevel: "Involve",
+      },
+    ],
+  });
+
+  assert.deepEqual(
+    result.map((group) => group.records.map((record) => record.id)),
+    [["mental-consult"], ["cancer-involve"]],
   );
 });
 
