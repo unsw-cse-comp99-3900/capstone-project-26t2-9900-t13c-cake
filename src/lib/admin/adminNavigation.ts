@@ -22,7 +22,7 @@ export const adminNavigation: AdminNavItem[] = [
     description:
       "Browse, create, edit, and soft-delete remuneration guidance records. Import and export the evidence table via Excel from the same workspace.",
     href: "/admin/records",
-    status: "coming_soon",
+    status: "available",
   },
   {
     id: "account",

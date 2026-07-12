@@ -1,5 +1,6 @@
 import type { EvidenceRecord } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
+import type { EvidencePayload } from "@/server/services/validationService";
 
 export type EvidenceRecordDTO = Omit<EvidenceRecord, "deletedAt">;
 
@@ -26,20 +27,24 @@ export const evidenceRepository = {
     return record ? toDTO(record) : null;
   },
 
-  async create(_data: unknown): Promise<EvidenceRecordDTO> {
-    void _data;
-    throw new Error("Not implemented");
+  async create(data: EvidencePayload): Promise<EvidenceRecordDTO> {
+    const record = await prisma.evidenceRecord.create({ data });
+    return toDTO(record);
   },
 
-  async update(_id: string, _data: unknown): Promise<EvidenceRecordDTO> {
-    void _id;
-    void _data;
-    throw new Error("Not implemented");
+  async update(id: string, data: EvidencePayload): Promise<EvidenceRecordDTO> {
+    const record = await prisma.evidenceRecord.update({
+      where: { id },
+      data,
+    });
+    return toDTO(record);
   },
 
-  async softDelete(_id: string): Promise<void> {
-    void _id;
-    throw new Error("Not implemented");
+  async softDelete(id: string): Promise<void> {
+    await prisma.evidenceRecord.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
   },
 
   async bulkUpsert(_rows: unknown[]): Promise<void> {
