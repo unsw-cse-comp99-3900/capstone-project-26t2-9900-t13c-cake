@@ -1,29 +1,29 @@
 import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
-import { formatBoolean, formatRateRange } from "@/lib/results/resultFormatting";
 
 type ResultCardProps = {
   record: EvidenceRecordDTO;
-  isSelectedForComparison?: boolean;
-  isComparisonDisabled?: boolean;
-  onToggleComparison?: (recordId: string) => void;
 };
 
-/** CAKE-5 - ResultCard */
-export function ResultCard({
-  record,
-  isSelectedForComparison = false,
-  isComparisonDisabled = false,
-  onToggleComparison,
-}: ResultCardProps) {
-  const comparisonInputId = `compare-${record.id}`;
+function formatRateRange(record: EvidenceRecordDTO): string {
+  if (record.minHourlyRate === null && record.maxHourlyRate === null) {
+    return "Not specified";
+  }
 
+  if (record.minHourlyRate === record.maxHourlyRate) {
+    return `$${record.minHourlyRate}/hr`;
+  }
+
+  return `$${record.minHourlyRate ?? "?"}-$${record.maxHourlyRate ?? "?"}/hr`;
+}
+
+function formatBoolean(value: boolean): string {
+  return value ? "Included" : "Not included";
+}
+
+/** CAKE-5 - ResultCard */
+export function ResultCard({ record }: ResultCardProps) {
   return (
-    <article
-      className={[
-        "rounded-xl border bg-white p-4 shadow-sm transition",
-        isSelectedForComparison ? "border-teal-600 ring-2 ring-teal-100" : "border-slate-200",
-      ].join(" ")}
-    >
+    <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
         <div className="min-w-0">
           <p className="text-sm font-bold text-teal-800">
@@ -40,31 +40,6 @@ export function ResultCard({
           </span>
         </div>
       </div>
-
-      {onToggleComparison ? (
-        <label
-          htmlFor={comparisonInputId}
-          className={[
-            "mt-4 flex min-h-10 cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm font-semibold transition",
-            isSelectedForComparison
-              ? "border-teal-600 bg-teal-50 text-teal-900"
-              : "border-slate-200 bg-slate-50 text-slate-700 hover:border-teal-300",
-            isComparisonDisabled && !isSelectedForComparison
-              ? "cursor-not-allowed opacity-50 hover:border-slate-200"
-              : "",
-          ].join(" ")}
-        >
-          <input
-            id={comparisonInputId}
-            type="checkbox"
-            checked={isSelectedForComparison}
-            disabled={isComparisonDisabled && !isSelectedForComparison}
-            onChange={() => onToggleComparison(record.id)}
-            className="size-5 rounded border-slate-300 text-teal-700 accent-teal-700"
-          />
-          <span>{isSelectedForComparison ? "Selected for comparison" : "Select to compare"}</span>
-        </label>
-      ) : null}
 
       <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div>

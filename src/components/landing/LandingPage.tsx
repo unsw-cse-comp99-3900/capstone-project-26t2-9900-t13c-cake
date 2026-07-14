@@ -54,7 +54,11 @@ const citation =
 
 export function LandingPage() {
   return (
-    <main className="min-h-screen overflow-hidden bg-slate-50 text-slate-900">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="min-h-screen overflow-hidden bg-slate-50 text-slate-900 outline-none"
+    >
       <section className="relative isolate bg-[#0b3b4a] text-white">
         <div
           aria-hidden="true"

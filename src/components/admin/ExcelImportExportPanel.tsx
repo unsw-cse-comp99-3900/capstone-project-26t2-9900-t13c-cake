@@ -67,7 +67,6 @@ function previewMessage(summary: ImportPreviewSummary): string {
 }
 
 /** CAKE-12 — ExcelImportExportPanel (embedded in CRUD workspace) */
-export function ExcelImportExportPanel({ variant = "panel" }: { variant?: "panel" | "buttons" }) {
 export function ExcelImportExportPanel({
   variant = "panel",
   onImportApplied,
@@ -141,18 +140,6 @@ export function ExcelImportExportPanel({
     <div className="flex flex-wrap gap-3">
       <button
         type="button"
-        disabled
-        className="inline-flex min-h-10 cursor-not-allowed items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-400"
-      >
-        Import excel
-      </button>
-      <button
-        type="button"
-        disabled
-        className="inline-flex min-h-10 cursor-not-allowed items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-400"
-      >
-        Export data
-      </button>
         onClick={() => download("/api/evidence/export?template=true")}
         className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
       >
@@ -184,7 +171,6 @@ export function ExcelImportExportPanel({
   );
 
   if (variant === "buttons") {
-    return controls;
     return (
       <div className="space-y-2">
         {controls}
@@ -199,8 +185,6 @@ export function ExcelImportExportPanel({
         <div>
           <h4 className="text-base font-bold text-slate-900">Bulk data tools</h4>
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            Reserved for CAKE-12 Excel import and data export workflows.
-          </p>
             Download the Excel template, export active evidence records, or import a completed
             workbook with preview before applying changes.
           </p>
