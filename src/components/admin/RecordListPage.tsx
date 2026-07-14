@@ -309,7 +309,7 @@ export function RecordListPage() {
                 <h3 className="text-lg font-bold text-slate-900">Evidence table</h3>
               </div>
               <div className="flex flex-wrap gap-3">
-                <ExcelImportExportPanel variant="buttons" />
+                <ExcelImportExportPanel variant="buttons" onImportApplied={loadRecords} />
                 <button
                   type="button"
                   onClick={startCreate}

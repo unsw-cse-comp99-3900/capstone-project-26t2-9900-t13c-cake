@@ -1,9 +1,18 @@
-import { evidenceRepository, type EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
+import {
+  evidenceRepository,
+  type BulkImportResult,
+  type EvidenceImportRow,
+  type EvidenceRecordDTO,
+} from "@/server/repositories/evidenceRepository";
 import { validationService } from "@/server/services/validationService";
 
 /** Layer 3 — EvidenceService */
 export const evidenceService = {
   async listPublicEvidence(): Promise<EvidenceRecordDTO[]> {
+    return evidenceRepository.findAllActive();
+  },
+
+  async listAllActiveEvidence(): Promise<EvidenceRecordDTO[]> {
     return evidenceRepository.findAllActive();
   },
 
@@ -19,5 +28,9 @@ export const evidenceService = {
 
   async deleteEvidence(id: string): Promise<void> {
     await evidenceRepository.softDelete(id);
+  },
+
+  async applyExcelImport(rows: EvidenceImportRow[]): Promise<BulkImportResult> {
+    return evidenceRepository.bulkUpsert(rows);
   },
 };
