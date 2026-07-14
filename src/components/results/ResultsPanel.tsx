@@ -10,18 +10,18 @@ import { ResultCard } from "./ResultCard";
 import { ResultsComparisonView } from "./ResultsComparisonView";
 
 type ResultsPanelProps = {
-  filters: QuizFilters;
-  records: EvidenceRecordDTO[];
+  filters: MultiQuizFilters;
+  records: FilteredEvidenceGroup[];
   error: string | null;
   onRetry: () => void;
   onStartOver: () => void;
 };
 
-function formatResultSummary(count: number): string {
+function formatResultSummary(count: number, groupCount: number): string {
   const resultWord = count === 1 ? "result" : "results";
   const matchWord = count === 1 ? "matches" : "match";
 
-  return `${count} ${resultWord} best ${matchWord} your selections`;
+  return `${count} ${resultWord} best ${matchWord} your ${groupCount} selection${groupCount === 1 ? "" : "s"}`;
 }
 
 const plannedActions = ["Print results", "Export PDF"] as const;
@@ -58,11 +58,13 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
       <div>
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-            {error ? "Unable to load results" : formatResultSummary(records.length)}
+            {error
+              ? "Unable to load results"
+              : formatResultSummary(totalRecords, records.length)}
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-            {filters.jurisdictions.join(", ")} / {filters.context} /{" "}
-            {filters.subCategory ?? "No sub-category"} / {filters.engagementLevel}
+            {filters.jurisdictions.join(", ")} / {filters.selections.length} research
+            context selection{filters.selections.length === 1 ? "" : "s"}
           </p>
         </div>
       </div>

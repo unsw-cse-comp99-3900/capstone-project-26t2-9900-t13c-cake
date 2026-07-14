@@ -7,6 +7,18 @@ export type QuizFilters = {
   engagementLevel: string;
 };
 
+export type QuizSelection = Omit<QuizFilters, "jurisdictions">;
+
+export type MultiQuizFilters = {
+  jurisdictions: string[];
+  selections: QuizSelection[];
+};
+
+export type FilteredEvidenceGroup = {
+  selection: QuizSelection;
+  records: EvidenceRecordDTO[];
+};
+
 export type SubCategoryOptionFilters = Pick<
   QuizFilters,
   "jurisdictions" | "context"
@@ -136,4 +148,17 @@ export function filterEvidence(
       compareText(left.id, right.id)
     );
   });
+}
+
+export function filterEvidenceGroups(
+  records: EvidenceRecordDTO[],
+  filters: MultiQuizFilters,
+): FilteredEvidenceGroup[] {
+  return filters.selections.map((selection) => ({
+    selection,
+    records: filterEvidence(records, {
+      jurisdictions: filters.jurisdictions,
+      ...selection,
+    }),
+  }));
 }

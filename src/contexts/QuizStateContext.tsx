@@ -3,13 +3,17 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 
 /** CAKE-3 - holds quiz answers across wizard steps */
-export type QuizStep = 1 | 2 | 3;
+export type QuizStep = 1 | 2;
+
+export type ContextSelection = {
+  context: string;
+  subCategory: string | null;
+  engagementLevel: string | null;
+};
 
 export type QuizAnswers = {
   jurisdictions: string[];
-  context: string | null;
-  subCategory: string | null;
-  engagementLevel: string | null;
+  selections: ContextSelection[];
 };
 
 type QuizStateContextValue = {
@@ -18,17 +22,15 @@ type QuizStateContextValue = {
   setCurrentStep: (step: QuizStep) => void;
   toggleJurisdiction: (jurisdiction: string) => void;
   clearJurisdictions: () => void;
-  setContext: (context: string) => void;
-  setSubCategory: (subCategory: string | null) => void;
-  setEngagementLevel: (engagementLevel: string) => void;
+  toggleContext: (context: string) => void;
+  setSelectionSubCategory: (context: string, subCategory: string | null) => void;
+  setSelectionEngagementLevel: (context: string, engagementLevel: string | null) => void;
   resetAnswers: () => void;
 };
 
 const initialAnswers: QuizAnswers = {
   jurisdictions: [],
-  context: null,
-  subCategory: null,
-  engagementLevel: null,
+  selections: [],
 };
 
 const QuizStateContext = createContext<QuizStateContextValue | null>(null);
@@ -51,25 +53,53 @@ export function QuizStateProvider({ children }: { children: ReactNode }) {
             jurisdictions: isSelected
               ? previous.jurisdictions.filter((item) => item !== jurisdiction)
               : [...previous.jurisdictions, jurisdiction],
+            selections: [],
           };
         });
       },
       clearJurisdictions() {
-        setAnswers((previous) => ({ ...previous, jurisdictions: [] }));
+        setAnswers((previous) => ({ ...previous, jurisdictions: [], selections: [] }));
       },
-      setContext(context) {
+      toggleContext(context) {
+        setAnswers((previous) => {
+          const isSelected = previous.selections.some(
+            (selection) => selection.context === context,
+          );
+
+          return {
+            ...previous,
+            selections: isSelected
+              ? previous.selections.filter((selection) => selection.context !== context)
+              : [
+                  ...previous.selections,
+                  {
+                    context,
+                    subCategory: null,
+                    engagementLevel: null,
+                  },
+                ],
+          };
+        });
+      },
+      setSelectionSubCategory(context, subCategory) {
         setAnswers((previous) => ({
           ...previous,
-          context,
-          subCategory: null,
-          engagementLevel: null,
+          selections: previous.selections.map((selection) =>
+            selection.context === context
+              ? { ...selection, subCategory, engagementLevel: null }
+              : selection,
+          ),
         }));
       },
-      setSubCategory(subCategory) {
-        setAnswers((previous) => ({ ...previous, subCategory, engagementLevel: null }));
-      },
-      setEngagementLevel(engagementLevel) {
-        setAnswers((previous) => ({ ...previous, engagementLevel }));
+      setSelectionEngagementLevel(context, engagementLevel) {
+        setAnswers((previous) => ({
+          ...previous,
+          selections: previous.selections.map((selection) =>
+            selection.context === context
+              ? { ...selection, engagementLevel }
+              : selection,
+          ),
+        }));
       },
       resetAnswers() {
         setAnswers(initialAnswers);

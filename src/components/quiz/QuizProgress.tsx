@@ -2,8 +2,7 @@ import type { QuizStep } from "@/contexts/QuizStateContext";
 
 const steps = [
   "Jurisdiction",
-  "Research context",
-  "Consumer engagement level",
+  "Research context and engagement",
 ] as const;
 
 type QuizProgressProps = {
@@ -14,7 +13,7 @@ type QuizProgressProps = {
 export function QuizProgress({ currentStep }: QuizProgressProps) {
   return (
     <nav aria-label="Questionnaire progress">
-      <ol className="grid gap-2 sm:grid-cols-3">
+      <ol className="grid gap-2 sm:grid-cols-2">
         {steps.map((step, index) => {
           const stepNumber = index + 1;
           const isCurrent = stepNumber === currentStep;
