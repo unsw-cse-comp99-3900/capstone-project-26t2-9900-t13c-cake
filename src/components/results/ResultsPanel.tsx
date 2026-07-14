@@ -31,16 +31,28 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
   const [selectedRecordIds, setSelectedRecordIds] = useState<string[]>([]);
   const [isComparing, setIsComparing] = useState(false);
 
+  const availableRecordIds = useMemo(
+    () => new Set(records.map((record) => record.id)),
+    [records],
+  );
+
   const selectedRecords = useMemo(() => {
     const selectedIds = new Set(selectedRecordIds);
     return records.filter((record) => selectedIds.has(record.id));
   }, [records, selectedRecordIds]);
 
-  const canCompare = selectedRecordIds.length >= 2;
-  const reachedComparisonLimit = selectedRecordIds.length >= MAX_COMPARISON_RECORDS;
+  const selectedRecordCount = selectedRecords.length;
+  const canCompare = selectedRecordCount >= 2;
+  const reachedComparisonLimit = selectedRecordCount >= MAX_COMPARISON_RECORDS;
 
   function handleToggleComparison(recordId: string) {
-    setSelectedRecordIds((previous) => toggleComparisonSelection(previous, recordId));
+    setIsComparing(false);
+    setSelectedRecordIds((previous) =>
+      toggleComparisonSelection(
+        previous.filter((selectedId) => availableRecordIds.has(selectedId)),
+        recordId,
+      ),
+    );
   }
 
   function handleClearSelection() {
@@ -116,7 +128,7 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
             engagement context.
           </p>
         </div>
-      ) : isComparing ? (
+      ) : isComparing && canCompare ? (
         <ResultsComparisonView
           records={selectedRecords}
           onBack={() => setIsComparing(false)}
@@ -125,9 +137,9 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
       ) : (
         <>
           <div className="mt-3 text-sm leading-6 text-slate-600" aria-live="polite">
-            {selectedRecordIds.length === 0
+            {selectedRecordCount === 0
               ? `Select 2-${MAX_COMPARISON_RECORDS} results to compare side by side.`
-              : `${selectedRecordIds.length} of ${MAX_COMPARISON_RECORDS} results selected for comparison.`}
+              : `${selectedRecordCount} of ${MAX_COMPARISON_RECORDS} results selected for comparison.`}
           </div>
           <div className="mt-4 grid gap-3">
             {records.map((record) => (
