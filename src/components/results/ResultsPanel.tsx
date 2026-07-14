@@ -1,7 +1,13 @@
+import { useMemo, useState } from "react";
 import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
 import type { QuizFilters } from "@/lib/filter/filterService";
+import {
+  MAX_COMPARISON_RECORDS,
+  toggleComparisonSelection,
+} from "@/lib/results/resultFormatting";
 import { DisclaimerBanner } from "./DisclaimerBanner";
 import { ResultCard } from "./ResultCard";
+import { ResultsComparisonView } from "./ResultsComparisonView";
 
 type ResultsPanelProps = {
   filters: QuizFilters;
@@ -18,10 +24,47 @@ function formatResultSummary(count: number): string {
   return `${count} ${resultWord} best ${matchWord} your selections`;
 }
 
-const plannedActions = ["Print results", "Export PDF", "Compare side by side"] as const;
+const plannedActions = ["Print results", "Export PDF"] as const;
 
 /** CAKE-5 - ResultsPanel */
 export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: ResultsPanelProps) {
+  const [selectedRecordIds, setSelectedRecordIds] = useState<string[]>([]);
+  const [isComparing, setIsComparing] = useState(false);
+
+  const availableRecordIds = useMemo(
+    () => new Set(records.map((record) => record.id)),
+    [records],
+  );
+
+  const selectedRecords = useMemo(() => {
+    const selectedIds = new Set(selectedRecordIds);
+    return records.filter((record) => selectedIds.has(record.id));
+  }, [records, selectedRecordIds]);
+
+  const selectedRecordCount = selectedRecords.length;
+  const canCompare = selectedRecordCount >= 2;
+  const reachedComparisonLimit = selectedRecordCount >= MAX_COMPARISON_RECORDS;
+
+  function handleToggleComparison(recordId: string) {
+    setIsComparing(false);
+    setSelectedRecordIds((previous) =>
+      toggleComparisonSelection(
+        previous.filter((selectedId) => availableRecordIds.has(selectedId)),
+        recordId,
+      ),
+    );
+  }
+
+  function handleClearSelection() {
+    setSelectedRecordIds([]);
+    setIsComparing(false);
+  }
+
+  function handleStartOverClick() {
+    handleClearSelection();
+    onStartOver();
+  }
+
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-6">
       <div>
@@ -48,10 +91,18 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
               {action}
             </button>
           ))}
+          <button
+            type="button"
+            disabled={!canCompare || Boolean(error)}
+            onClick={() => setIsComparing(true)}
+            className="min-h-10 rounded-lg border border-teal-700 px-4 py-2 text-sm font-bold text-teal-800 transition hover:bg-teal-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-500 disabled:opacity-70 disabled:hover:bg-transparent"
+          >
+            Compare side by side
+          </button>
         </div>
         <button
           type="button"
-          onClick={onStartOver}
+          onClick={handleStartOverClick}
           className="min-h-10 rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
         >
           Start over
@@ -77,12 +128,33 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
             engagement context.
           </p>
         </div>
+      ) : isComparing && canCompare ? (
+        <ResultsComparisonView
+          records={selectedRecords}
+          onBack={() => setIsComparing(false)}
+          onClearSelection={handleClearSelection}
+        />
       ) : (
-        <div className="mt-4 grid gap-3">
-          {records.map((record) => (
-            <ResultCard key={record.id} record={record} />
-          ))}
-        </div>
+        <>
+          <div className="mt-3 text-sm leading-6 text-slate-600" aria-live="polite">
+            {selectedRecordCount === 0
+              ? `Select 2-${MAX_COMPARISON_RECORDS} results to compare side by side.`
+              : `${selectedRecordCount} of ${MAX_COMPARISON_RECORDS} results selected for comparison.`}
+          </div>
+          <div className="mt-4 grid gap-3">
+            {records.map((record) => (
+              <ResultCard
+                key={record.id}
+                record={record}
+                isSelectedForComparison={selectedRecordIds.includes(record.id)}
+                isComparisonDisabled={
+                  reachedComparisonLimit && !selectedRecordIds.includes(record.id)
+                }
+                onToggleComparison={handleToggleComparison}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       <div className="mt-4">
