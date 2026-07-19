@@ -276,7 +276,7 @@ export function LandingPage() {
               </Link>
               <Link
                 href="/admin"
-                className="font-semibold text-slate-400 transition hover:text-slate-200 focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-teal-200"
+                className="font-semibold text-teal-200 transition hover:text-white focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-teal-200"
               >
                 Administrator account centre
               </Link>
