@@ -1,5 +1,5 @@
 import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
-import type { QuizFilters } from "@/lib/filter/filterService";
+import type { MultiQuizFilters, QuizFilters } from "@/lib/filter/filterService";
 import {
   RESULTS_DISCLAIMER,
   TOOL_TITLE,
@@ -11,7 +11,7 @@ import {
 } from "./resultFormatters";
 
 type ExportResultsPdfInput = {
-  filters: QuizFilters;
+  filters: QuizFilters | MultiQuizFilters;
   records: EvidenceRecordDTO[];
   generatedAt?: Date;
 };

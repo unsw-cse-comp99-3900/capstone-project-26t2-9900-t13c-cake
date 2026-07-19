@@ -2,12 +2,12 @@
 
 import { useState, type ReactNode } from "react";
 import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
-import type { QuizFilters } from "@/lib/filter/filterService";
+import type { MultiQuizFilters, QuizFilters } from "@/lib/filter/filterService";
 import { exportResultsPdf } from "@/lib/results/exportResultsPdf";
 import { printResults } from "@/lib/results/printResults";
 
 type ResultsExportActionsProps = {
-  filters: QuizFilters;
+  filters: QuizFilters | MultiQuizFilters;
   records: EvidenceRecordDTO[];
   disabled?: boolean;
   trailingActions?: ReactNode;

@@ -1,5 +1,5 @@
 import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
-import type { QuizFilters } from "@/lib/filter/filterService";
+import type { MultiQuizFilters, QuizFilters } from "@/lib/filter/filterService";
 
 export const RESULTS_DISCLAIMER =
   "This tool provides indicative guidance only. Rates and policies may change. Always confirm with the publishing organisation before budgeting.";
@@ -29,7 +29,22 @@ export function formatResultSummary(count: number): string {
   return `${count} ${resultWord} best ${matchWord} your selections`;
 }
 
-export function formatFilterSummary(filters: QuizFilters): string {
+function isMultiQuizFilters(
+  filters: QuizFilters | MultiQuizFilters,
+): filters is MultiQuizFilters {
+  return "selections" in filters;
+}
+
+export function formatFilterSummary(filters: QuizFilters | MultiQuizFilters): string {
+  if (isMultiQuizFilters(filters)) {
+    const selectionSummaries = filters.selections.map((selection) => {
+      const subCategory = selection.subCategory ?? "No sub-category";
+      return `${selection.context} / ${subCategory} / ${selection.engagementLevel}`;
+    });
+
+    return `${filters.jurisdictions.join(", ")} / ${selectionSummaries.join("; ")}`;
+  }
+
   const subCategory = filters.subCategory ?? "No sub-category";
 
   return `${filters.jurisdictions.join(", ")} / ${filters.context} / ${subCategory} / ${filters.engagementLevel}`;
