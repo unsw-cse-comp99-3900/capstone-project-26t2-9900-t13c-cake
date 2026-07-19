@@ -26,6 +26,7 @@ npm run dev
 | CAKE-5 Results display | Jiawei Dai |
 | CAKE-9 Privacy notice and data scope | Zhengqian Zhang |
 | CAKE-10 Admin authentication | Zeyu Yang |
+| CAKE-14 Print / export results | Zeyu Yang |
 | CAKE-15 Anonymous feedback survey | Zhengqian Zhang |
 
 ---
@@ -203,7 +204,22 @@ Shows filtered remuneration guidance inline below the questionnaire on `/questio
 - Error state with retry when the evidence API fails
 - Empty state with suggestions when no records match
 
-**Planned (not yet active):** Print results, Export PDF, Compare side by side (buttons shown as disabled placeholders).
+**Related (CAKE-14):** Print results and Export PDF are active on the results toolbar. Compare side by side is available when 2–4 results are selected.
+
+---
+
+## CAKE-14: Print / export results
+
+**Route:** `/questionnaire` (results step)
+**Key files:** `src/components/results/ResultsExportActions.tsx`, `src/lib/results/resultFormatters.ts`, `src/lib/results/exportResultsPdf.ts`, `src/lib/results/printResults.ts`, `src/app/globals.css`
+
+Researchers can save or print their matched remuneration guidance for project documentation.
+
+**Implemented:**
+- **Print results** — opens the browser print dialog with print-friendly styles (hides navigation, action buttons, and comparison controls; shows tool title; preserves result cards and disclaimer; appends source URLs after links)
+- **Export PDF** — downloads a text-based PDF summary (`remuneration-results-YYYY-MM-DD.pdf`) with filter selections, each matching record, and the indicative-guidance disclaimer
+- Shared result formatting helpers reused by result cards and export output
+- Works for both populated and empty result sets; disabled when the evidence API fails
 
 ---
 
@@ -355,7 +371,7 @@ Stores optional anonymous feedback without asking for contact or identity inform
 
 - `main` — stable, reviewed code
 - `dev` — integration branch
-- `feat/*` — feature branches (e.g. `feat/database` for CAKE-2, `feat/admin-auth` for CAKE-10)
+- `feat/*` — feature branches (e.g. `feat/database` for CAKE-2)
 
 ### Workflow
 
