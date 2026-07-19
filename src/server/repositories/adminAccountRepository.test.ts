@@ -4,6 +4,7 @@ import {
   adminAccountRepository,
   isValidAdminPassword,
   isValidAdminUsername,
+  isValidRecoveryEmail,
 } from "@/server/repositories/adminAccountRepository";
 
 describe("adminAccountRepository (CAKE-10)", () => {
@@ -74,6 +75,51 @@ describe("adminAccountRepository (CAKE-10)", () => {
     expect(result).toEqual({ ok: true, username: "admin" });
     await expect(
       adminAccountRepository.verifyCredentials("admin", "brand-new-password"),
+    ).resolves.toBe(true);
+  });
+
+  it("validates recovery email addresses", () => {
+    expect(isValidRecoveryEmail("admin@example.com")).toBe(true);
+    expect(isValidRecoveryEmail("invalid-address")).toBe(false);
+  });
+
+  it("updates the recovery email only with the current password", async () => {
+    await adminAccountRepository.getOrCreate();
+
+    await expect(
+      adminAccountRepository.updateRecoveryContacts("wrong-password", "admin@example.com"),
+    ).resolves.toEqual({ ok: false, error: "INVALID_PASSWORD" });
+
+    await expect(
+      adminAccountRepository.updateRecoveryContacts("secret-pass", "Admin@Example.com"),
+    ).resolves.toEqual({
+      ok: true,
+      contacts: { email: "admin@example.com" },
+    });
+  });
+
+  it("consumes a valid one-time code once and limits invalid attempts", async () => {
+    await adminAccountRepository.getOrCreate();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    await adminAccountRepository.saveRecoveryCode("correct-hash", expiresAt, new Date());
+
+    await expect(
+      adminAccountRepository.verifyRecoveryCode("wrong-hash"),
+    ).resolves.toEqual({ ok: false, error: "INVALID_RECOVERY_CODE" });
+
+    await expect(adminAccountRepository.verifyRecoveryCode("correct-hash")).resolves.toEqual({
+      ok: true,
+    });
+
+    await expect(
+      adminAccountRepository.resetPasswordWithCode("wrong-hash", "new-admin", "new-secret-pass"),
+    ).resolves.toEqual({ ok: false, error: "INVALID_RECOVERY_CODE" });
+
+    await expect(
+      adminAccountRepository.resetPasswordWithCode("correct-hash", "new-admin", "new-secret-pass"),
+    ).resolves.toEqual({ ok: true, username: "new-admin" });
+    await expect(
+      adminAccountRepository.verifyCredentials("new-admin", "new-secret-pass"),
     ).resolves.toBe(true);
   });
 });

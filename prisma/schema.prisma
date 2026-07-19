@@ -35,11 +35,16 @@ model EvidenceRecord {
 
 /// Singleton administrator credentials (CAKE-10).
 model AdminAccount {
-  id           String   @id @default("default")
-  username     String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                    String    @id @default("default")
+  username              String    @unique
+  passwordHash          String
+  recoveryEmail         String?
+  recoveryCodeHash      String?
+  recoveryCodeExpiresAt DateTime?
+  recoveryCodeSentAt    DateTime?
+  recoveryCodeAttempts  Int       @default(0)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   @@map("admin_account")
 }

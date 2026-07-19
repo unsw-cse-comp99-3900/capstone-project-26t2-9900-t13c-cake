@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ForgotPasswordForm } from "@/components/admin/ForgotPasswordForm";
+import { AccountRecoveryForm } from "@/components/admin/AccountRecoveryForm";
 
 export default function AdminForgotPasswordPage() {
   return (
@@ -22,7 +22,7 @@ export default function AdminForgotPasswordPage() {
       </header>
 
       <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <ForgotPasswordForm />
+        <AccountRecoveryForm />
       </main>
     </div>
   );
