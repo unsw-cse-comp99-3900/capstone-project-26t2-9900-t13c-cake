@@ -240,8 +240,9 @@ Explains what the public tool does and does not store.
 
 ## CAKE-10: Admin authentication
 
-**Routes:** `/admin`, `/admin/account`, `/admin/forgot-password`
-**API:** `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/session`, `POST /api/auth/change-username`, `POST /api/auth/change-password`, `POST /api/auth/reset-password`
+**Routes:** `/admin`, `/admin/account`, `/admin/forgot-password`  
+**API:** `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/session`, `POST /api/auth/change-username`, `POST /api/auth/change-password`, `GET|PUT /api/auth/recovery/contacts`, `GET /api/auth/recovery/options`, `POST /api/auth/recovery/request`, `POST /api/auth/recovery/verify`, `POST /api/auth/reset-password`  
+
 **Key files:** `src/components/admin/`, `src/lib/admin/adminNavigation.ts`, `src/server/services/authService.ts`, `src/server/services/sessionService.ts`, `src/server/repositories/adminAccountRepository.ts`, `src/server/middleware/authMiddleware.ts`
 
 Protected maintenance area for supervisors and i2i staff. Public users access the questionnaire without an account. The entry point is a low-emphasis **Administrator account centre** link in the landing page footer.
@@ -251,8 +252,8 @@ Protected maintenance area for supervisors and i2i staff. Public users access th
 | Route | Access | Purpose |
 |-------|--------|---------|
 | `/admin` | Guest or signed in | Login form, then account centre hub |
-| `/admin/account` | Signed in | Change username and password |
-| `/admin/forgot-password` | Guest | Reset username and password with recovery code |
+| `/admin/account` | Signed in | Change username, password, and recovery email |
+| `/admin/forgot-password` | Guest | Reset password by email code or supervisor recovery code |
 | `/admin/records` | Signed in | Evidence CRUD workspace scaffold (CAKE-11 / CAKE-12) |
 | `/admin/analytics` | Signed in | Website usage scaffold |
 | `/admin/surveys` | Signed in | Anonymous feedback survey data |
@@ -279,14 +280,25 @@ Signed-in administrators land on `/admin` and can open:
 
 ### Account recovery
 
-If an administrator forgets their credentials:
+Signed-in administrators first configure a recovery email address in **Account settings**. The current password is required when the recovery email is changed.
 
-1. Open **Forgot password?** on the login form
-2. Enter `ADMIN_RECOVERY_CODE` from `.env`
-3. Set a new username and password
-4. Return to `/admin` and sign in with the new credentials
+On **Forgot password?**, administrators can:
 
-Recovery resets **both** username and password. It does not automatically revert the username to `admin`.
+- receive a six-digit code at the configured recovery email (SMTP), verify the code, then set a new password;
+- use the supervisor `ADMIN_RECOVERY_CODE` as a fallback.
+
+One-time codes expire after 10 minutes, can be requested once per minute, are stored only as HMAC hashes, and are invalidated after a successful reset. Five incorrect attempts require a new code. Email recovery changes only the password; supervisor recovery can reset both username and password.
+
+#### Design justification: why email-only (no SMS recovery)
+
+SMS delivery of recovery codes was prototyped with Twilio and deliberately removed. The decision record:
+
+1. **Australian regulatory barrier.** Since the ACMA SMS Sender ID register came into effect, sending SMS to Australian (+61) numbers through providers such as Twilio requires a registered business identity (ABN and sender ID registration). A student capstone team cannot complete this registration, so delivery to the client's own jurisdiction fails outright (Twilio error `60250: Australian destination requires a business registration`).
+2. **Unreliable international delivery.** Delivery to other jurisdictions (for example Chinese +86 numbers) is aggressively filtered by carriers; even Twilio's own number-verification SMS frequently failed during testing. A recovery channel that fails unpredictably is worse than no channel, because it blocks an administrator precisely when they are locked out.
+3. **Cost and account constraints.** Trial SMS accounts only deliver to pre-verified numbers and prepend trial banners; production use would introduce an ongoing paid dependency for the client with no maintainer.
+4. **Email meets the actual requirement.** The tool has a single administrator account. A recovery email via standard SMTP is free, provider-agnostic, reliable, and easy for i2i staff to reconfigure at handover. Combined with the offline supervisor recovery code (`ADMIN_RECOVERY_CODE`), there are already two independent recovery paths, so SMS added operational cost without adding meaningful resilience.
+
+The delivery layer (`recoveryDeliveryService`) remains a separate module, so an SMS or other channel can be reinstated later by an organisation that holds the required sender registration, without changing the recovery workflow.
 
 ### AdminAccount schema
 
@@ -295,6 +307,10 @@ Recovery resets **both** username and password. It does not automatically revert
 | `id` | string | Singleton row (`default`) |
 | `username` | string | Unique administrator username |
 | `passwordHash` | string | scrypt hash |
+| `recoveryEmail` | nullable string | Administrator-managed recovery email |
+| `recoveryCodeHash` | nullable string | Active one-time code (HMAC hash only) |
+| `recoveryCodeExpiresAt` / `recoveryCodeSentAt` | nullable datetime | Expiry and resend-rate-limit timestamps |
+| `recoveryCodeAttempts` | integer | Failed verification count |
 | `createdAt` / `updatedAt` | datetime | Audit timestamps |
 
 ### Environment variables
@@ -305,12 +321,13 @@ Recovery resets **both** username and password. It does not automatically revert
 | `ADMIN_PASSWORD` | Bootstrap password when `admin_account` is empty |
 | `SESSION_SECRET` | Signs admin session cookies |
 | `ADMIN_RECOVERY_CODE` | Supervisor recovery code for `/admin/forgot-password` |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | SMTP email recovery delivery |
 
 **Configure locally:**
 
 ```bash
 cp .env.example .env
-# Edit ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_SECRET, and ADMIN_RECOVERY_CODE
+# Edit admin and SMTP settings
 npx prisma migrate dev
 npm run dev
 ```
@@ -330,7 +347,7 @@ Default local sign-in after bootstrap: `admin` / `change-me`
 npm test
 ```
 
-Covers session signing, credential verification, username/password changes, recovery-code validation, and `admin_account` repository behaviour.
+Covers session signing, credential verification, username/password/contact changes, one-time recovery delivery and rate limiting, recovery-code validation, and `admin_account` repository behaviour.
 
 ---
 

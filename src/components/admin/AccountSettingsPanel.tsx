@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAdminAuth } from "@/components/admin/AdminLoginGate";
 import { ADMIN_HOME_PATH } from "@/lib/admin/adminNavigation";
 
@@ -36,6 +36,43 @@ export function AccountSettingsPanel() {
     success: "",
     isSubmitting: false,
   });
+
+  const [recoveryForm, setRecoveryForm] = useState({
+    email: "",
+    currentPassword: "",
+    error: "",
+    success: "",
+    isLoading: true,
+    isSubmitting: false,
+  });
+
+  useEffect(() => {
+    async function loadRecoveryContacts() {
+      try {
+        const response = await fetch("/api/auth/recovery/contacts");
+        const data = (await response.json()) as {
+          email?: string | null;
+          error?: string;
+        };
+        if (!response.ok) {
+          throw new Error(data.error);
+        }
+        setRecoveryForm((state) => ({
+          ...state,
+          email: data.email ?? "",
+          isLoading: false,
+        }));
+      } catch {
+        setRecoveryForm((state) => ({
+          ...state,
+          error: "Unable to load recovery contacts.",
+          isLoading: false,
+        }));
+      }
+    }
+
+    void loadRecoveryContacts();
+  }, []);
 
   async function handleUsernameSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -118,6 +155,49 @@ export function AccountSettingsPanel() {
       setPasswordForm((state) => ({
         ...state,
         error: "Unable to update password. Please try again.",
+        isSubmitting: false,
+      }));
+    }
+  }
+
+  async function handleRecoverySubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setRecoveryForm((state) => ({ ...state, error: "", success: "", isSubmitting: true }));
+
+    try {
+      const response = await fetch("/api/auth/recovery/contacts", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: recoveryForm.email,
+          currentPassword: recoveryForm.currentPassword,
+        }),
+      });
+      const data = (await response.json()) as {
+        email?: string | null;
+        error?: string;
+      };
+      if (!response.ok) {
+        setRecoveryForm((state) => ({
+          ...state,
+          error: data.error ?? "Unable to update recovery contacts.",
+          isSubmitting: false,
+        }));
+        return;
+      }
+
+      setRecoveryForm((state) => ({
+        ...state,
+        email: data.email ?? "",
+        currentPassword: "",
+        error: "",
+        success: "Recovery contacts updated successfully.",
+        isSubmitting: false,
+      }));
+    } catch {
+      setRecoveryForm((state) => ({
+        ...state,
+        error: "Unable to update recovery contacts. Please try again.",
         isSubmitting: false,
       }));
     }
@@ -327,6 +407,76 @@ export function AccountSettingsPanel() {
             className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#0b3b4a] px-4 py-2.5 text-base font-bold text-white transition hover:bg-[#0a3340] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {passwordForm.isSubmitting ? "Saving…" : "Save password"}
+          </button>
+        </form>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 className="text-lg font-bold text-slate-900">Password recovery contacts</h3>
+        <p className="mt-1 max-w-2xl text-base text-slate-600">
+          Configure the email address that receives one-time password recovery codes. Saving
+          requires your current password.
+        </p>
+
+        <form
+          className="mt-5 max-w-lg space-y-4"
+          autoComplete="off"
+          onSubmit={handleRecoverySubmit}
+        >
+          <div>
+            <label htmlFor="recovery-email" className="block text-sm font-semibold text-slate-800">
+              Recovery email
+            </label>
+            <input
+              id="recovery-email"
+              type="email"
+              autoComplete="email"
+              value={recoveryForm.email}
+              disabled={recoveryForm.isLoading}
+              onChange={(event) =>
+                setRecoveryForm((state) => ({ ...state, email: event.target.value }))
+              }
+              className={inputClassName}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="recovery-current-password"
+              className="block text-sm font-semibold text-slate-800"
+            >
+              Current password
+            </label>
+            <input
+              id="recovery-current-password"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={recoveryForm.currentPassword}
+              onChange={(event) =>
+                setRecoveryForm((state) => ({ ...state, currentPassword: event.target.value }))
+              }
+              className={inputClassName}
+            />
+          </div>
+
+          {recoveryForm.error && (
+            <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-800">
+              {recoveryForm.error}
+            </p>
+          )}
+          {recoveryForm.success && (
+            <p role="status" className="rounded-lg bg-teal-50 px-3 py-2 text-sm font-medium text-teal-900">
+              {recoveryForm.success}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={recoveryForm.isLoading || recoveryForm.isSubmitting}
+            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#0b3b4a] px-4 py-2.5 text-base font-bold text-white transition hover:bg-[#0a3340] disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {recoveryForm.isSubmitting ? "Saving…" : "Save recovery contacts"}
           </button>
         </form>
       </div>

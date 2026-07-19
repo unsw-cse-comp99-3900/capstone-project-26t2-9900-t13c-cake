@@ -58,6 +58,18 @@ export const authService = {
     return isRecoveryConfigured();
   },
 
+  verifySupervisorRecoveryCode(recoveryCode: string) {
+    if (!isRecoveryConfigured()) {
+      return { ok: false as const, error: "RECOVERY_NOT_CONFIGURED" as const };
+    }
+
+    if (!verifyRecoveryCode(recoveryCode)) {
+      return { ok: false as const, error: "INVALID_RECOVERY_CODE" as const };
+    }
+
+    return { ok: true as const };
+  },
+
   async resetAccountWithRecovery(
     recoveryCode: string,
     newUsername: string,
