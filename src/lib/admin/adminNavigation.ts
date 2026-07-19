@@ -44,9 +44,9 @@ export const adminNavigation: AdminNavItem[] = [
     id: "surveys",
     title: "Anonymous survey data",
     description:
-      "Review aggregated, de-identified questionnaire selections to understand how the tool is being used.",
+      "Review anonymous feedback submitted by public tool users.",
     href: "/admin/surveys",
-    status: "coming_soon",
+    status: "available",
   },
 ];
 

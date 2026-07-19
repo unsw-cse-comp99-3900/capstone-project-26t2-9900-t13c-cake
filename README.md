@@ -24,8 +24,10 @@ npm run dev
 | CAKE-3 Quiz wizard | Jiawei Dai |
 | CAKE-4 Filter engine | Jialun Li, Zhengqian Zhang |
 | CAKE-5 Results display | Jiawei Dai |
+| CAKE-9 Privacy notice and data scope | Zhengqian Zhang |
 | CAKE-10 Admin authentication | Zeyu Yang |
 | CAKE-14 Print / export results | Zeyu Yang |
+| CAKE-15 Anonymous feedback survey | Zhengqian Zhang |
 
 ---
 
@@ -208,7 +210,7 @@ Shows filtered remuneration guidance inline below the questionnaire on `/questio
 
 ## CAKE-14: Print / export results
 
-**Route:** `/questionnaire` (results step)  
+**Route:** `/questionnaire` (results step)
 **Key files:** `src/components/results/ResultsExportActions.tsx`, `src/lib/results/resultFormatters.ts`, `src/lib/results/exportResultsPdf.ts`, `src/lib/results/printResults.ts`, `src/app/globals.css`
 
 Researchers can save or print their matched remuneration guidance for project documentation.
@@ -221,10 +223,25 @@ Researchers can save or print their matched remuneration guidance for project do
 
 ---
 
+## CAKE-9: Privacy notice and data scope
+
+**Route:** `/privacy`
+**Key files:** `src/components/privacy/PrivacyNoticePage.tsx`, `src/components/landing/LandingPage.tsx`
+
+Explains what the public tool does and does not store.
+
+**Implemented:**
+- Footer link from the landing page to the privacy/data scope page
+- Clear data scope for questionnaire answers, evidence records, administrator areas, and anonymous feedback
+- Disclaimer that the tool is indicative guidance only and should be checked against current source policies
+- Link from the privacy page to the anonymous feedback survey
+
+---
+
 ## CAKE-10: Admin authentication
 
-**Routes:** `/admin`, `/admin/account`, `/admin/forgot-password`  
-**API:** `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/session`, `POST /api/auth/change-username`, `POST /api/auth/change-password`, `POST /api/auth/reset-password`  
+**Routes:** `/admin`, `/admin/account`, `/admin/forgot-password`
+**API:** `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/session`, `POST /api/auth/change-username`, `POST /api/auth/change-password`, `POST /api/auth/reset-password`
 **Key files:** `src/components/admin/`, `src/lib/admin/adminNavigation.ts`, `src/server/services/authService.ts`, `src/server/services/sessionService.ts`, `src/server/repositories/adminAccountRepository.ts`, `src/server/middleware/authMiddleware.ts`
 
 Protected maintenance area for supervisors and i2i staff. Public users access the questionnaire without an account. The entry point is a low-emphasis **Administrator account centre** link in the landing page footer.
@@ -238,7 +255,7 @@ Protected maintenance area for supervisors and i2i staff. Public users access th
 | `/admin/forgot-password` | Guest | Reset username and password with recovery code |
 | `/admin/records` | Signed in | Evidence CRUD workspace scaffold (CAKE-11 / CAKE-12) |
 | `/admin/analytics` | Signed in | Website usage scaffold |
-| `/admin/surveys` | Signed in | Anonymous survey data scaffold |
+| `/admin/surveys` | Signed in | Anonymous feedback survey data |
 
 Legacy paths `/admin/username` and `/admin/password` redirect to `/admin/account`. `/admin/import-export` redirects to `/admin/records`.
 
@@ -258,7 +275,7 @@ Signed-in administrators land on `/admin` and can open:
 - **Account settings** — update username or password (requires current password)
 - **Evidence records** — future CRUD + Excel import/export workspace
 - **Website usage** — future anonymised traffic insights
-- **Anonymous survey data** — future aggregated questionnaire usage
+- **Anonymous survey data** — review anonymous feedback survey responses
 
 ### Account recovery
 
@@ -314,6 +331,23 @@ npm test
 ```
 
 Covers session signing, credential verification, username/password changes, recovery-code validation, and `admin_account` repository behaviour.
+
+---
+
+## CAKE-15: Anonymous feedback survey
+
+**Routes:** `/feedback`, `/admin/surveys`
+**API:** `POST /api/feedback`
+**Key files:** `src/components/feedback/`, `src/app/api/feedback/route.ts`, `src/server/services/feedbackService.ts`, `src/server/repositories/feedbackRepository.ts`
+
+Stores optional anonymous feedback without asking for contact or identity information.
+
+**Implemented:**
+- Public feedback form with a 1-5 usefulness rating, tool-area selector, and two optional comment fields
+- Required confirmation that the response is anonymous and should not include contact details
+- Server-side validation for rating, known tool areas, text length, and obvious contact details
+- Prisma `AnonymousFeedback` table with a migration
+- Administrator review page showing total responses, average rating, rating spread, and recent comments
 
 ---
 

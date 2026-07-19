@@ -33,6 +33,20 @@ model EvidenceRecord {
   @@map("evidence_records")
 }
 
+/// Anonymous feedback survey response (CAKE-15).
+model AnonymousFeedback {
+  id               String   @id @default(cuid())
+  rating           Int
+  partOfTool       String?
+  workedWell       String?
+  improvement      String?
+  consentConfirmed Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("anonymous_feedback")
+}
+
 /// Singleton administrator credentials (CAKE-10).
 model AdminAccount {
   id           String   @id @default("default")
