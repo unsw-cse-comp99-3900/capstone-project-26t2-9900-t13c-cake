@@ -67,6 +67,8 @@ export function RecordFormPage({
   return (
     <form
       className="bg-white"
+      aria-busy={isSubmitting}
+      aria-describedby="evidence-form-required"
       onSubmit={(event) => {
         event.preventDefault();
         if (!canSubmit) {
@@ -75,15 +77,21 @@ export function RecordFormPage({
         onSubmit();
       }}
     >
+      <p id="evidence-form-required" className="mb-4 text-sm leading-6 text-slate-700">
+        Fields marked with an asterisk are required. Use plain words and enter comma-separated
+        values where noted.
+      </p>
       <div className="grid gap-4 md:grid-cols-2">
         <TextInput
           label="Publisher"
+          description="The organisation that published the evidence."
           required
           value={value.publisher}
           onChange={(nextValue) => onChange(updateTextField(value, "publisher", nextValue))}
         />
         <TextInput
           label="Year"
+          description="Enter the four-digit publication year, if known."
           type="number"
           value={value.year ?? ""}
           onChange={(nextValue) => onChange(updateTextField(value, "year", nextValue))}
@@ -91,6 +99,7 @@ export function RecordFormPage({
         <div className="md:col-span-2">
           <TextInput
             label="Title"
+            description="Use the title shown on the source document or webpage."
             required
             value={value.title}
             onChange={(nextValue) => onChange(updateTextField(value, "title", nextValue))}
@@ -99,6 +108,7 @@ export function RecordFormPage({
         <div className="md:col-span-2">
           <TextInput
             label="Link"
+            description="Enter the full source address, including https://."
             type="url"
             value={value.link ?? ""}
             onChange={(nextValue) => onChange(updateTextField(value, "link", nextValue))}
@@ -106,6 +116,7 @@ export function RecordFormPage({
         </div>
         <TextInput
           label="Jurisdictions"
+          description="Separate multiple locations with commas, for example: National, NSW."
           required
           value={value.jurisdictions}
           placeholder="National,NSW"
@@ -113,23 +124,27 @@ export function RecordFormPage({
         />
         <TextInput
           label="Context"
+          description="Enter the broad health or research area used by the questionnaire."
           required
           value={value.context}
           onChange={(nextValue) => onChange(updateTextField(value, "context", nextValue))}
         />
         <TextInput
           label="Sub-category"
+          description="Add a narrower area only when one applies."
           value={value.subCategory ?? ""}
           onChange={(nextValue) => onChange(updateTextField(value, "subCategory", nextValue))}
         />
         <TextInput
           label="Engagement level"
+          description="Enter the consumer engagement level used by the questionnaire."
           required
           value={value.engagementLevel}
           onChange={(nextValue) => onChange(updateTextField(value, "engagementLevel", nextValue))}
         />
         <TextInput
           label="Minimum hourly rate"
+          description="Enter an amount in Australian dollars without the dollar sign."
           type="number"
           min="0"
           step="0.01"
@@ -138,6 +153,7 @@ export function RecordFormPage({
         />
         <TextInput
           label="Maximum hourly rate"
+          description="Enter an amount in Australian dollars without the dollar sign."
           type="number"
           min="0"
           step="0.01"
@@ -169,7 +185,11 @@ export function RecordFormPage({
       </div>
 
       {error && (
-        <p role="alert" className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-800">
+        <p
+          id="evidence-form-error"
+          role="alert"
+          className="mt-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900"
+        >
           {error}
         </p>
       )}
@@ -213,6 +233,7 @@ type TextInputProps = {
   min?: string;
   step?: string;
   placeholder?: string;
+  description?: string;
 };
 
 function TextInput({
@@ -224,13 +245,15 @@ function TextInput({
   min,
   step,
   placeholder,
+  description,
 }: TextInputProps) {
   const id = `evidence-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+  const descriptionId = `${id}-description`;
 
   return (
     <label htmlFor={id} className="block text-sm font-semibold text-slate-800">
       {label}
-      {required ? <span className="ml-1 text-red-700">*</span> : null}
+      {required ? <span aria-hidden="true" className="ml-1 text-red-700">*</span> : null}
       <input
         id={id}
         type={type}
@@ -239,9 +262,15 @@ function TextInput({
         required={required}
         value={value}
         placeholder={placeholder}
+        aria-describedby={description ? descriptionId : undefined}
         onChange={(event) => onChange(event.target.value)}
         className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base font-normal text-slate-900 outline-none ring-teal-500 focus:border-teal-500 focus:ring-2"
       />
+      {description ? (
+        <span id={descriptionId} className="mt-1 block text-sm font-normal leading-5 text-slate-700">
+          {description}
+        </span>
+      ) : null}
     </label>
   );
 }

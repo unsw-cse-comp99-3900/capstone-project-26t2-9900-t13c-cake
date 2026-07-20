@@ -167,10 +167,10 @@ export function QuizWizard() {
   }, [evidenceRecords]);
 
   useEffect(() => {
-    if (currentStep === 2 && !evidenceRecords && !isLoadingOptions) {
+    if (currentStep === 2 && !evidenceRecords && !isLoadingOptions && !optionsError) {
       void loadEvidenceRecords();
     }
-  }, [currentStep, evidenceRecords, isLoadingOptions, loadEvidenceRecords]);
+  }, [currentStep, evidenceRecords, isLoadingOptions, loadEvidenceRecords, optionsError]);
 
   async function loadResults(nextFilters: MultiQuizFilters) {
     setIsSubmitting(true);

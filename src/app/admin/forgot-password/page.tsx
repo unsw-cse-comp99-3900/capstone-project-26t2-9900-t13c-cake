@@ -21,7 +21,7 @@ export default function AdminForgotPasswordPage() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-6xl px-4 py-8 outline-none sm:px-6 lg:px-8">
         <AccountRecoveryForm />
       </main>
     </div>

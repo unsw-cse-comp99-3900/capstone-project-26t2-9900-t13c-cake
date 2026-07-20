@@ -25,7 +25,7 @@ const dataItems = [
 
 export function PrivacyNoticePage() {
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-slate-50 text-slate-900 outline-none">
       <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <Link

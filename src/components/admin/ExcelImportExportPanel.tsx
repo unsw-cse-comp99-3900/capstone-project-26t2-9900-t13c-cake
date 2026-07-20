@@ -137,7 +137,7 @@ export function ExcelImportExportPanel({
   }
 
   const controls = (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-wrap gap-3" aria-busy={isImporting}>
       <button
         type="button"
         onClick={() => download("/api/evidence/export?template=true")}
@@ -155,6 +155,7 @@ export function ExcelImportExportPanel({
       <button
         type="button"
         disabled={isImporting}
+        aria-describedby="excel-import-help"
         onClick={() => fileInputRef.current?.click()}
         className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#0b3b4a] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#0a3340] disabled:cursor-not-allowed disabled:bg-slate-400"
       >
@@ -163,10 +164,14 @@ export function ExcelImportExportPanel({
       <input
         ref={fileInputRef}
         type="file"
+        aria-label="Choose an Excel workbook to import"
         accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         className="hidden"
         onChange={handleFileSelected}
       />
+      <span id="excel-import-help" className="sr-only">
+        Select an XLSX workbook. You can review a preview before any records are changed.
+      </span>
     </div>
   );
 
@@ -174,7 +179,11 @@ export function ExcelImportExportPanel({
     return (
       <div className="space-y-2">
         {controls}
-        {message && <p className="max-w-xl text-sm font-medium text-slate-700">{message}</p>}
+        {message && (
+          <p role="status" aria-live="polite" className="max-w-xl text-sm font-medium text-slate-800">
+            {message}
+          </p>
+        )}
       </div>
     );
   }
@@ -184,11 +193,15 @@ export function ExcelImportExportPanel({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h4 className="text-base font-bold text-slate-900">Bulk data tools</h4>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
-            Download the Excel template, export active evidence records, or import a completed
-            workbook with preview before applying changes.
+          <p className="mt-1 text-sm leading-6 text-slate-700">
+            Download a blank template, export the current records, or choose a completed XLSX
+            workbook to import. You will see a preview before any data changes.
           </p>
-          {message && <p className="mt-2 text-sm font-medium text-slate-700">{message}</p>}
+          {message && (
+            <p role="status" aria-live="polite" className="mt-2 text-sm font-medium text-slate-800">
+              {message}
+            </p>
+          )}
         </div>
         {controls}
       </div>

@@ -106,7 +106,7 @@ export function AdminSurveyDataPage() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-2xl font-bold text-slate-900">{item.title}</h2>
-            <p className="mt-2 max-w-3xl text-base leading-7 text-slate-600">
+            <p className="mt-2 max-w-3xl text-base leading-7 text-slate-700">
               {item.description}
             </p>
           </div>
@@ -117,7 +117,7 @@ export function AdminSurveyDataPage() {
       </div>
 
       {state.status === "loading" && (
-        <div className="rounded-xl border border-slate-200 bg-white p-6 text-base text-slate-600 shadow-sm">
+        <div role="status" aria-live="polite" className="rounded-xl border border-slate-200 bg-white p-6 text-base text-slate-700 shadow-sm">
           Loading anonymous survey data...
         </div>
       )}
@@ -125,7 +125,7 @@ export function AdminSurveyDataPage() {
       {state.status === "error" && (
         <div
           role="alert"
-          className="rounded-xl border border-red-200 bg-red-50 p-6 text-base text-red-800 shadow-sm"
+          className="rounded-xl border border-red-300 bg-red-50 p-6 text-base font-medium text-red-900 shadow-sm"
         >
           {state.message}
         </div>
@@ -145,7 +145,7 @@ function SurveySummaryView({ summary }: { summary: SurveySummary }) {
           <p className="mt-3 text-4xl font-bold text-teal-800">
             {summary.averageRating == null ? "No data" : `${summary.averageRating}/5`}
           </p>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-slate-700">
             Based on {summary.totalResponses} anonymous response
             {summary.totalResponses === 1 ? "" : "s"}.
           </p>
@@ -156,7 +156,7 @@ function SurveySummaryView({ summary }: { summary: SurveySummary }) {
           <dl className="mt-4 grid grid-cols-5 gap-2 text-center">
             {[1, 2, 3, 4, 5].map((rating) => (
               <div key={rating} className="rounded-lg bg-slate-50 px-3 py-2">
-                <dt className="text-sm font-semibold text-slate-500">{rating}</dt>
+                <dt className="text-sm font-semibold text-slate-700">Rating {rating}</dt>
                 <dd className="mt-1 text-xl font-bold text-slate-900">
                   {summary.ratingCounts[rating]}
                 </dd>
@@ -168,19 +168,19 @@ function SurveySummaryView({ summary }: { summary: SurveySummary }) {
 
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h3 className="text-lg font-bold text-slate-900">Recent responses</h3>
-        <p className="mt-2 max-w-3xl text-base leading-7 text-slate-600">
+        <p className="mt-2 max-w-3xl text-base leading-7 text-slate-700">
           Responses are stored without names, contact details, or personal health information.
         </p>
 
         {summary.recentResponses.length === 0 ? (
-          <div className="mt-5 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-base leading-7 text-slate-600">
+          <div className="mt-5 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-base leading-7 text-slate-700">
             No anonymous feedback has been submitted yet.
           </div>
         ) : (
           <div className="mt-5 grid gap-3">
             {summary.recentResponses.map((response) => (
               <article key={response.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
+                <div className="flex flex-wrap items-center gap-2 text-sm text-slate-700">
                   <span className="rounded-full bg-teal-100 px-3 py-1 font-bold text-teal-900">
                     {response.rating}/5
                   </span>
@@ -194,7 +194,7 @@ function SurveySummaryView({ summary }: { summary: SurveySummary }) {
 
                 <div className="mt-3 grid gap-3 md:grid-cols-2">
                   <div>
-                    <h4 className="text-sm font-bold uppercase tracking-wide text-slate-500">
+                    <h4 className="text-sm font-bold uppercase tracking-wide text-slate-700">
                       Worked well
                     </h4>
                     <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-800">
@@ -202,7 +202,7 @@ function SurveySummaryView({ summary }: { summary: SurveySummary }) {
                     </p>
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold uppercase tracking-wide text-slate-500">
+                    <h4 className="text-sm font-bold uppercase tracking-wide text-slate-700">
                       Could improve
                     </h4>
                     <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-800">

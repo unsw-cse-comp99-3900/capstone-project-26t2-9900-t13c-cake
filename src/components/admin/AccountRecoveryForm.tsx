@@ -275,11 +275,12 @@ export function AccountRecoveryForm() {
   const canResend = !isResending && !isSubmitting && resendCountdown <= 0;
 
   return (
-    <section className="mx-auto w-full max-w-md">
+    <section className="mx-auto w-full max-w-md" aria-busy={isSubmitting || isResending}>
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <h2 className="text-2xl font-bold text-slate-900">Reset administrator password</h2>
-        <p className="mt-2 text-base leading-7 text-slate-600">
-          Choose a configured recovery method. One-time codes expire after 10 minutes.
+        <p id="recovery-help" className="mt-2 text-base leading-7 text-slate-700">
+          Choose email or a supervisor code. Email codes contain 6 digits and expire after 10
+          minutes.
         </p>
 
         {!method ? (
@@ -289,7 +290,7 @@ export function AccountRecoveryForm() {
             </p>
           ) : (
             <div className="mt-6 space-y-3">
-              {!options && !error ? <p className="text-sm text-slate-600">Loading recovery options…</p> : null}
+              {!options && !error ? <p role="status" className="text-sm text-slate-700">Loading recovery options…</p> : null}
               {options?.email.available ? (
                 <button
                   type="button"
@@ -331,6 +332,8 @@ export function AccountRecoveryForm() {
                   pattern="[0-9]{6}"
                   maxLength={6}
                   required
+                  aria-describedby={error ? "recovery-help recovery-error" : "recovery-help"}
+                  aria-invalid={Boolean(error)}
                   value={code}
                   onChange={(event) => setCode(event.target.value)}
                   className="w-full rounded-lg border border-slate-300 py-2 pl-3 pr-28 text-base text-slate-900 outline-none ring-teal-500 focus:border-teal-500 focus:ring-2"
@@ -345,7 +348,7 @@ export function AccountRecoveryForm() {
                     {isResending ? "Sending…" : "Resend"}
                   </button>
                   {resendCountdown > 0 ? (
-                    <span className="pr-2 text-sm tabular-nums text-slate-500" aria-live="polite">
+                    <span className="pr-2 text-sm tabular-nums text-slate-700" aria-live="polite">
                       {resendCountdown}s
                     </span>
                   ) : null}
@@ -536,10 +539,10 @@ export function AccountRecoveryForm() {
           </form>
         ) : null}
 
-        {message ? <p role="status" className="mt-4 rounded-lg bg-teal-50 px-3 py-2 text-sm text-teal-900">{message}</p> : null}
-        {error ? <p role="alert" className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-800">{error}</p> : null}
+        {message ? <p role="status" aria-live="polite" className="mt-4 rounded-lg bg-teal-50 px-3 py-2 text-sm font-medium text-teal-900">{message}</p> : null}
+        {error ? <p id="recovery-error" role="alert" className="mt-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900">{error}</p> : null}
 
-        <p className="mt-4 text-center text-sm text-slate-600">
+        <p className="mt-4 text-center text-sm text-slate-700">
           <Link href={ADMIN_HOME_PATH} className="font-semibold text-teal-800 hover:text-teal-900">
             Back to sign in
           </Link>

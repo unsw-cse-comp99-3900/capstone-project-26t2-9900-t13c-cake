@@ -20,12 +20,13 @@ export function JurisdictionStep() {
         >
           Which locations apply to your project?
         </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          Select all locations that apply to your project.
+        <p id="jurisdiction-help" className="mt-2 text-sm leading-6 text-slate-700">
+          Choose every state or territory where the work will happen. Choose National if the
+          project covers all of Australia.
         </p>
       </div>
 
-      <fieldset className="mt-5">
+      <fieldset className="mt-5" aria-describedby="jurisdiction-help">
         <legend className="sr-only">Select jurisdictions</legend>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {JURISDICTIONS.map((jurisdiction) => {

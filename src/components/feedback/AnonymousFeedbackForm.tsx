@@ -61,22 +61,26 @@ export function AnonymousFeedbackForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+    <form
+      onSubmit={handleSubmit}
+      aria-busy={status.type === "submitting"}
+      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+    >
       <div>
         <h2 className="text-2xl font-bold tracking-tight text-slate-950">Anonymous feedback survey</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
+        <p className="mt-2 text-sm leading-6 text-slate-700">
           The survey is optional. Please do not include names, email addresses, phone numbers, or
           personal health information in your answers.
         </p>
       </div>
 
-      <fieldset className="mt-6">
+      <fieldset className="mt-6" aria-describedby="usefulness-help">
         <legend className="text-base font-bold text-slate-900">Overall usefulness</legend>
         <div className="mt-3 grid gap-2 sm:grid-cols-5">
           {[1, 2, 3, 4, 5].map((value) => (
             <label
               key={value}
-              className={`flex cursor-pointer items-center justify-center rounded-xl border px-4 py-3 text-sm font-bold transition ${
+              className={`flex cursor-pointer items-center justify-center rounded-xl border px-4 py-3 text-sm font-bold transition focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-teal-700 ${
                 rating === String(value)
                   ? "border-teal-700 bg-teal-50 text-teal-900"
                   : "border-slate-200 bg-white text-slate-700 hover:border-teal-300"
@@ -95,10 +99,12 @@ export function AnonymousFeedbackForm() {
             </label>
           ))}
         </div>
-        <p className="mt-2 text-sm text-slate-500">1 means not useful; 5 means very useful.</p>
+        <p id="usefulness-help" className="mt-2 text-sm text-slate-700">
+          Choose one number. 1 means not useful; 5 means very useful.
+        </p>
       </fieldset>
 
-      <label className="mt-5 block">
+      <label htmlFor="feedback-worked-well" className="mt-5 block">
         <span className="text-base font-bold text-slate-900">Which part are you commenting on?</span>
         <select
           value={partOfTool}
@@ -116,23 +122,33 @@ export function AnonymousFeedbackForm() {
       <label className="mt-5 block">
         <span className="text-base font-bold text-slate-900">What worked well?</span>
         <textarea
+          id="feedback-worked-well"
+          aria-describedby="feedback-worked-well-help"
           value={workedWell}
           onChange={(event) => setWorkedWell(event.target.value)}
           maxLength={800}
           rows={4}
           className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2 text-base text-slate-900 shadow-sm focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-100"
         />
+        <span id="feedback-worked-well-help" className="mt-1 block text-sm leading-6 text-slate-700">
+          Optional. Do not include personal or health information. Maximum 800 characters.
+        </span>
       </label>
 
-      <label className="mt-5 block">
+      <label htmlFor="feedback-improvement" className="mt-5 block">
         <span className="text-base font-bold text-slate-900">What could be improved?</span>
         <textarea
+          id="feedback-improvement"
+          aria-describedby="feedback-improvement-help"
           value={improvement}
           onChange={(event) => setImprovement(event.target.value)}
           maxLength={800}
           rows={4}
           className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2 text-base text-slate-900 shadow-sm focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-100"
         />
+        <span id="feedback-improvement-help" className="mt-1 block text-sm leading-6 text-slate-700">
+          Optional. Describe one change that would make the tool easier to use.
+        </span>
       </label>
 
       <label className="mt-5 flex gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
@@ -162,7 +178,7 @@ export function AnonymousFeedbackForm() {
           </p>
         )}
         {status.type === "error" && (
-          <p role="alert" className="text-sm font-semibold text-red-700">
+          <p role="alert" className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900">
             {status.message}
           </p>
         )}
