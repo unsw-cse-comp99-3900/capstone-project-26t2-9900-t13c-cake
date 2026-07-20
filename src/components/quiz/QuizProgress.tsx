@@ -35,6 +35,9 @@ export function QuizProgress({ currentStep }: QuizProgressProps) {
                 {stepNumber}
               </span>
               <span className="text-sm font-semibold text-slate-800">{step}</span>
+              <span className="sr-only">
+                {isCurrent ? "Current step" : isComplete ? "Completed" : "Not started"}
+              </span>
             </li>
           );
         })}

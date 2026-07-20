@@ -219,7 +219,7 @@ export function AccountSettingsPanel() {
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-2xl font-bold text-slate-900">Account settings</h2>
-        <p className="mt-2 max-w-3xl text-base leading-7 text-slate-600">
+        <p className="mt-2 max-w-3xl text-base leading-7 text-slate-700">
           Update your administrator username and password. You will stay signed in after a
           successful change.
         </p>
@@ -227,11 +227,12 @@ export function AccountSettingsPanel() {
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h3 className="text-lg font-bold text-slate-900">Username</h3>
-        <p className="mt-1 text-base text-slate-600">Change the username used to sign in.</p>
+        <p className="mt-1 text-base text-slate-700">Change the username used to sign in.</p>
 
         <form
           className="mt-5 max-w-lg space-y-4"
           autoComplete="off"
+          aria-busy={usernameForm.isSubmitting}
           onSubmit={handleUsernameSubmit}
         >
           <div>
@@ -257,6 +258,8 @@ export function AccountSettingsPanel() {
               type="text"
               autoComplete="off"
               required
+              aria-describedby={usernameForm.error ? "new-username-help username-form-error" : "new-username-help"}
+              aria-invalid={Boolean(usernameForm.error)}
               value={usernameForm.newUsername}
               onChange={(event) =>
                 setUsernameForm((state) => ({ ...state, newUsername: event.target.value }))
@@ -264,8 +267,8 @@ export function AccountSettingsPanel() {
               className={inputClassName}
               {...readOnlyUntilFocusProps}
             />
-            <p className="mt-1 text-sm text-slate-500">
-              3–32 characters. Letters, numbers, dots, dashes, and underscores only.
+            <p id="new-username-help" className="mt-1 text-sm text-slate-700">
+              Use 3 to 32 characters. You can use letters, numbers, dots, dashes, and underscores.
             </p>
           </div>
 
@@ -292,7 +295,7 @@ export function AccountSettingsPanel() {
           </div>
 
           {usernameForm.error && (
-            <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-800">
+            <p id="username-form-error" role="alert" className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900">
               {usernameForm.error}
             </p>
           )}
@@ -318,11 +321,12 @@ export function AccountSettingsPanel() {
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h3 className="text-lg font-bold text-slate-900">Password</h3>
-        <p className="mt-1 text-base text-slate-600">Change the password used to sign in.</p>
+        <p className="mt-1 text-base text-slate-700">Change the password used to sign in.</p>
 
         <form
           className="mt-5 max-w-lg space-y-4"
           autoComplete="off"
+          aria-busy={passwordForm.isSubmitting}
           onSubmit={handlePasswordSubmit}
         >
           <div>
@@ -338,6 +342,7 @@ export function AccountSettingsPanel() {
               type="password"
               autoComplete="off"
               required
+              aria-invalid={Boolean(passwordForm.error)}
               value={passwordForm.currentPassword}
               onChange={(event) =>
                 setPasswordForm((state) => ({ ...state, currentPassword: event.target.value }))
@@ -357,6 +362,8 @@ export function AccountSettingsPanel() {
               type="password"
               autoComplete="new-password"
               required
+              aria-describedby={passwordForm.error ? "new-password-help password-form-error" : "new-password-help"}
+              aria-invalid={Boolean(passwordForm.error)}
               value={passwordForm.newPassword}
               onChange={(event) =>
                 setPasswordForm((state) => ({ ...state, newPassword: event.target.value }))
@@ -364,7 +371,9 @@ export function AccountSettingsPanel() {
               className={inputClassName}
               {...readOnlyUntilFocusProps}
             />
-            <p className="mt-1 text-sm text-slate-500">8–128 characters.</p>
+            <p id="new-password-help" className="mt-1 text-sm text-slate-700">
+              Use 8 to 128 characters.
+            </p>
           </div>
 
           <div>
@@ -387,7 +396,7 @@ export function AccountSettingsPanel() {
           </div>
 
           {passwordForm.error && (
-            <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-800">
+            <p id="password-form-error" role="alert" className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900">
               {passwordForm.error}
             </p>
           )}
@@ -413,14 +422,16 @@ export function AccountSettingsPanel() {
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h3 className="text-lg font-bold text-slate-900">Password recovery contacts</h3>
-        <p className="mt-1 max-w-2xl text-base text-slate-600">
-          Configure the email address that receives one-time password recovery codes. Saving
-          requires your current password.
+        <p id="recovery-contact-help" className="mt-1 max-w-2xl text-base text-slate-700">
+          Enter the email address that should receive one-time recovery codes. To save it, enter
+          your current password.
         </p>
 
         <form
           className="mt-5 max-w-lg space-y-4"
           autoComplete="off"
+          aria-busy={recoveryForm.isLoading || recoveryForm.isSubmitting}
+          aria-describedby="recovery-contact-help"
           onSubmit={handleRecoverySubmit}
         >
           <div>
@@ -461,7 +472,7 @@ export function AccountSettingsPanel() {
           </div>
 
           {recoveryForm.error && (
-            <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-800">
+            <p role="alert" className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900">
               {recoveryForm.error}
             </p>
           )}

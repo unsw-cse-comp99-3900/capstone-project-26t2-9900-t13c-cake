@@ -96,18 +96,18 @@ export function ContextStep({
         >
           What is the research context and consumer engagement level?
         </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          Choose one or more research contexts. Each selected context can use its own
-          sub-category and consumer engagement level.
+        <p id="context-help" className="mt-2 text-sm leading-6 text-slate-700">
+          Choose the area that best describes the work. If more than one area applies, choose
+          each one and set its payment involvement level separately.
         </p>
       </div>
 
       {isLoading ? (
-        <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-700">
+        <div role="status" aria-live="polite" className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-700">
           Loading options from the evidence database...
         </div>
       ) : error ? (
-        <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-950">
+        <div role="alert" className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-950">
           <p className="font-semibold">{error}</p>
           <button
             type="button"
@@ -119,7 +119,7 @@ export function ContextStep({
         </div>
       ) : (
         <>
-          <fieldset className="mt-5">
+          <fieldset className="mt-5" aria-describedby="context-help">
             <legend className="sr-only">Select research contexts</legend>
             <div className="grid gap-3 md:grid-cols-2">
               {contexts.map((context) => {
@@ -185,6 +185,7 @@ export function ContextStep({
                       <button
                         type="button"
                         onClick={() => toggleContext(selection.context)}
+                        aria-label={`Remove ${selection.context} context`}
                         className="min-h-9 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-white focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
                       >
                         Remove

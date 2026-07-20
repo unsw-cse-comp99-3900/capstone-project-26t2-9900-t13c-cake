@@ -66,11 +66,11 @@ export function ResultCard({
 
       <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div>
-          <dt className="text-xs font-bold uppercase tracking-wide text-slate-500">Rate</dt>
+          <dt className="text-xs font-bold uppercase tracking-wide text-slate-700">Rate</dt>
           <dd className="mt-1 text-base font-bold text-slate-950">{formatRateRange(record)}</dd>
         </div>
         <div>
-          <dt className="text-xs font-bold uppercase tracking-wide text-slate-500">
+          <dt className="text-xs font-bold uppercase tracking-wide text-slate-700">
             Reimbursement guidance
           </dt>
           <dd className="mt-1 text-base font-semibold text-slate-800">
@@ -78,7 +78,7 @@ export function ResultCard({
           </dd>
         </div>
         <div>
-          <dt className="text-xs font-bold uppercase tracking-wide text-slate-500">
+          <dt className="text-xs font-bold uppercase tracking-wide text-slate-700">
             Unpaid consumer engagement guidance
           </dt>
           <dd className="mt-1 text-base font-semibold text-slate-800">
@@ -101,6 +101,7 @@ export function ResultCard({
               href={record.link}
               target="_blank"
               rel="noreferrer"
+              aria-label={`Open source for ${record.title} in a new tab`}
               className="result-card-link inline-flex min-h-9 items-center justify-center rounded-lg border border-teal-700 px-3 py-1.5 text-sm font-bold text-teal-800 transition hover:bg-teal-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
             >
               Open source

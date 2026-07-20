@@ -104,7 +104,10 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
       <div>
         <h2
           id="results-heading"
-          className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl"
+          tabIndex={-1}
+          autoFocus
+          aria-live="polite"
+          className="text-2xl font-bold tracking-tight text-slate-950 outline-none sm:text-3xl"
         >
           {error ? "Unable to load results" : formatResultSummary(totalRecords, records.length)}
         </h2>
@@ -140,7 +143,7 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
       </div>
 
       {error ? (
-        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-red-950">
+        <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-red-950">
           <p className="font-semibold">{error}</p>
           <button
             type="button"

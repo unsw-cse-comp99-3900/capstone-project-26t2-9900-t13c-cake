@@ -27,9 +27,6 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Run unit tests
-        run: npm test
-
       - name: Apply database migrations
         run: npx prisma migrate deploy
         env:
@@ -37,6 +34,11 @@ jobs:
 
       - name: Seed database
         run: npm run db:seed
+        env:
+          DATABASE_URL: file:./dev.db
+
+      - name: Run unit tests
+        run: npm test
         env:
           DATABASE_URL: file:./dev.db
 

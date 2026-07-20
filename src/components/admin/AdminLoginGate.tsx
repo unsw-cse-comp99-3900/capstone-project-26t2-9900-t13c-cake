@@ -139,7 +139,11 @@ export function AdminLoginGate({ children }: AdminLoginGateProps) {
 
   if (session.status === "loading") {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center text-base text-slate-600">
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex min-h-[50vh] items-center justify-center text-base text-slate-700"
+      >
         Checking administrator access…
       </div>
     );
@@ -165,11 +169,12 @@ export function AdminLoginGate({ children }: AdminLoginGateProps) {
       <div className="mx-auto w-full max-w-md">
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <h2 className="text-2xl font-bold text-slate-900">Evidence table maintenance</h2>
-          <p className="mt-2 text-base leading-7 text-slate-600">
+          <p className="mt-2 text-base leading-7 text-slate-700">
             Sign in to update remuneration guidance records.
           </p>
-          <p className="mt-1 text-sm leading-6 text-slate-500">
-            Researchers do not need an account to use the questionnaire.
+          <p id="admin-login-help" className="mt-1 text-sm leading-6 text-slate-700">
+            This page is for authorised administrators. Researchers can use the public
+            questionnaire without signing in.
           </p>
 
           <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
@@ -183,6 +188,8 @@ export function AdminLoginGate({ children }: AdminLoginGateProps) {
                 type="text"
                 autoComplete="username"
                 required
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? "admin-login-help admin-login-error" : "admin-login-help"}
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 outline-none ring-teal-500 focus:border-teal-500 focus:ring-2"
@@ -199,6 +206,8 @@ export function AdminLoginGate({ children }: AdminLoginGateProps) {
                 type="password"
                 autoComplete="current-password"
                 required
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? "admin-login-help admin-login-error" : "admin-login-help"}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 outline-none ring-teal-500 focus:border-teal-500 focus:ring-2"
@@ -223,7 +232,11 @@ export function AdminLoginGate({ children }: AdminLoginGateProps) {
             )}
 
             {error && (
-              <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-800">
+              <p
+                id="admin-login-error"
+                role="alert"
+                className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900"
+              >
                 {error}
               </p>
             )}

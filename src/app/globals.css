@@ -14,6 +14,67 @@ body {
   }
 }
 
+/* CAKE-8: keyboard focus and system accessibility preferences. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 9999;
+  transform: translateY(-200%);
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #082f3b;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  box-shadow: 0 0 0 3px #0f766e;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 3px;
+}
+
+::selection {
+  background: #0f766e;
+  color: #ffffff;
+}
+
+@media (prefers-contrast: more) {
+  :where(button, input, select, textarea) {
+    border-color: #334155;
+  }
+
+  a {
+    text-decoration-thickness: 0.15em;
+    text-underline-offset: 0.2em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  :where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline-color: Highlight;
+  }
+
+  .skip-link {
+    border: 2px solid ButtonText;
+  }
+}
+
 .print-only {
   display: none;
 }

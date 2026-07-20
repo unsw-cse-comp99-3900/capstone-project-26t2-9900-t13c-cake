@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ExcelImportExportPanel } from "@/components/admin/ExcelImportExportPanel";
 import {
   RecordFormPage,
@@ -93,6 +93,9 @@ export function RecordListPage() {
   const [loadError, setLoadError] = useState("");
   const [formError, setFormError] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogTitleRef = useRef<HTMLHeadingElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   async function loadRecords() {
     setIsLoading(true);
@@ -115,6 +118,20 @@ export function RecordListPage() {
   useEffect(() => {
     void loadRecords();
   }, []);
+
+  useEffect(() => {
+    if (!isFormOpen) {
+      return undefined;
+    }
+
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    const frame = window.requestAnimationFrame(() => dialogTitleRef.current?.focus());
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      previousFocusRef.current?.focus();
+    };
+  }, [isFormOpen]);
 
   const filterOptions = useMemo(() => {
     const jurisdictions = new Set<string>();
@@ -218,6 +235,39 @@ export function RecordListPage() {
     setFormError("");
   }
 
+  function handleDialogKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeForm();
+      return;
+    }
+
+    if (event.key !== "Tab" || !dialogRef.current) {
+      return;
+    }
+
+    const focusableElements = Array.from(
+      dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+      ),
+    );
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements.at(-1);
+
+    if (!firstElement || !lastElement) {
+      event.preventDefault();
+      return;
+    }
+
+    if (event.shiftKey && document.activeElement === firstElement) {
+      event.preventDefault();
+      lastElement.focus();
+    } else if (!event.shiftKey && document.activeElement === lastElement) {
+      event.preventDefault();
+      firstElement.focus();
+    }
+  }
+
   async function handleSubmit() {
     setIsSubmitting(true);
     setFormError("");
@@ -307,6 +357,9 @@ export function RecordListPage() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">Evidence table</h3>
+                <p id="evidence-table-help" className="mt-1 text-sm leading-6 text-slate-700">
+                  Search or filter the records, then use Edit or Delete for the record you need.
+                </p>
               </div>
               <div className="flex flex-wrap gap-3">
                 <ExcelImportExportPanel variant="buttons" onImportApplied={loadRecords} />
@@ -326,11 +379,15 @@ export function RecordListPage() {
                 <input
                   id="record-search"
                   type="search"
+                  aria-describedby="record-search-help"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Publisher or title..."
                   className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base font-normal text-slate-900 outline-none ring-teal-500 focus:border-teal-500 focus:ring-2"
                 />
+                <span id="record-search-help" className="mt-1 block text-sm font-normal text-slate-700">
+                  Search by publisher or title.
+                </span>
               </label>
 
               <SelectInput
@@ -385,14 +442,21 @@ export function RecordListPage() {
           </div>
 
           {loadError && (
-            <p role="alert" className="m-5 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-800">
+            <p role="alert" className="m-5 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900">
               {loadError}
             </p>
           )}
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+            <table
+              aria-describedby="evidence-table-help"
+              aria-busy={isLoading}
+              className="min-w-full divide-y divide-slate-200 text-left text-sm"
+            >
+              <caption className="sr-only">
+                Active evidence records with scope, rate, and edit or delete actions.
+              </caption>
+              <thead className="bg-slate-50 text-xs uppercase text-slate-700">
                 <tr>
                   <th scope="col" className="px-4 py-3 font-bold">
                     Record
@@ -411,7 +475,7 @@ export function RecordListPage() {
               <tbody className="divide-y divide-slate-100 bg-white">
                 {isLoading && (
                   <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-slate-600">
+                    <td role="status" colSpan={4} className="px-4 py-8 text-center text-slate-700">
                       Loading evidence records...
                     </td>
                   </tr>
@@ -419,7 +483,7 @@ export function RecordListPage() {
 
                 {!isLoading && filteredRecords.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-slate-600">
+                    <td colSpan={4} className="px-4 py-8 text-center text-slate-700">
                       No records match this search.
                     </td>
                   </tr>
@@ -430,7 +494,7 @@ export function RecordListPage() {
                     <tr key={record.id} className="hover:bg-slate-50">
                       <td className="max-w-sm px-4 py-4 align-top">
                         <p className="font-bold text-slate-900">{record.title}</p>
-                        <p className="mt-1 text-slate-600">
+                        <p className="mt-1 text-slate-700">
                           {record.publisher}
                           {record.year ? `, ${record.year}` : ""}
                         </p>
@@ -438,13 +502,14 @@ export function RecordListPage() {
                       <td className="px-4 py-4 align-top text-slate-700">
                         <p className="font-semibold text-slate-900">{record.jurisdictions}</p>
                         <p className="mt-1">{record.context}</p>
-                        <p className="mt-1 text-slate-500">{record.engagementLevel}</p>
+                        <p className="mt-1 text-slate-700">{record.engagementLevel}</p>
                       </td>
                       <td className="px-4 py-4 align-top text-slate-700">{formatRate(record)}</td>
                       <td className="px-4 py-4 align-top">
                         <div className="flex flex-col gap-2">
                           <button
                             type="button"
+                            aria-label={`Edit ${record.title}`}
                             onClick={() => startEdit(record)}
                             className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
                           >
@@ -452,6 +517,7 @@ export function RecordListPage() {
                           </button>
                           <button
                             type="button"
+                            aria-label={`Delete ${record.title}`}
                             onClick={() => void handleDelete(record)}
                             className="inline-flex min-h-9 items-center justify-center rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm font-semibold text-red-700 transition hover:bg-red-50"
                           >
@@ -472,18 +538,28 @@ export function RecordListPage() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="record-form-title"
+          aria-describedby="record-form-help"
+          onKeyDown={handleDialogKeyDown}
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) {
               closeForm();
             }
           }}
         >
-          <div className="w-full max-w-3xl rounded-xl bg-white p-5 shadow-2xl sm:p-6">
+          <div ref={dialogRef} className="w-full max-w-3xl rounded-xl bg-white p-5 shadow-2xl sm:p-6">
             <div className="mb-5 flex items-start justify-between gap-4 border-b border-slate-200 pb-4">
               <div>
-                <h3 id="record-form-title" className="text-xl font-bold text-slate-900">
+                <h3
+                  ref={dialogTitleRef}
+                  id="record-form-title"
+                  tabIndex={-1}
+                  className="text-xl font-bold text-slate-900 outline-none"
+                >
                   {selectedRecord ? "Edit record" : "Add record"}
                 </h3>
+                <p id="record-form-help" className="mt-1 text-sm leading-6 text-slate-700">
+                  Complete the record details. Press Escape to close this window without saving.
+                </p>
               </div>
               <button
                 type="button"
@@ -515,7 +591,7 @@ export function RecordListPage() {
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-sm font-semibold text-slate-500">{label}</p>
+      <p className="text-sm font-semibold text-slate-700">{label}</p>
       <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
     </div>
   );
