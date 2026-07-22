@@ -218,6 +218,37 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
       <div className="mt-4">
         <DisclaimerBanner />
       </div>
+
+      <aside className="no-print mt-4 border border-teal-200 bg-[#e9f5f2] px-4 py-4">
+        <div className="grid gap-3 md:grid-cols-[0.45fr_1fr] md:items-center">
+          <div>
+            <h3 className="text-base font-bold text-slate-950">Contact / Support</h3>
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              Need help interpreting results or want to provide feedback?
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold text-slate-700 md:justify-end">
+            <a
+              href="mailto:deborah.johnston@unsw.edu.au"
+              className="text-teal-800 underline underline-offset-4 transition hover:text-teal-950 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            >
+              deborah.johnston@unsw.edu.au
+            </a>
+            <a
+              href="tel:+610290659414"
+              className="text-teal-800 underline underline-offset-4 transition hover:text-teal-950 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            >
+              +61 (02) 9065 9414
+            </a>
+            <a
+              href="/feedback"
+              className="text-teal-800 underline underline-offset-4 transition hover:text-teal-950 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            >
+              Anonymous feedback
+            </a>
+          </div>
+        </div>
+      </aside>
     </section>
   );
 }
