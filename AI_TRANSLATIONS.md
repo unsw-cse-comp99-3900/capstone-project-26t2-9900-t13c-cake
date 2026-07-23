@@ -10,8 +10,10 @@ key is used. The administrator interface remains English-only.
 2. Leave `language` empty for all languages, or enter `fr`, `es`, `it`, `de`,
    `ja`, `ko`, `th`, or `vi`.
 
-The workflow validates all public keys and placeholders before committing
-`src/i18n/generatedPublicTranslations.json` to the selected branch.
+The workflow generates translations temporarily and validates all public keys
+and placeholders. It has read-only repository access and never commits or
+pushes changes. Maintainers regenerate and commit the language pack locally
+when the English source text changes.
 
 ## Local commands
 
