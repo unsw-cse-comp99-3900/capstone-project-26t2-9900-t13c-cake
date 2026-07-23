@@ -5,6 +5,7 @@ import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository
 import type { MultiQuizFilters, QuizFilters } from "@/lib/filter/filterService";
 import { exportResultsPdf } from "@/lib/results/exportResultsPdf";
 import { printResults } from "@/lib/results/printResults";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type ResultsExportActionsProps = {
   filters: QuizFilters | MultiQuizFilters;
@@ -23,6 +24,7 @@ export function ResultsExportActions({
   disabled = false,
   trailingActions,
 }: ResultsExportActionsProps) {
+  const { t } = useLanguage();
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
@@ -35,7 +37,7 @@ export function ResultsExportActions({
     try {
       await exportResultsPdf({ filters, records });
     } catch {
-      setExportError("Unable to export PDF. Please try again or use Print results.");
+      setExportError(t("exportError"));
     } finally {
       setIsExporting(false);
     }
@@ -50,7 +52,7 @@ export function ResultsExportActions({
           disabled={actionsDisabled}
           className={actionButtonClassName}
         >
-          Print results
+          {t("printResults")}
         </button>
         <button
           type="button"
@@ -58,7 +60,7 @@ export function ResultsExportActions({
           disabled={actionsDisabled}
           className={actionButtonClassName}
         >
-          {isExporting ? "Exporting PDF..." : "Export PDF"}
+          {isExporting ? t("exportingPdf") : t("exportPdf")}
         </button>
         {trailingActions}
       </div>

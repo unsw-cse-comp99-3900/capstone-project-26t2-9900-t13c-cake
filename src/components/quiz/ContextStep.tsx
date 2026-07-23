@@ -1,6 +1,8 @@
 "use client";
 
 import { useQuizState } from "@/contexts/QuizStateContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translateLevelLabel, translateOption } from "@/i18n/optionTranslations";
 
 type ContextSelectionOptions = {
   context: string;
@@ -55,6 +57,7 @@ export function ContextStep({
   isSubmitting,
   onSubmit,
 }: ContextStepProps) {
+  const { t, language } = useLanguage();
   const {
     answers,
     toggleContext,
@@ -94,17 +97,16 @@ export function ContextStep({
           id="context-heading"
           className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl"
         >
-          What is the research context and consumer engagement level?
+          {t("contextHeading")}
         </h2>
         <p id="context-help" className="mt-2 text-sm leading-6 text-slate-700">
-          Choose the area that best describes the work. If more than one area applies, choose
-          each one and set its payment involvement level separately.
+          {t("contextHelp")}
         </p>
       </div>
 
       {isLoading ? (
         <div role="status" aria-live="polite" className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-700">
-          Loading options from the evidence database...
+          {t("loadingOptions")}
         </div>
       ) : error ? (
         <div role="alert" className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-950">
@@ -114,13 +116,13 @@ export function ContextStep({
             onClick={onRetry}
             className="mt-4 min-h-10 rounded-lg bg-red-700 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-red-700"
           >
-            Try again
+            {t("tryAgain")}
           </button>
         </div>
       ) : (
         <>
           <fieldset className="mt-5" aria-describedby="context-help">
-            <legend className="sr-only">Select research contexts</legend>
+            <legend className="sr-only">{t("selectContexts")}</legend>
             <div className="grid gap-3 md:grid-cols-2">
               {contexts.map((context) => {
                 const optionId = `context-${context.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`;
@@ -148,7 +150,9 @@ export function ContextStep({
                         onChange={() => toggleContext(context)}
                         className="mt-1 size-5 border-slate-300 text-teal-700 accent-teal-700"
                       />
-                      <span className="text-base font-bold text-slate-950">{context}</span>
+                      <span className="text-base font-bold text-slate-950">
+                        {translateOption(language, context)}
+                      </span>
                     </div>
                   </label>
                 );
@@ -176,10 +180,10 @@ export function ContextStep({
                           id={`selection-${selection.context.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`}
                           className="text-lg font-bold text-slate-950"
                         >
-                          {selection.context}
+                          {translateOption(language, selection.context)}
                         </h3>
                         <p className="mt-1 text-sm leading-6 text-slate-600">
-                          Configure this context independently.
+                          {t("configureContext")}
                         </p>
                       </div>
                       <button
@@ -188,7 +192,7 @@ export function ContextStep({
                         aria-label={`Remove ${selection.context} context`}
                         className="min-h-9 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-white focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
                       >
-                        Remove
+                        {t("remove")}
                       </button>
                     </div>
 
@@ -197,7 +201,7 @@ export function ContextStep({
                         htmlFor={`sub-category-${selection.context.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`}
                         className="block text-sm font-bold text-slate-800"
                       >
-                        Sub-category
+                        {t("subCategory")}
                       </label>
                       <select
                         id={`sub-category-${selection.context.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`}
@@ -210,10 +214,10 @@ export function ContextStep({
                         }
                         className="mt-2 min-h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-3 focus:outline-offset-2 focus:outline-teal-700"
                       >
-                        <option value="">No specific sub-category</option>
+                        <option value="">{t("noSpecificSubCategory")}</option>
                         {options?.subCategories.map((subCategory) => (
                           <option key={subCategory} value={subCategory}>
-                            {subCategory}
+                            {translateOption(language, subCategory)}
                           </option>
                         ))}
                       </select>
@@ -221,14 +225,12 @@ export function ContextStep({
 
                     {engagementLevels.length === 0 ? (
                       <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-950">
-                        No evidence is currently available for this context and
-                        sub-category. Try removing the sub-category or selecting another
-                        context.
+                        {t("noEvidence")}
                       </div>
                     ) : (
                       <fieldset className="mt-4">
                         <legend className="text-sm font-bold text-slate-800">
-                          Consumer engagement level
+                          {t("engagementLevel")}
                         </legend>
                         <div className="mt-2 grid gap-3 md:grid-cols-2">
                           {engagementLevels.map((engagementLevel) => {
@@ -268,14 +270,17 @@ export function ContextStep({
                                   />
                                   <span>
                                     <span className="block text-sm font-bold text-teal-700">
-                                      {details?.label ?? "Additional level"}
+                                      {details
+                                        ? translateLevelLabel(language, details.label)
+                                        : t("additionalLevel")}
                                     </span>
                                     <span className="mt-1 block text-base font-bold text-slate-950">
-                                      {engagementLevel}
+                                      {translateOption(language, engagementLevel)}
                                     </span>
                                     <span className="mt-2 block text-sm leading-6 text-slate-600">
-                                      {details?.description ??
-                                        "Evidence-table engagement level."}
+                                      {language === "en"
+                                        ? details?.description ?? t("evidenceLevel")
+                                        : t("evidenceLevel")}
                                     </span>
                                   </span>
                                 </div>
@@ -300,7 +305,7 @@ export function ContextStep({
           disabled={isSubmitting}
           className="min-h-10 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-45"
         >
-          Back
+          {t("back")}
         </button>
         <button
           type="button"
@@ -308,7 +313,7 @@ export function ContextStep({
           disabled={!canSubmit}
           className="min-h-10 rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600 disabled:shadow-none"
         >
-          {isSubmitting ? "Finding guidance..." : "View results"}
+          {isSubmitting ? t("findingGuidance") : t("viewResults")}
         </button>
       </div>
     </section>
