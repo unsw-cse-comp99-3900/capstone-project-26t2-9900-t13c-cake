@@ -11,6 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:filter": "vitest run src/lib/filter/filterService.test.ts",
+    "translate:public": "python3 scripts/generate-public-translations.py",
+    "translate:public:check": "node scripts/check-public-translations.mjs",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
