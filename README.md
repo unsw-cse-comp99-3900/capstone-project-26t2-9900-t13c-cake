@@ -24,8 +24,10 @@ npm run dev
 | CAKE-3 Quiz wizard | Jiawei Dai |
 | CAKE-4 Filter engine | Jialun Li, Zhengqian Zhang |
 | CAKE-5 Results display | Jiawei Dai |
+| CAKE-8 Public and admin accessibility | Yihui Liu |
 | CAKE-9 Privacy notice and data scope | Zhengqian Zhang |
 | CAKE-10 Admin authentication | Zeyu Yang |
+| CAKE-12 Bulk Excel import / export | Yihui Liu |
 | CAKE-14 Print / export results | Zeyu Yang |
 | CAKE-15 Anonymous feedback survey | Zhengqian Zhang |
 
