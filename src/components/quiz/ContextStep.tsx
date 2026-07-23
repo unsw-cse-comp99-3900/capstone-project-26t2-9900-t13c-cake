@@ -2,6 +2,7 @@
 
 import { useQuizState } from "@/contexts/QuizStateContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { translateLevelLabel, translateOption } from "@/i18n/optionTranslations";
 
 type ContextSelectionOptions = {
   context: string;
@@ -149,7 +150,9 @@ export function ContextStep({
                         onChange={() => toggleContext(context)}
                         className="mt-1 size-5 border-slate-300 text-teal-700 accent-teal-700"
                       />
-                      <span className="text-base font-bold text-slate-950">{context}</span>
+                      <span className="text-base font-bold text-slate-950">
+                        {translateOption(language, context)}
+                      </span>
                     </div>
                   </label>
                 );
@@ -177,7 +180,7 @@ export function ContextStep({
                           id={`selection-${selection.context.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`}
                           className="text-lg font-bold text-slate-950"
                         >
-                          {selection.context}
+                          {translateOption(language, selection.context)}
                         </h3>
                         <p className="mt-1 text-sm leading-6 text-slate-600">
                           {t("configureContext")}
@@ -214,7 +217,7 @@ export function ContextStep({
                         <option value="">{t("noSpecificSubCategory")}</option>
                         {options?.subCategories.map((subCategory) => (
                           <option key={subCategory} value={subCategory}>
-                            {subCategory}
+                            {translateOption(language, subCategory)}
                           </option>
                         ))}
                       </select>
@@ -267,15 +270,17 @@ export function ContextStep({
                                   />
                                   <span>
                                     <span className="block text-sm font-bold text-teal-700">
-                                      {details?.label ?? t("additionalLevel")}
+                                      {details
+                                        ? translateLevelLabel(language, details.label)
+                                        : t("additionalLevel")}
                                     </span>
                                     <span className="mt-1 block text-base font-bold text-slate-950">
-                                      {engagementLevel}
+                                      {translateOption(language, engagementLevel)}
                                     </span>
                                     <span className="mt-2 block text-sm leading-6 text-slate-600">
-                                      {language === "zh-CN"
-                                        ? t("evidenceLevel")
-                                        : details?.description ?? t("evidenceLevel")}
+                                      {language === "en"
+                                        ? details?.description ?? t("evidenceLevel")
+                                        : t("evidenceLevel")}
                                     </span>
                                   </span>
                                 </div>

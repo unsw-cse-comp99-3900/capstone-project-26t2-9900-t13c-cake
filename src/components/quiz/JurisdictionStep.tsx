@@ -3,11 +3,12 @@
 import { JURISDICTIONS } from "@/lib/constants/quizOptions";
 import { useQuizState } from "@/contexts/QuizStateContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { translateOption } from "@/i18n/optionTranslations";
 
 /** CAKE-3 — JurisdictionStep */
 export function JurisdictionStep() {
   const { answers, toggleJurisdiction, clearJurisdictions, setCurrentStep } = useQuizState();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const hasSelection = answers.jurisdictions.length > 0;
 
   return (
@@ -57,7 +58,7 @@ export function JurisdictionStep() {
                   />
                   <span>
                     <span className="block text-base font-bold text-slate-950">
-                      {jurisdiction.label}
+                      {translateOption(language, jurisdiction.label)}
                     </span>
                   </span>
                 </div>

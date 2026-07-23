@@ -22,7 +22,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored === "en" || stored === "zh-CN") setLanguageState(stored);
+    if (stored && stored in dictionaries) setLanguageState(stored as Language);
   }, []);
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
 import type {
   FilteredEvidenceGroup,
@@ -15,10 +15,7 @@ import { ResultCard } from "./ResultCard";
 import { ResultsComparisonView } from "./ResultsComparisonView";
 import { ResultsExportActions } from "./ResultsExportActions";
 import { useLanguage } from "@/contexts/LanguageContext";
-import {
-  translateEvidenceRecords,
-  type EvidenceTranslation,
-} from "@/lib/api/translationApiClient";
+import { translateOption } from "@/i18n/optionTranslations";
 
 type ResultsPanelProps = {
   filters: MultiQuizFilters;
@@ -57,8 +54,6 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
   const { language, t } = useLanguage();
   const [selectedRecordIds, setSelectedRecordIds] = useState<string[]>([]);
   const [isComparing, setIsComparing] = useState(false);
-  const [translations, setTranslations] = useState<Record<string, EvidenceTranslation>>({});
-  const [translationState, setTranslationState] = useState<"idle" | "loading" | "error">("idle");
 
   const flatRecords = useMemo(() => flattenUniqueRecords(records), [records]);
   const totalRecords = flatRecords.length;
@@ -77,24 +72,6 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
   const selectedRecordCount = selectedRecords.length;
   const canCompare = selectedRecordCount >= 2;
   const reachedComparisonLimit = selectedRecordCount >= MAX_COMPARISON_RECORDS;
-
-  useEffect(() => {
-    if (language !== "zh-CN" || flatRecords.length === 0) {
-      setTranslationState("idle");
-      return;
-    }
-    const controller = new AbortController();
-    setTranslationState("loading");
-    void translateEvidenceRecords(flatRecords, controller.signal)
-      .then((items) => {
-        setTranslations(Object.fromEntries(items.map((item) => [item.id, item])));
-        setTranslationState("idle");
-      })
-      .catch((requestError) => {
-        if ((requestError as Error).name !== "AbortError") setTranslationState("error");
-      });
-    return () => controller.abort();
-  }, [flatRecords, language]);
 
   function handleToggleComparison(recordId: string) {
     setIsComparing(false);
@@ -137,7 +114,7 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
         >
           {error
             ? t("unableResults")
-            : language === "zh-CN"
+            : language !== "en"
               ? t("resultSummary", { count: totalRecords, groups: records.length })
               : formatResultSummary(totalRecords, records.length)}
         </h2>
@@ -208,24 +185,22 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
             </div>
           )}
 
-          {language === "zh-CN" && translationState !== "idle" ? (
-            <div role="status" className={`rounded-lg border p-3 text-sm ${translationState === "error" ? "border-amber-200 bg-amber-50 text-amber-950" : "border-violet-200 bg-violet-50 text-violet-950"}`}>
-              {translationState === "loading" ? t("translating") : t("translationFailed")}
-            </div>
-          ) : null}
-
           {records.map((group) => (
             <section
               key={`${group.selection.context}-${group.selection.subCategory ?? "none"}-${group.selection.engagementLevel}`}
               className="rounded-xl border border-slate-200 bg-slate-50 p-4"
             >
               <div>
-                <h3 className="text-lg font-bold text-slate-950">{group.selection.context}</h3>
+                <h3 className="text-lg font-bold text-slate-950">
+                  {translateOption(language, group.selection.context)}
+                </h3>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  {group.selection.subCategory ?? t("noSubCategory")} /{" "}
+                  {group.selection.subCategory
+                    ? translateOption(language, group.selection.subCategory)
+                    : t("noSubCategory")} /{" "}
                   {t("groupResults", {
-                    context: group.selection.context,
-                    engagement: group.selection.engagementLevel,
+                    context: translateOption(language, group.selection.context),
+                    engagement: translateOption(language, group.selection.engagementLevel),
                     count: group.records.length,
                   })}
                 </p>
@@ -246,7 +221,6 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
                         reachedComparisonLimit && !selectedRecordIds.includes(record.id)
                       }
                       onToggleComparison={handleToggleComparison}
-                      translation={translations[record.id]}
                     />
                   ))}
                 </div>

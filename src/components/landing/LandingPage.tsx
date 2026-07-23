@@ -1,58 +1,28 @@
+"use client";
+
 import Link from "next/link";
 import { CitationCopyButton } from "./CitationCopyButton";
-
-const instructions = [
-  {
-    title: "Describe your context",
-    description:
-      "Answer a short set of questions about the jurisdiction, context and consumer engagement level.",
-  },
-  {
-    title: "View matched evidence",
-    description:
-      "See remuneration guidance and supporting evidence that are relevant to the circumstances you selected.",
-  },
-  {
-    title: "Use the findings and cite the tool",
-    description:
-      "Draw on the results when planning budgets and preparing grant, governance, or ethics applications.",
-  },
-];
-
-const reasons = [
-  {
-    title: "Make remuneration decisions with confidence",
-    description:
-      "Use evidence-informed guidance instead of relying on guesswork or inconsistent past practice.",
-  },
-  {
-    title: "Support fair consumer involvement",
-    description:
-      "Recognise the time, expertise, preparation and lived experience that consumer representatives contribute.",
-  },
-  {
-    title: "Save time when planning projects",
-    description:
-      "Quickly narrow broad remuneration evidence into guidance that matches your research context.",
-  },
-];
-
-const supportAreas = [
-  "Selecting remuneration guidance for different jurisdictions and engagement contexts.",
-  "Preparing transparent budget justifications for grants, governance reviews and ethics applications.",
-  "Reducing uncertainty when consumer representatives are involved across diverse populations and locations.",
-];
-
-const values = [
-  "Clearer and more defensible remuneration planning.",
-  "More consistent decisions across projects and teams.",
-  "Stronger support for respectful, inclusive consumer partnerships.",
-];
+import { LanguageSelector } from "@/components/language/LanguageSelector";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const citation =
   "Johnston, D., Nguyen, L., Liu, Y., Wei, X., Dai, J., Li, J., Zhang, Z., & Yang, Z. (2026). Consumer Rep Remuneration Tool [Web application]. i2i, UNSW Population Health and UNSW COMP9900/3900 Team T13C.";
 
 export function LandingPage() {
+  const { t } = useLanguage();
+  const instructions = [
+    { title: t("step1Title"), description: t("step1Description") },
+    { title: t("step2Title"), description: t("step2Description") },
+    { title: t("step3Title"), description: t("step3Description") },
+  ];
+  const reasons = [
+    { title: t("reason1Title"), description: t("reason1Description") },
+    { title: t("reason2Title"), description: t("reason2Description") },
+    { title: t("reason3Title"), description: t("reason3Description") },
+  ];
+  const supportAreas = [t("problem1"), t("problem2"), t("problem3")];
+  const values = [t("value1"), t("value2"), t("value3")];
+
   return (
     <main id="main-content" tabIndex={-1} className="min-h-screen overflow-hidden bg-slate-50 text-slate-900 outline-none">
       <section className="relative isolate bg-[#0b3b4a] text-white">
@@ -60,21 +30,24 @@ export function LandingPage() {
           aria-hidden="true"
           className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(45,212,191,0.22),_transparent_52%)]"
         />
+        <div className="absolute right-4 top-4 z-10 rounded-lg bg-white px-3 py-1 shadow-sm sm:right-6 lg:right-8">
+          <LanguageSelector />
+        </div>
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center px-4 py-8 text-center sm:px-6 sm:py-10 lg:px-8 lg:py-14">
             <h1 className="w-full text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
-              Consumer Rep Remuneration Tool
+              {t("toolTitle")}
             </h1>
             <p className="mt-3 w-full text-lg leading-8 text-slate-100 sm:text-xl sm:leading-9">
-              Find relevant evidence to support fair remuneration for health consumer representatives in Australia.
+              {t("homeSubtitle")}
             </p>
             <p className="mt-2 w-full text-base leading-7 text-slate-300">
-              This decision tool is designed for researchers to seek guidance regarding the remuneration of consumer representatives across diverse populations and locations.
+              {t("homeDescription")}
             </p>
             <Link
               href="/questionnaire"
               className="mt-5 inline-flex min-h-12 items-center justify-center rounded-lg bg-teal-300 px-7 py-3 text-lg font-bold text-[#082f3b] shadow-lg shadow-black/15 transition hover:bg-teal-200 focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-white"
             >
-              Start the questionnaire
+              {t("startQuestionnaire")}
               <span aria-hidden="true" className="ml-2">
                 &rarr;
               </span>
@@ -91,11 +64,10 @@ export function LandingPage() {
             id="why-heading"
             className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
           >
-            Why use this tool?
+            {t("whyTitle")}
           </h2>
           <p className="mt-2 text-lg leading-8 text-slate-600">
-            It helps research teams make fair, transparent and evidence-informed
-            remuneration decisions for health consumer representatives.
+            {t("whyDescription")}
           </p>
         </div>
 
@@ -118,7 +90,7 @@ export function LandingPage() {
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <div className="rounded-xl border border-teal-200 bg-teal-50 p-4">
             <h3 className="text-lg font-bold text-slate-900">
-              Problems it helps solve
+              {t("problemsTitle")}
             </h3>
             <ul className="mt-3 space-y-2 text-base leading-7 text-slate-700">
               {supportAreas.map((area) => (
@@ -134,7 +106,7 @@ export function LandingPage() {
 
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <h3 className="text-lg font-bold text-slate-900">
-              Value you gain
+              {t("valueTitle")}
             </h3>
             <ul className="mt-3 space-y-2 text-base leading-7 text-slate-700">
               {values.map((value) => (
@@ -160,10 +132,10 @@ export function LandingPage() {
             id="instructions-heading"
             className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
           >
-            How the tool works?
+            {t("howTitle")}
           </h2>
           <p className="mt-2 text-lg leading-8 text-slate-600 md:whitespace-nowrap">
-            Work through three simple stages.
+            {t("howDescription")}
           </p>
         </div>
 
@@ -187,7 +159,7 @@ export function LandingPage() {
         </ol>
 
         <aside className="mt-4 rounded-xl border-l-4 border-amber-500 bg-amber-50 px-4 py-3 text-base leading-7 text-amber-950">
-          <strong>Important:</strong> This tool provides evidence-informed decision support. It does not replace your organisation&apos;s policies, funder requirements, legal advice, or professional judgement.
+          <strong>{t("important")}</strong> {t("decisionNotice")}
         </aside>
       </section>
 
@@ -201,17 +173,17 @@ export function LandingPage() {
               id="citation-heading"
               className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl"
             >
-              How to cite the tool
+              {t("citeTitle")}
             </h2>
             <p className="mt-2 text-lg leading-7 text-slate-600">
-              Include this citation when referring to the tool.
+              {t("citeDescription")}
             </p>
           </div>
 
           <div className="min-w-0 rounded-xl border border-teal-200 bg-teal-50 p-3 sm:p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-base font-bold uppercase tracking-wide text-teal-800">
-                Suggested citation
+                {t("suggestedCitation")}
               </p>
               <CitationCopyButton citation={citation} />
             </div>
@@ -220,11 +192,11 @@ export function LandingPage() {
             </p>
             <div className="mt-3 border-t border-teal-200 pt-3 text-base leading-7 text-slate-600">
               <p>
-                <strong className="text-slate-800">Project supervisors:</strong>{" "}
+                <strong className="text-slate-800">{t("supervisors")}:</strong>{" "}
                 Deborah Johnston and Loc Nguyen
               </p>
               <p className="mt-2">
-                <strong className="text-slate-800">Student group:</strong> UNSW
+                <strong className="text-slate-800">{t("studentGroup")}:</strong> UNSW
                 COMP9900/3900 Team T13C
               </p>
             </div>
@@ -235,7 +207,7 @@ export function LandingPage() {
       <footer className="bg-slate-950 text-slate-300">
         <div className="mx-auto grid w-full max-w-6xl gap-5 px-4 py-5 text-base sm:px-6 md:grid-cols-[1.2fr_1fr] md:items-start lg:px-8">
           <div>
-            <p className="font-bold text-slate-100">Contact us</p>
+            <p className="font-bold text-slate-100">{t("contactUs")}</p>
             <div className="mt-2 space-y-1 leading-7">
               <p>Availability: Mon, Tue, Wed - Implementation to Impact (i2i)</p>
               <p>School of Population Health - Faculty of Medicine and Health</p>
@@ -257,7 +229,7 @@ export function LandingPage() {
           </div>
           <div className="flex flex-col gap-2 md:items-end md:text-right">
             <p>&copy; 2026 T13C Cake</p>
-            <p>Developed with i2i, UNSW Population Health</p>
+            <p>{t("developedWith")}</p>
             <nav
               aria-label="Footer navigation"
               className="mt-1 flex flex-wrap gap-x-4 gap-y-2 md:justify-end"
@@ -266,19 +238,19 @@ export function LandingPage() {
                 href="/privacy"
                 className="font-semibold text-teal-200 transition hover:text-white focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-teal-200"
               >
-                Privacy/Data Scope
+                {t("privacyScope")}
               </Link>
               <Link
                 href="/feedback"
                 className="font-semibold text-teal-200 transition hover:text-white focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-teal-200"
               >
-                Anonymous feedback
+                {t("anonymousFeedback")}
               </Link>
               <Link
                 href="/admin"
                 className="font-semibold text-teal-200 transition hover:text-white focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-teal-200"
               >
-                Administrator account centre
+                {t("adminCentre")}
               </Link>
             </nav>
           </div>

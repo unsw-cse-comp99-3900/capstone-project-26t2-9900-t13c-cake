@@ -1,7 +1,5 @@
-import { useState } from "react";
 import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
 import { formatBoolean, formatRateRange } from "@/lib/results/resultFormatting";
-import type { EvidenceTranslation } from "@/lib/api/translationApiClient";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 type ResultCardProps = {
@@ -9,7 +7,6 @@ type ResultCardProps = {
   isSelectedForComparison?: boolean;
   isComparisonDisabled?: boolean;
   onToggleComparison?: (recordId: string) => void;
-  translation?: EvidenceTranslation;
 };
 
 /** CAKE-5 - ResultCard */
@@ -18,12 +15,8 @@ export function ResultCard({
   isSelectedForComparison = false,
   isComparisonDisabled = false,
   onToggleComparison,
-  translation,
 }: ResultCardProps) {
   const { language, t } = useLanguage();
-  const [showOriginal, setShowOriginal] = useState(false);
-  const useTranslation = language === "zh-CN" && translation && !showOriginal;
-  const display = useTranslation ? translation : record;
   const comparisonInputId = `compare-${record.id}`;
 
   return (
@@ -35,18 +28,8 @@ export function ResultCard({
     >
       <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
         <div className="min-w-0">
-          <p className="text-sm font-bold text-teal-800">{display.publisher}</p>
-          <h3 className="mt-1 text-lg font-bold leading-6 text-slate-950">{display.title}</h3>
-          {language === "zh-CN" && translation ? (
-            <div className="no-print mt-2 flex items-center gap-3 text-xs">
-              <span className="rounded-full bg-violet-50 px-2 py-1 font-semibold text-violet-800">
-                {t("aiTranslation")}
-              </span>
-              <button type="button" className="font-semibold text-teal-800 underline" onClick={() => setShowOriginal((value) => !value)}>
-                {showOriginal ? t("showTranslation") : t("showOriginal")}
-              </button>
-            </div>
-          ) : null}
+          <p className="text-sm font-bold text-teal-800">{record.publisher}</p>
+          <h3 className="mt-1 text-lg font-bold leading-6 text-slate-950">{record.title}</h3>
         </div>
         <div className="flex shrink-0 flex-wrap justify-start gap-2 text-sm font-semibold text-slate-700 sm:w-48 sm:justify-end">
           {record.year ? (
@@ -97,7 +80,7 @@ export function ResultCard({
             {t("reimbursement")}
           </dt>
           <dd className="mt-1 text-base font-semibold text-slate-800">
-            {language === "zh-CN" ? t(record.reimbursementGuidance ? "included" : "notIncluded") : formatBoolean(record.reimbursementGuidance)}
+            {language !== "en" ? t(record.reimbursementGuidance ? "included" : "notIncluded") : formatBoolean(record.reimbursementGuidance)}
           </dd>
         </div>
         <div>
@@ -105,16 +88,16 @@ export function ResultCard({
             {t("unpaid")}
           </dt>
           <dd className="mt-1 text-base font-semibold text-slate-800">
-            {language === "zh-CN" ? t(record.unpaidEngagementGuidance ? "included" : "notIncluded") : formatBoolean(record.unpaidEngagementGuidance)}
+            {language !== "en" ? t(record.unpaidEngagementGuidance ? "included" : "notIncluded") : formatBoolean(record.unpaidEngagementGuidance)}
           </dd>
         </div>
       </dl>
 
-      {display.exampleOrganisations || record.link ? (
+      {record.exampleOrganisations || record.link ? (
         <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
-          {display.exampleOrganisations ? (
+          {record.exampleOrganisations ? (
             <p className="text-sm leading-6 text-slate-600">
-              {t("exampleOrganisations")}: {display.exampleOrganisations}
+              {t("exampleOrganisations")}: {record.exampleOrganisations}
             </p>
           ) : (
             <span />
