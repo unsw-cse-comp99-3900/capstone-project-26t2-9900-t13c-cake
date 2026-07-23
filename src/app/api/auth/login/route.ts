@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { authService } from "@/server/services/authService";
+import { backupRecoveryService } from "@/server/services/backupRecoveryService";
 
 type LoginBody = {
   username?: string;
@@ -34,8 +35,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
+  const recoveryStatus = await backupRecoveryService.getStatus();
   const token = authService.createSessionToken(username);
-  const response = NextResponse.json({ authenticated: true, username });
+  const response = NextResponse.json(
+    {
+      authenticated: true,
+      username,
+      backupRecoverySetupRequired: recoveryStatus?.setupRequired ?? true,
+    },
+    { headers: { "Cache-Control": "no-store" } },
+  );
   const cookie = authService.getSessionCookieOptions();
 
   response.cookies.set(cookie.name, token, {

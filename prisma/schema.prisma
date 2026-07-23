@@ -57,6 +57,9 @@ model AdminAccount {
   recoveryCodeExpiresAt DateTime?
   recoveryCodeSentAt    DateTime?
   recoveryCodeAttempts  Int       @default(0)
+  backupRecoveryCodeHash        String?
+  backupRecoveryCodeCreatedAt   DateTime?
+  backupRecoveryCodeConfirmedAt DateTime?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 

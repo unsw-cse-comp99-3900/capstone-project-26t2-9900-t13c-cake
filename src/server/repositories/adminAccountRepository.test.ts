@@ -6,6 +6,7 @@ import {
   isValidAdminUsername,
   isValidRecoveryEmail,
 } from "@/server/repositories/adminAccountRepository";
+import { hashBackupRecoveryCode } from "@/server/utils/backupRecoveryCodeUtils";
 
 describe("adminAccountRepository (CAKE-10)", () => {
   beforeEach(async () => {
@@ -120,6 +121,93 @@ describe("adminAccountRepository (CAKE-10)", () => {
     ).resolves.toEqual({ ok: true, username: "new-admin" });
     await expect(
       adminAccountRepository.verifyCredentials("new-admin", "new-secret-pass"),
+    ).resolves.toBe(true);
+  });
+
+  it("requires backup recovery setup until a generated code is confirmed", async () => {
+    await adminAccountRepository.getOrCreate();
+
+    await expect(adminAccountRepository.getBackupRecoveryStatus()).resolves.toMatchObject({
+      setupRequired: true,
+      createdAt: null,
+      confirmedAt: null,
+    });
+
+    const createdAt = new Date("2026-07-23T10:00:00.000Z");
+    await adminAccountRepository.saveBackupRecoveryCode(
+      hashBackupRecoveryCode("ABCD-EFGH-JKMN-PQRS-TVWX"),
+      createdAt,
+    );
+
+    await expect(adminAccountRepository.getBackupRecoveryStatus()).resolves.toMatchObject({
+      setupRequired: true,
+      createdAt,
+      confirmedAt: null,
+    });
+
+    await expect(
+      adminAccountRepository.confirmBackupRecoveryCode(createdAt),
+    ).resolves.toEqual({ ok: true });
+
+    await expect(adminAccountRepository.getBackupRecoveryStatus()).resolves.toMatchObject({
+      setupRequired: false,
+      createdAt,
+      confirmedAt: expect.any(Date),
+    });
+  });
+
+  it("resets the password with a backup code once and requires a replacement", async () => {
+    await adminAccountRepository.getOrCreate();
+    const createdAt = new Date("2026-07-23T10:00:00.000Z");
+    await adminAccountRepository.saveBackupRecoveryCode(
+      hashBackupRecoveryCode("ABCD-EFGH-JKMN-PQRS-TVWX"),
+      createdAt,
+    );
+    await adminAccountRepository.confirmBackupRecoveryCode(createdAt);
+
+    await expect(
+      adminAccountRepository.resetPasswordWithBackupRecoveryCode(
+        "abcd efgh jkmn pqrs tvwx",
+        "new-admin",
+        "new-secret-pass",
+      ),
+    ).resolves.toEqual({ ok: true, username: "new-admin" });
+
+    await expect(
+      adminAccountRepository.verifyCredentials("new-admin", "new-secret-pass"),
+    ).resolves.toBe(true);
+    await expect(adminAccountRepository.getBackupRecoveryStatus()).resolves.toMatchObject({
+      setupRequired: true,
+      createdAt: null,
+      confirmedAt: null,
+    });
+    await expect(
+      adminAccountRepository.resetPasswordWithBackupRecoveryCode(
+        "ABCD-EFGH-JKMN-PQRS-TVWX",
+        "new-admin",
+        "another-secret-pass",
+      ),
+    ).resolves.toEqual({ ok: false, error: "INVALID_RECOVERY_CODE" });
+  });
+
+  it("does not reset the password when the backup code is incorrect", async () => {
+    await adminAccountRepository.getOrCreate();
+    const createdAt = new Date("2026-07-23T10:00:00.000Z");
+    await adminAccountRepository.saveBackupRecoveryCode(
+      hashBackupRecoveryCode("ABCD-EFGH-JKMN-PQRS-TVWX"),
+      createdAt,
+    );
+    await adminAccountRepository.confirmBackupRecoveryCode(createdAt);
+
+    await expect(
+      adminAccountRepository.resetPasswordWithBackupRecoveryCode(
+        "ABCD-EFGH-JKMN-PQRS-TVW2",
+        "new-admin",
+        "new-secret-pass",
+      ),
+    ).resolves.toEqual({ ok: false, error: "INVALID_RECOVERY_CODE" });
+    await expect(
+      adminAccountRepository.verifyCredentials("admin", "secret-pass"),
     ).resolves.toBe(true);
   });
 });

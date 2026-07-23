@@ -5,6 +5,7 @@ import { accountRecoveryService } from "@/server/services/accountRecoveryService
 type ResetPasswordBody = {
   recoveryCode?: string;
   verificationCode?: string;
+  backupRecoveryCode?: string;
   newUsername?: string;
   newPassword?: string;
   confirmPassword?: string;
@@ -44,6 +45,34 @@ export async function POST(request: Request) {
 
   if (newPassword !== confirmPassword) {
     return NextResponse.json({ error: "New password and confirmation do not match." }, { status: 400 });
+  }
+
+  if (body.backupRecoveryCode !== undefined) {
+    const result = await accountRecoveryService.resetPasswordWithBackupCode(
+      body.backupRecoveryCode,
+      newUsername,
+      newPassword,
+    );
+    if (!result.ok) {
+      return NextResponse.json(
+        {
+          error:
+            result.error === "INVALID_RECOVERY_CODE"
+              ? "Recovery code is invalid or unavailable."
+              : ERROR_MESSAGES[result.error] ??
+                "Unable to reset administrator password.",
+        },
+        {
+          status: result.error === "NOT_CONFIGURED" ? 503 : 400,
+          headers: { "Cache-Control": "no-store" },
+        },
+      );
+    }
+
+    return NextResponse.json(
+      { success: true, username: result.username },
+      { headers: { "Cache-Control": "no-store" } },
+    );
   }
 
   if (body.verificationCode !== undefined) {
