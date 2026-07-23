@@ -50,6 +50,20 @@ const it: Glossary = {
   Empower: "Responsabilizzare", "Extended roles": "Ruoli estesi",
 };
 
+const de: Glossary = {
+  National: "National", "Australian Capital Territory": "Australisches Hauptstadtterritorium",
+  "New South Wales": "Neusüdwales", "Northern Territory": "Nordterritorium",
+  Queensland: "Queensland", "South Australia": "Südaustralien", Tasmania: "Tasmanien",
+  Victoria: "Victoria", "Western Australia": "Westaustralien",
+  Disability: "Behinderung", "General Public": "Allgemeine Öffentlichkeit",
+  "Medical Conditions": "Erkrankungen", "Mental Health": "Psychische Gesundheit",
+  Research: "Forschung", "Social Services": "Soziale Dienste",
+  "Victims of Crime": "Kriminalitätsopfer",
+  "Women's health and OB/GYN": "Frauengesundheit und Gynäkologie",
+  Inform: "Informieren", Consult: "Konsultieren", Involve: "Einbeziehen",
+  Collaborate: "Zusammenarbeiten", Empower: "Befähigen", "Extended roles": "Erweiterte Rollen",
+};
+
 const ja: Glossary = {
   National: "全国", "Australian Capital Territory": "オーストラリア首都特別地域",
   "New South Wales": "ニューサウスウェールズ州", "Northern Territory": "ノーザンテリトリー",
@@ -99,10 +113,10 @@ const vi: Glossary = {
 };
 
 const glossaries: Partial<Record<Language, Glossary>> = {
-  "zh-CN": zh, fr, es, it, ja, ko, th, vi,
+  "zh-CN": zh, fr, es, it, de, ja, ko, th, vi,
 };
 
-type LocalisedOption = Record<Exclude<Language, "en">, string>;
+type LocalisedOption = Partial<Record<Exclude<Language, "en">, string>>;
 const subcategories: Record<string, LocalisedOption> = {
   "Alcohol and other Drugs": {
     "zh-CN": "酒精及其他药物", fr: "Alcool et autres drogues", es: "Alcohol y otras drogas",
@@ -209,7 +223,7 @@ export function translateOption(language: Language, value: string): string {
 
 const levelWords: Partial<Record<Language, string>> = {
   "zh-CN": "等级", fr: "Niveau", es: "Nivel", it: "Livello",
-  ja: "レベル", ko: "수준", th: "ระดับ", vi: "Cấp độ",
+  de: "Stufe", ja: "レベル", ko: "수준", th: "ระดับ", vi: "Cấp độ",
 };
 
 export function translateLevelLabel(language: Language, label: string): string {
