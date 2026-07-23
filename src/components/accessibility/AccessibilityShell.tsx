@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const routeNames: Record<string, string> = {
   "/": "Home",
@@ -22,19 +23,22 @@ const routeNames: Record<string, string> = {
 /** CAKE-8: shared keyboard and screen-reader support on public and admin routes. */
 export function AccessibilityShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { language } = useLanguage();
 
   useEffect(() => {
     const routeName = routeNames[pathname] ?? "Consumer Rep Remuneration Tool";
-    document.title = `${routeName} | Consumer Rep Remuneration Tool`;
-  }, [pathname]);
+    document.title = language === "zh-CN"
+      ? `${pathname === "/questionnaire" ? "问卷" : routeName} | 消费者代表报酬工具`
+      : `${routeName} | Consumer Rep Remuneration Tool`;
+  }, [language, pathname]);
 
   return (
     <>
       <a className="skip-link" href="#main-content">
-        Skip to main content
+        {language === "zh-CN" ? "跳至主要内容" : "Skip to main content"}
       </a>
       <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
-        {routeNames[pathname] ?? "Page loaded"}
+        {language === "zh-CN" ? "页面已加载" : routeNames[pathname] ?? "Page loaded"}
       </p>
       {children}
     </>
