@@ -41,7 +41,7 @@ const comparisonRows: ComparisonRow[] = [
           href={record.link}
           target="_blank"
           rel="noreferrer"
-          className="font-bold text-teal-800 underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+          className="result-source-link font-bold text-teal-800 underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
         >
           Open source
         </a>
@@ -84,7 +84,7 @@ export function ResultsComparisonView({
         </div>
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200">
+      <div className="results-comparison-print mt-4 overflow-x-auto rounded-xl border border-slate-200">
         <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
           <thead className="bg-slate-50">
             <tr>

@@ -128,8 +128,6 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
 
       <div className="no-print mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <ResultsExportActions
-          filters={filters}
-          records={flatRecords}
           disabled={!hasExportableResults}
           trailingActions={
             <button
@@ -230,7 +228,7 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
         </div>
       )}
 
-      <div className="mt-4">
+      <div className="results-disclaimer-print mt-4">
         <DisclaimerBanner />
       </div>
     </section>
