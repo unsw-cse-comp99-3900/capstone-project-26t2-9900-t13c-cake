@@ -2,10 +2,13 @@
 
 import { JURISDICTIONS } from "@/lib/constants/quizOptions";
 import { useQuizState } from "@/contexts/QuizStateContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translateOption } from "@/i18n/optionTranslations";
 
 /** CAKE-3 — JurisdictionStep */
 export function JurisdictionStep() {
   const { answers, toggleJurisdiction, clearJurisdictions, setCurrentStep } = useQuizState();
+  const { t, language } = useLanguage();
   const hasSelection = answers.jurisdictions.length > 0;
 
   return (
@@ -18,15 +21,15 @@ export function JurisdictionStep() {
           id="jurisdiction-heading"
           className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl"
         >
-          Which locations apply to your project?
+          {t("jurisdictionHeading")}
         </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          Select all locations that apply to your project.
+        <p id="jurisdiction-help" className="mt-2 text-sm leading-6 text-slate-700">
+          {t("jurisdictionHelp")}
         </p>
       </div>
 
-      <fieldset className="mt-5">
-        <legend className="sr-only">Select jurisdictions</legend>
+      <fieldset className="mt-5" aria-describedby="jurisdiction-help">
+        <legend className="sr-only">{t("selectJurisdictions")}</legend>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {JURISDICTIONS.map((jurisdiction) => {
             const optionId = `jurisdiction-${jurisdiction.value.toLowerCase()}`;
@@ -55,7 +58,7 @@ export function JurisdictionStep() {
                   />
                   <span>
                     <span className="block text-base font-bold text-slate-950">
-                      {jurisdiction.label}
+                      {translateOption(language, jurisdiction.label)}
                     </span>
                   </span>
                 </div>
@@ -68,8 +71,8 @@ export function JurisdictionStep() {
       <div className="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm leading-6 text-slate-600" aria-live="polite">
           {hasSelection
-            ? `${answers.jurisdictions.length} jurisdiction${answers.jurisdictions.length > 1 ? "s" : ""} selected`
-            : "Choose at least one jurisdiction to continue."}
+            ? t("selectedJurisdictions", { count: answers.jurisdictions.length })
+            : t("chooseJurisdiction")}
         </p>
 
         <div className="flex flex-col-reverse gap-3 sm:flex-row">
@@ -79,7 +82,7 @@ export function JurisdictionStep() {
             disabled={!hasSelection}
             className="min-h-10 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-45"
           >
-            Clear selection
+            {t("clearSelection")}
           </button>
           <button
             type="button"
@@ -87,7 +90,7 @@ export function JurisdictionStep() {
             disabled={!hasSelection}
             className="min-h-10 rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600 disabled:shadow-none"
           >
-            Continue
+            {t("continue")}
           </button>
         </div>
       </div>

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { AccessibilityShell } from "@/components/accessibility/AccessibilityShell";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import "./globals.css";
 
 const inter = Inter({
@@ -17,7 +19,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased`} suppressHydrationWarning>
-        {children}
+        <LanguageProvider>
+          <AccessibilityShell>{children}</AccessibilityShell>
+        </LanguageProvider>
       </body>
     </html>
   );

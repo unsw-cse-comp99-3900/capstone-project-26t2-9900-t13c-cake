@@ -5,3 +5,121 @@ body {
   color: #1e1e1e;
   background: #f5f5f5;
 }
+
+/* Tailwind v4 preflight resets buttons to cursor: default; restore the pointer for enabled buttons. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* CAKE-8: keyboard focus and system accessibility preferences. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 9999;
+  transform: translateY(-200%);
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #082f3b;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  box-shadow: 0 0 0 3px #0f766e;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 3px;
+}
+
+::selection {
+  background: #0f766e;
+  color: #ffffff;
+}
+
+@media (prefers-contrast: more) {
+  :where(button, input, select, textarea) {
+    border-color: #334155;
+  }
+
+  a {
+    text-decoration-thickness: 0.15em;
+    text-underline-offset: 0.2em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  :where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline-color: Highlight;
+  }
+
+  .skip-link {
+    border: 2px solid ButtonText;
+  }
+}
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 1.5cm;
+  }
+
+  body {
+    background: #fff;
+    color: #111;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .results-print-area {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .result-card-print {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+  }
+
+  .result-card-link::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    font-weight: 600;
+  }
+
+  main,
+  .quiz-shell,
+  .quiz-shell-inner {
+    background: #fff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}

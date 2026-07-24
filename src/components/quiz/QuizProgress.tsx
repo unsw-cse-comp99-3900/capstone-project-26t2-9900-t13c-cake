@@ -1,10 +1,5 @@
 import type { QuizStep } from "@/contexts/QuizStateContext";
-
-const steps = [
-  "Jurisdiction",
-  "Research context",
-  "Consumer engagement level",
-] as const;
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type QuizProgressProps = {
   currentStep: QuizStep;
@@ -12,9 +7,11 @@ type QuizProgressProps = {
 
 /** CAKE-3 — quiz progress indicator */
 export function QuizProgress({ currentStep }: QuizProgressProps) {
+  const { t } = useLanguage();
+  const steps = [t("jurisdictionStep"), t("contextStep")];
   return (
-    <nav aria-label="Questionnaire progress">
-      <ol className="grid gap-2 sm:grid-cols-3">
+    <nav aria-label={t("questionnaireProgress")}>
+      <ol className="grid gap-2 sm:grid-cols-2">
         {steps.map((step, index) => {
           const stepNumber = index + 1;
           const isCurrent = stepNumber === currentStep;
@@ -36,6 +33,9 @@ export function QuizProgress({ currentStep }: QuizProgressProps) {
                 {stepNumber}
               </span>
               <span className="text-sm font-semibold text-slate-800">{step}</span>
+              <span className="sr-only">
+                {isCurrent ? t("currentStep") : isComplete ? t("completed") : t("notStarted")}
+              </span>
             </li>
           );
         })}

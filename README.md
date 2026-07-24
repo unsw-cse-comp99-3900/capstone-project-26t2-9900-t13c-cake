@@ -13,6 +13,7 @@ npm run dev
 - Landing page: [http://localhost:3000](http://localhost:3000)
 - Questionnaire: [http://localhost:3000/questionnaire](http://localhost:3000/questionnaire)
 - Evidence API: [http://localhost:3000/api/evidence](http://localhost:3000/api/evidence)
+- Admin account centre: [http://localhost:3000/admin](http://localhost:3000/admin)
 
 ## Contributors
 
@@ -23,6 +24,12 @@ npm run dev
 | CAKE-3 Quiz wizard | Jiawei Dai |
 | CAKE-4 Filter engine | Jialun Li, Zhengqian Zhang |
 | CAKE-5 Results display | Jiawei Dai |
+| CAKE-8 Public and admin accessibility | Yihui Liu |
+| CAKE-9 Privacy notice and data scope | Zhengqian Zhang |
+| CAKE-10 Admin authentication | Zeyu Yang |
+| CAKE-12 Bulk Excel import / export | Yihui Liu |
+| CAKE-14 Print / export results | Zeyu Yang |
+| CAKE-15 Anonymous feedback survey | Zhengqian Zhang |
 
 ---
 
@@ -199,7 +206,207 @@ Shows filtered remuneration guidance inline below the questionnaire on `/questio
 - Error state with retry when the evidence API fails
 - Empty state with suggestions when no records match
 
-**Planned (not yet active):** Print results, Export PDF, Compare side by side (buttons shown as disabled placeholders).
+**Related (CAKE-14):** Print results and Export PDF are active on the results toolbar. Compare side by side is available when 2–4 results are selected.
+
+---
+
+## CAKE-8: Public and admin accessibility
+
+**Routes:** All public and administrator routes
+**Key files:** `src/components/accessibility/AccessibilityShell.tsx`, `src/app/layout.tsx`, `src/app/globals.css`, `src/components/quiz/`, `src/components/admin/`
+
+Improves keyboard, screen-reader, focus, and form accessibility across the public questionnaire and administrator workspace.
+
+**Implemented:**
+- Global **Skip to main content** link and consistent `main-content` targets for keyboard users
+- Route-specific document titles and polite screen-reader announcements when a page loads
+- Visible keyboard focus styles, screen-reader-only utility content, and reduced-motion support
+- Semantic headings, landmarks, fieldsets, legends, labels, and progress information throughout the questionnaire
+- Accessible names and descriptions for interactive controls, including result selection and Excel upload
+- `aria-live` status and error feedback for asynchronous forms, authentication, imports, and administrator data
+- Improved touch targets, colour contrast, disabled states, and responsive layouts on public and administrator pages
+
+---
+
+## CAKE-14: Print / export results
+
+**Route:** `/questionnaire` (results step)
+**Key files:** `src/components/results/ResultsExportActions.tsx`, `src/lib/results/resultFormatters.ts`, `src/lib/results/exportResultsPdf.ts`, `src/lib/results/printResults.ts`, `src/app/globals.css`
+
+Researchers can save or print their matched remuneration guidance for project documentation.
+
+**Implemented:**
+- **Print results** — opens the browser print dialog with print-friendly styles (hides navigation, action buttons, and comparison controls; shows tool title; preserves result cards and disclaimer; appends source URLs after links)
+- **Export PDF** — downloads a text-based PDF summary (`remuneration-results-YYYY-MM-DD.pdf`) with filter selections, each matching record, and the indicative-guidance disclaimer
+- Shared result formatting helpers reused by result cards and export output
+- Works for both populated and empty result sets; disabled when the evidence API fails
+
+---
+
+## CAKE-9: Privacy notice and data scope
+
+**Route:** `/privacy`
+**Key files:** `src/components/privacy/PrivacyNoticePage.tsx`, `src/components/landing/LandingPage.tsx`
+
+Explains what the public tool does and does not store.
+
+**Implemented:**
+- Footer link from the landing page to the privacy/data scope page
+- Clear data scope for questionnaire answers, evidence records, administrator areas, and anonymous feedback
+- Disclaimer that the tool is indicative guidance only and should be checked against current source policies
+- Link from the privacy page to the anonymous feedback survey
+
+---
+
+## CAKE-10: Admin authentication
+
+**Routes:** `/admin`, `/admin/account`, `/admin/forgot-password`  
+**API:** `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/session`, `POST /api/auth/change-username`, `POST /api/auth/change-password`, `GET|PUT /api/auth/recovery/contacts`, `GET /api/auth/recovery/options`, `POST /api/auth/recovery/request`, `POST /api/auth/recovery/verify`, `POST /api/auth/reset-password`  
+
+**Key files:** `src/components/admin/`, `src/lib/admin/adminNavigation.ts`, `src/server/services/authService.ts`, `src/server/services/sessionService.ts`, `src/server/repositories/adminAccountRepository.ts`, `src/server/middleware/authMiddleware.ts`
+
+Protected maintenance area for supervisors and i2i staff. Public users access the questionnaire without an account. The entry point is a low-emphasis **Administrator account centre** link in the landing page footer.
+
+### Admin routes
+
+| Route | Access | Purpose |
+|-------|--------|---------|
+| `/admin` | Guest or signed in | Login form, then account centre hub |
+| `/admin/account` | Signed in | Change username, password, and recovery email |
+| `/admin/forgot-password` | Guest | Reset password by email code or supervisor recovery code |
+| `/admin/records` | Signed in | Evidence CRUD workspace scaffold (CAKE-11 / CAKE-12) |
+| `/admin/analytics` | Signed in | Website usage scaffold |
+| `/admin/surveys` | Signed in | Anonymous feedback survey data |
+
+Legacy paths `/admin/username` and `/admin/password` redirect to `/admin/account`. `/admin/import-export` redirects to `/admin/records`.
+
+### Authentication
+
+- Session-based sign-in using a signed **httpOnly** cookie (`admin_session`, 8-hour expiry)
+- Credentials stored in the `admin_account` SQLite table after first bootstrap
+- `.env` values `ADMIN_USERNAME` and `ADMIN_PASSWORD` are used only when the table is empty
+- `AdminLoginGate` shows the login form for guests and protects child routes when authenticated
+- **Sign out** and successful **sign in** redirect to `/admin`
+- Successful **account recovery** also redirects to `/admin` with a one-time success message
+
+### Account centre
+
+Signed-in administrators land on `/admin` and can open:
+
+- **Account settings** — update username or password (requires current password)
+- **Evidence records** — future CRUD + Excel import/export workspace
+- **Website usage** — future anonymised traffic insights
+- **Anonymous survey data** — review anonymous feedback survey responses
+
+### Account recovery
+
+Signed-in administrators first configure a recovery email address in **Account settings**. The current password is required when the recovery email is changed.
+
+On **Forgot password?**, administrators can:
+
+- receive a six-digit code at the configured recovery email (SMTP), verify the code, then set a new password;
+- use the supervisor `ADMIN_RECOVERY_CODE` as a fallback.
+
+One-time codes expire after 10 minutes, can be requested once per minute, are stored only as HMAC hashes, and are invalidated after a successful reset. Five incorrect attempts require a new code. Email recovery changes only the password; supervisor recovery can reset both username and password.
+
+#### Design justification: why email-only (no SMS recovery)
+
+SMS delivery of recovery codes was prototyped with Twilio and deliberately removed. The decision record:
+
+1. **Australian regulatory barrier.** Since the ACMA SMS Sender ID register came into effect, sending SMS to Australian (+61) numbers through providers such as Twilio requires a registered business identity (ABN and sender ID registration). A student capstone team cannot complete this registration, so delivery to the client's own jurisdiction fails outright (Twilio error `60250: Australian destination requires a business registration`).
+2. **Unreliable international delivery.** Delivery to other jurisdictions (for example Chinese +86 numbers) is aggressively filtered by carriers; even Twilio's own number-verification SMS frequently failed during testing. A recovery channel that fails unpredictably is worse than no channel, because it blocks an administrator precisely when they are locked out.
+3. **Cost and account constraints.** Trial SMS accounts only deliver to pre-verified numbers and prepend trial banners; production use would introduce an ongoing paid dependency for the client with no maintainer.
+4. **Email meets the actual requirement.** The tool has a single administrator account. A recovery email via standard SMTP is free, provider-agnostic, reliable, and easy for i2i staff to reconfigure at handover. Combined with the offline supervisor recovery code (`ADMIN_RECOVERY_CODE`), there are already two independent recovery paths, so SMS added operational cost without adding meaningful resilience.
+
+The delivery layer (`recoveryDeliveryService`) remains a separate module, so an SMS or other channel can be reinstated later by an organisation that holds the required sender registration, without changing the recovery workflow.
+
+### AdminAccount schema
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | string | Singleton row (`default`) |
+| `username` | string | Unique administrator username |
+| `passwordHash` | string | scrypt hash |
+| `recoveryEmail` | nullable string | Administrator-managed recovery email |
+| `recoveryCodeHash` | nullable string | Active one-time code (HMAC hash only) |
+| `recoveryCodeExpiresAt` / `recoveryCodeSentAt` | nullable datetime | Expiry and resend-rate-limit timestamps |
+| `recoveryCodeAttempts` | integer | Failed verification count |
+| `createdAt` / `updatedAt` | datetime | Audit timestamps |
+
+### Environment variables
+
+| Variable | Purpose |
+|----------|---------|
+| `ADMIN_USERNAME` | Bootstrap username when `admin_account` is empty |
+| `ADMIN_PASSWORD` | Bootstrap password when `admin_account` is empty |
+| `SESSION_SECRET` | Signs admin session cookies |
+| `ADMIN_RECOVERY_CODE` | Supervisor recovery code for `/admin/forgot-password` |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | SMTP email recovery delivery |
+
+**Configure locally:**
+
+```bash
+cp .env.example .env
+# Edit admin and SMTP settings
+npx prisma migrate dev
+npm run dev
+```
+
+Default local sign-in after bootstrap: `admin` / `change-me`
+
+### Protected APIs
+
+`requireAdmin()` guards admin write routes. Import/export endpoints return `401` when unsigned:
+
+- `POST /api/evidence/import` (CAKE-12 stub)
+- `GET /api/evidence/export` (CAKE-12 stub)
+
+### Tests
+
+```bash
+npm test
+```
+
+Covers session signing, credential verification, username/password/contact changes, one-time recovery delivery and rate limiting, recovery-code validation, and `admin_account` repository behaviour.
+
+---
+
+## CAKE-12: Bulk Excel import / export
+
+**Route:** `/admin/records`
+
+**API:** `GET /api/evidence/export`, `POST /api/evidence/import`
+**Key files:** `src/components/admin/ExcelImportExportPanel.tsx`, `src/components/admin/RecordListPage.tsx`, `src/app/api/evidence/import/route.ts`, `src/app/api/evidence/export/route.ts`, `src/server/services/excelParseService.ts`, `src/server/services/validationService.ts`
+
+Allows signed-in administrators to maintain the evidence table in bulk using XLSX workbooks from the same protected records workspace.
+
+**Implemented:**
+- **Download template** — exports a blank `evidence-template.xlsx` workbook with the required ordered columns
+- **Export data** — downloads all active evidence records as `evidence-records.xlsx`
+- **Import Excel** — accepts one `.xlsx` workbook and validates its worksheet headers and row values
+- Preview phase classifies every row as **create**, **update**, or **invalid** before any database changes
+- New rows use a blank `id`; updates require the ID of an existing active evidence record
+- Invalid rows display row numbers and validation messages and prevent the import from being applied
+- Valid previews require administrator confirmation before records are created or updated
+- Successful imports refresh the records workspace and announce the created and updated totals
+- Import and export APIs require an authenticated administrator session and return structured error responses
+
+---
+
+## CAKE-15: Anonymous feedback survey
+
+**Routes:** `/feedback`, `/admin/surveys`
+**API:** `POST /api/feedback`
+**Key files:** `src/components/feedback/`, `src/app/api/feedback/route.ts`, `src/server/services/feedbackService.ts`, `src/server/repositories/feedbackRepository.ts`
+
+Stores optional anonymous feedback without asking for contact or identity information.
+
+**Implemented:**
+- Public feedback form with a 1-5 usefulness rating, tool-area selector, and two optional comment fields
+- Required confirmation that the response is anonymous and should not include contact details
+- Server-side validation for rating, known tool areas, text length, and obvious contact details
+- Prisma `AnonymousFeedback` table with a migration
+- Administrator review page showing total responses, average rating, rating spread, and recent comments
 
 ---
 
