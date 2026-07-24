@@ -1,0 +1,57 @@
+name: Update offline public translations
+
+on:
+  push:
+    branches: [feat/ai-translation-v2]
+    paths:
+      - "src/i18n/translations.ts"
+      - "scripts/generate-public-translations.py"
+      - "scripts/public-translation-utils.mjs"
+      - "requirements-translation.txt"
+      - ".github/workflows/update-public-translations.yml"
+  workflow_dispatch:
+    inputs:
+      language:
+        description: "Optional language code: fr, es, it, de, ja, ko, th, or vi"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-translation.txt
+
+      - name: Cache offline translation models
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/argos-translate
+            ~/.local/cache/argos-translate
+          key: argos-en-public-v1
+
+      - name: Install offline translation engine
+        run: python -m pip install -r requirements-translation.txt
+
+      - name: Generate translations offline
+        env:
+          TRANSLATION_LANGUAGE: ${{ inputs.language }}
+        run: npm run translate:public -- "$TRANSLATION_LANGUAGE"
+
+      - name: Validate generated translations
+        run: npm run translate:public:check

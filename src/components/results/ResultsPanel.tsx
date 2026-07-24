@@ -14,6 +14,8 @@ import { DisclaimerBanner } from "./DisclaimerBanner";
 import { ResultCard } from "./ResultCard";
 import { ResultsComparisonView } from "./ResultsComparisonView";
 import { ResultsExportActions } from "./ResultsExportActions";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translateOption } from "@/i18n/optionTranslations";
 
 type ResultsPanelProps = {
   filters: MultiQuizFilters;
@@ -49,6 +51,7 @@ function flattenUniqueRecords(groups: FilteredEvidenceGroup[]): EvidenceRecordDT
 
 /** CAKE-5 / CAKE-14 — ResultsPanel with grouped filters, print/export, and comparison */
 export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: ResultsPanelProps) {
+  const { language, t } = useLanguage();
   const [selectedRecordIds, setSelectedRecordIds] = useState<string[]>([]);
   const [isComparing, setIsComparing] = useState(false);
 
@@ -109,11 +112,17 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
           aria-live="polite"
           className="text-2xl font-bold tracking-tight text-slate-950 outline-none sm:text-3xl"
         >
-          {error ? "Unable to load results" : formatResultSummary(totalRecords, records.length)}
+          {error
+            ? t("unableResults")
+            : language !== "en"
+              ? t("resultSummary", { count: totalRecords, groups: records.length })
+              : formatResultSummary(totalRecords, records.length)}
         </h2>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-          {filters.jurisdictions.join(", ")} / {filters.selections.length} research context
-          selection{filters.selections.length === 1 ? "" : "s"}
+          {t("researchSelections", {
+            jurisdictions: filters.jurisdictions.join(", "),
+            count: filters.selections.length,
+          })}
         </p>
       </div>
 
@@ -129,7 +138,7 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
               onClick={() => setIsComparing(true)}
               className="min-h-10 rounded-lg border border-teal-700 px-4 py-2 text-sm font-bold text-teal-800 transition hover:bg-teal-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-500 disabled:opacity-70 disabled:hover:bg-transparent"
             >
-              Compare side by side
+              {t("compare")}
             </button>
           }
         />
@@ -138,7 +147,7 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
           onClick={handleStartOverClick}
           className="min-h-10 rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
         >
-          Start over
+          {t("startOver")}
         </button>
       </div>
 
@@ -150,7 +159,7 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
             onClick={onRetry}
             className="no-print mt-4 min-h-10 rounded-lg bg-red-700 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-red-700"
           >
-            Try again
+            {t("tryAgain")}
           </button>
         </div>
       ) : isComparing && canCompare ? (
@@ -163,17 +172,16 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
         <div className="mt-4 space-y-5">
           {totalRecords === 0 ? (
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="text-xl font-bold text-slate-950">No exact matches found</h3>
+              <h3 className="text-xl font-bold text-slate-950">{t("noMatches")}</h3>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                Try broadening the jurisdiction, removing a sub-category, or selecting a more
-                general engagement context.
+                {t("broadenSearch")}
               </p>
             </div>
           ) : (
             <div className="no-print text-sm leading-6 text-slate-600" aria-live="polite">
               {selectedRecordCount === 0
-                ? `Select 2-${MAX_COMPARISON_RECORDS} results to compare side by side.`
-                : `${selectedRecordCount} of ${MAX_COMPARISON_RECORDS} results selected for comparison.`}
+                ? t("selectionHint", { max: MAX_COMPARISON_RECORDS })
+                : t("selectedForComparison", { count: selectedRecordCount, max: MAX_COMPARISON_RECORDS })}
             </div>
           )}
 
@@ -183,17 +191,24 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
               className="rounded-xl border border-slate-200 bg-slate-50 p-4"
             >
               <div>
-                <h3 className="text-lg font-bold text-slate-950">{group.selection.context}</h3>
+                <h3 className="text-lg font-bold text-slate-950">
+                  {translateOption(language, group.selection.context)}
+                </h3>
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  {group.selection.subCategory ?? "No sub-category"} /{" "}
-                  {group.selection.engagementLevel} / {group.records.length}{" "}
-                  result{group.records.length === 1 ? "" : "s"}
+                  {group.selection.subCategory
+                    ? translateOption(language, group.selection.subCategory)
+                    : t("noSubCategory")} /{" "}
+                  {t("groupResults", {
+                    context: translateOption(language, group.selection.context),
+                    engagement: translateOption(language, group.selection.engagementLevel),
+                    count: group.records.length,
+                  })}
                 </p>
               </div>
 
               {group.records.length === 0 ? (
                 <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-950">
-                  No exact matches are currently available for this selected combination.
+                  {t("noCombination")}
                 </div>
               ) : (
                 <div className="mt-3 grid gap-3">

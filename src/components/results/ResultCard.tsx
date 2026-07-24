@@ -1,5 +1,6 @@
 import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
 import { formatBoolean, formatRateRange } from "@/lib/results/resultFormatting";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type ResultCardProps = {
   record: EvidenceRecordDTO;
@@ -15,6 +16,7 @@ export function ResultCard({
   isComparisonDisabled = false,
   onToggleComparison,
 }: ResultCardProps) {
+  const { language, t } = useLanguage();
   const comparisonInputId = `compare-${record.id}`;
 
   return (
@@ -60,29 +62,33 @@ export function ResultCard({
             onChange={() => onToggleComparison(record.id)}
             className="size-5 rounded border-slate-300 text-teal-700 accent-teal-700"
           />
-          <span>{isSelectedForComparison ? "Selected for comparison" : "Select to compare"}</span>
+          <span>{isSelectedForComparison ? t("selectedCompare") : t("selectCompare")}</span>
         </label>
       ) : null}
 
       <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div>
-          <dt className="text-xs font-bold uppercase tracking-wide text-slate-700">Rate</dt>
-          <dd className="mt-1 text-base font-bold text-slate-950">{formatRateRange(record)}</dd>
-        </div>
-        <div>
-          <dt className="text-xs font-bold uppercase tracking-wide text-slate-700">
-            Reimbursement guidance
-          </dt>
-          <dd className="mt-1 text-base font-semibold text-slate-800">
-            {formatBoolean(record.reimbursementGuidance)}
+          <dt className="text-xs font-bold uppercase tracking-wide text-slate-700">{t("rate")}</dt>
+          <dd className="mt-1 text-base font-bold text-slate-950">
+            {record.minHourlyRate === null && record.maxHourlyRate === null
+              ? t("notSpecified")
+              : formatRateRange(record)}
           </dd>
         </div>
         <div>
           <dt className="text-xs font-bold uppercase tracking-wide text-slate-700">
-            Unpaid consumer engagement guidance
+            {t("reimbursement")}
           </dt>
           <dd className="mt-1 text-base font-semibold text-slate-800">
-            {formatBoolean(record.unpaidEngagementGuidance)}
+            {language !== "en" ? t(record.reimbursementGuidance ? "included" : "notIncluded") : formatBoolean(record.reimbursementGuidance)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs font-bold uppercase tracking-wide text-slate-700">
+            {t("unpaid")}
+          </dt>
+          <dd className="mt-1 text-base font-semibold text-slate-800">
+            {language !== "en" ? t(record.unpaidEngagementGuidance ? "included" : "notIncluded") : formatBoolean(record.unpaidEngagementGuidance)}
           </dd>
         </div>
       </dl>
@@ -91,7 +97,7 @@ export function ResultCard({
         <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
           {record.exampleOrganisations ? (
             <p className="text-sm leading-6 text-slate-600">
-              Example organisations: {record.exampleOrganisations}
+              {t("exampleOrganisations")}: {record.exampleOrganisations}
             </p>
           ) : (
             <span />
@@ -104,7 +110,7 @@ export function ResultCard({
               aria-label={`Open source for ${record.title} in a new tab`}
               className="result-card-link inline-flex min-h-9 items-center justify-center rounded-lg border border-teal-700 px-3 py-1.5 text-sm font-bold text-teal-800 transition hover:bg-teal-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
             >
-              Open source
+              {t("openSource")}
             </a>
           ) : null}
         </div>

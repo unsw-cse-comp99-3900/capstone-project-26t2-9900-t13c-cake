@@ -1,43 +1,49 @@
-import Link from "next/link";
+"use client";
 
-const featurePanels = [
-  {
-    title: "Why use it",
-    summary: "Evidence-informed guidance tailored to the Australian context.",
-    details:
-      "Support fair and consistent remuneration planning with guidance matched to your research circumstances.",
-  },
-  {
-    title: "Problems it helps solve",
-    summary: "Difficulty finding relevant, current evidence on remuneration.",
-    details: "Uncertainty about fair, reasonable and consistent payment.",
-  },
-  {
-    title: "Value you gain",
-    summary: "Save time, increase confidence and support better decisions.",
-    details:
-      "Use clearer evidence when preparing project budgets, governance notes and ethics materials.",
-  },
-  {
-    title: "How to use",
-    summary: "A simple 3-step questionnaire to match relevant evidence.",
-    details:
-      "Answer context questions, view matched results, then use and cite the guidance.",
-  },
-];
+import Link from "next/link";
+import { LanguageSelector } from "@/components/language/LanguageSelector";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function LandingPage() {
+  const { t } = useLanguage();
+
+  const featurePanels = [
+    {
+      title: t("whyTitle").replace(" this tool?", " it"),
+      summary: t("whyDescription"),
+      details: t("reason1Description"),
+    },
+    {
+      title: t("problemsTitle"),
+      summary: t("problem1"),
+      details: t("problem2"),
+    },
+    {
+      title: t("valueTitle"),
+      summary: t("value1"),
+      details: t("value2"),
+    },
+    {
+      title: t("howTitle"),
+      summary: t("howDescription"),
+      details: t("step1Description"),
+    },
+  ];
+
   return (
     <main
       id="main-content"
       tabIndex={-1}
-      className="min-h-screen overflow-hidden bg-[#fbfcfa] text-slate-900 outline-none"
+      className="min-h-screen overflow-hidden bg-white text-slate-900 outline-none"
     >
-      <section className="relative isolate flex min-h-[520px] border-b border-[#164f5f] bg-[#062c32] text-white">
+      <section className="relative isolate flex min-h-[520px] border-b border-teal-600 bg-[#115e59] text-white">
         <div
           aria-hidden="true"
-          className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,_rgba(40,166,150,0.17),_transparent_36%),linear-gradient(180deg,_rgba(0,0,0,0.05),_rgba(0,0,0,0.18))]"
+          className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,_rgba(153,246,228,0.22),_transparent_38%),linear-gradient(180deg,_rgba(15,118,110,0.08),_rgba(19,78,74,0.26))]"
         />
+        <div className="absolute right-4 top-4 z-10 rounded-lg bg-white px-3 py-1 shadow-sm sm:right-6 lg:right-8">
+          <LanguageSelector />
+        </div>
         <div
           aria-hidden="true"
           className="absolute left-8 top-7 -z-10 hidden h-[390px] w-[420px] -rotate-12 opacity-20 lg:block"
@@ -64,24 +70,23 @@ export function LandingPage() {
           <span className="absolute bottom-10 right-108 h-32 w-3 bg-teal-100/12" />
         </div>
 
-        <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center px-4 pb-10 pt-12 text-center sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center px-4 pb-10 pt-20 text-center sm:px-6 lg:px-8">
           <p className="landing-rise text-sm font-semibold uppercase tracking-[0.28em] text-teal-200">
             Evidence-informed decision support
           </p>
           <h1 className="landing-rise landing-rise-delay-1 mt-5 max-w-4xl font-[Georgia,serif] text-5xl font-normal leading-[0.98] tracking-tight text-white sm:text-6xl lg:text-7xl">
-            Consumer Rep Remuneration Tool
+            {t("toolTitle")}
           </h1>
           <p className="landing-rise landing-rise-delay-2 mt-5 max-w-2xl text-lg leading-8 text-slate-100">
-            Find relevant evidence to support fair remuneration for health
-            consumer representatives in Australia.
+            {t("homeSubtitle")}
           </p>
 
           <div className="landing-rise landing-rise-delay-3 mt-9 flex w-full max-w-[465px] flex-col items-center gap-5">
             <Link
               href="/questionnaire"
-              className="group inline-flex min-h-16 w-full items-center justify-center border border-teal-100/80 px-8 py-4 text-lg font-bold text-white transition hover:border-teal-100 hover:bg-teal-50 hover:text-[#062c32] focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-white"
+              className="group inline-flex min-h-16 w-full items-center justify-center border border-teal-100/85 px-8 py-4 text-lg font-bold text-white transition hover:border-teal-100 hover:bg-teal-50 hover:text-teal-900 focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-white"
             >
-              <span className="flex-1 text-center">Start questionnaire</span>
+              <span className="flex-1 text-center">{t("startQuestionnaire")}</span>
               <span
                 aria-hidden="true"
                 className="text-3xl font-normal leading-none transition-transform group-hover:translate-x-1"
@@ -93,7 +98,7 @@ export function LandingPage() {
               href="#how-it-works"
               className="inline-flex items-center gap-3 text-base font-medium text-teal-200 transition hover:text-white focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-white"
             >
-              How it works
+              {t("howTitle")}
               <span aria-hidden="true">&darr;</span>
             </Link>
           </div>
@@ -103,7 +108,7 @@ export function LandingPage() {
       <section
         aria-labelledby="overview-heading"
         id="how-it-works"
-        className="border-b border-slate-200 bg-[#fbfcfa]"
+        className="border-b border-slate-200 bg-white"
       >
         <div className="mx-auto w-full max-w-7xl px-6 pb-8 pt-12 text-center sm:px-8 sm:pt-14">
           <p className="landing-rise text-sm font-bold text-slate-700">
@@ -111,13 +116,12 @@ export function LandingPage() {
           </p>
           <h2
             id="overview-heading"
-            className="landing-rise landing-rise-delay-1 mt-4 font-[Georgia,serif] text-4xl font-normal leading-tight text-[#062c32] sm:text-5xl"
+            className="landing-rise landing-rise-delay-1 mt-4 font-[Georgia,serif] text-4xl font-normal leading-tight text-teal-900 sm:text-5xl"
           >
             Support fair remuneration planning
           </h2>
           <p className="landing-rise landing-rise-delay-2 mx-auto mt-5 max-w-4xl text-lg leading-8 text-slate-600">
-            Use evidence-informed guidance to make fair, transparent and
-            defensible remuneration decisions for consumer representatives.
+            {t("whyDescription")}
           </p>
           <div className="landing-line landing-rise-delay-3 mt-8 h-px w-full bg-slate-200" />
         </div>
@@ -137,17 +141,17 @@ export function LandingPage() {
               ].join(" ")}
             >
               <div className="flex items-start justify-between gap-6">
-                <h3 className="text-xl font-bold text-[#062c32] transition group-hover:text-[#e95f45]">
+                <h3 className="text-xl font-bold text-teal-950 transition group-hover:text-[#c65f46]">
                   {panel.title}
                 </h3>
                 <span
                   aria-hidden="true"
-                  className="text-2xl leading-none text-teal-800 transition group-hover:rotate-45 group-hover:text-[#e95f45]"
+                  className="text-2xl leading-none text-teal-800 transition group-hover:rotate-45 group-hover:text-[#c65f46]"
                 >
                   +
                 </span>
               </div>
-              <div className="mt-5 h-px w-full bg-transparent transition group-hover:bg-[#e95f45]" />
+              <div className="mt-5 h-px w-full bg-transparent transition group-hover:bg-[#c65f46]" />
               <p className="mt-4 text-base leading-7 text-slate-600">
                 {panel.summary}
               </p>
@@ -159,10 +163,10 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="border-b border-teal-100 bg-[#eef8f5]">
+      <section className="border-b border-teal-100 bg-teal-50">
         <div className="mx-auto grid w-full max-w-7xl gap-6 px-6 py-9 sm:px-8 lg:grid-cols-[1.3fr_1fr_1fr_1.1fr_1.2fr] lg:items-center">
           <div>
-            <h2 className="font-[Georgia,serif] text-2xl text-[#062c32]">
+            <h2 className="font-[Georgia,serif] text-2xl text-teal-950">
               Contact / Support
             </h2>
             <p className="mt-2 text-base text-slate-600">We&apos;re here to help.</p>
@@ -186,44 +190,40 @@ export function LandingPage() {
             </a>
           </div>
           <div className="border-slate-400/50 lg:border-l lg:pl-6">
-            <p className="text-sm text-slate-700">Feedback</p>
+            <p className="text-sm text-slate-700">{t("feedbackLabel")}</p>
             <Link
               href="/feedback"
               className="mt-2 inline-flex items-center gap-3 text-sm font-semibold text-teal-800 transition hover:text-teal-950"
             >
-              Send us feedback
+              {t("openFeedback")}
               <span aria-hidden="true">&rarr;</span>
             </Link>
           </div>
           <Link
-            href="/feedback"
+            href="/privacy"
             className="inline-flex min-h-12 items-center justify-center gap-3 border border-teal-800 px-5 py-3 text-sm font-semibold text-teal-900 transition hover:bg-teal-900 hover:text-white focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-teal-800"
           >
-            View help &amp; FAQs
+            {t("privacyLabel")}
             <span aria-hidden="true">↗</span>
           </Link>
         </div>
       </section>
 
-      <footer className="bg-[#061f27] text-slate-400">
+      <footer className="bg-teal-950 text-teal-100/70">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-6 py-6 text-sm sm:px-8 md:flex-row md:items-center md:justify-center md:gap-8">
           <p>&copy; 2026 Consumer Rep Remuneration Tool</p>
           <span aria-hidden="true" className="hidden h-5 w-px bg-slate-700 md:block" />
-          <Link href="/privacy" className="transition hover:text-white">
-            Privacy
+          <Link href="/questionnaire" className="transition hover:text-white">
+            {t("startQuestionnaire")}
           </Link>
           <span aria-hidden="true" className="hidden h-5 w-px bg-slate-700 md:block" />
-          <Link href="/feedback" className="transition hover:text-white">
-            Feedback
+          <Link href="/privacy" className="transition hover:text-white">
+            {t("privacyScope")}
           </Link>
           <span aria-hidden="true" className="hidden h-5 w-px bg-slate-700 md:block" />
           <Link href="/admin" className="transition hover:text-white">
-            About this tool
+            {t("adminCentre")}
           </Link>
-          <span aria-hidden="true" className="hidden h-5 w-px bg-slate-700 md:block" />
-          <a href="#how-it-works" className="transition hover:text-white">
-            Methodology &amp; sources
-          </a>
         </div>
       </footer>
     </main>

@@ -24,8 +24,10 @@ npm run dev
 | CAKE-3 Quiz wizard | Jiawei Dai |
 | CAKE-4 Filter engine | Jialun Li, Zhengqian Zhang |
 | CAKE-5 Results display | Jiawei Dai |
+| CAKE-8 Public and admin accessibility | Yihui Liu |
 | CAKE-9 Privacy notice and data scope | Zhengqian Zhang |
 | CAKE-10 Admin authentication | Zeyu Yang |
+| CAKE-12 Bulk Excel import / export | Yihui Liu |
 | CAKE-14 Print / export results | Zeyu Yang |
 | CAKE-15 Anonymous feedback survey | Zhengqian Zhang |
 
@@ -208,6 +210,24 @@ Shows filtered remuneration guidance inline below the questionnaire on `/questio
 
 ---
 
+## CAKE-8: Public and admin accessibility
+
+**Routes:** All public and administrator routes
+**Key files:** `src/components/accessibility/AccessibilityShell.tsx`, `src/app/layout.tsx`, `src/app/globals.css`, `src/components/quiz/`, `src/components/admin/`
+
+Improves keyboard, screen-reader, focus, and form accessibility across the public questionnaire and administrator workspace.
+
+**Implemented:**
+- Global **Skip to main content** link and consistent `main-content` targets for keyboard users
+- Route-specific document titles and polite screen-reader announcements when a page loads
+- Visible keyboard focus styles, screen-reader-only utility content, and reduced-motion support
+- Semantic headings, landmarks, fieldsets, legends, labels, and progress information throughout the questionnaire
+- Accessible names and descriptions for interactive controls, including result selection and Excel upload
+- `aria-live` status and error feedback for asynchronous forms, authentication, imports, and administrator data
+- Improved touch targets, colour contrast, disabled states, and responsive layouts on public and administrator pages
+
+---
+
 ## CAKE-14: Print / export results
 
 **Route:** `/questionnaire` (results step)
@@ -348,6 +368,28 @@ npm test
 ```
 
 Covers session signing, credential verification, username/password/contact changes, one-time recovery delivery and rate limiting, recovery-code validation, and `admin_account` repository behaviour.
+
+---
+
+## CAKE-12: Bulk Excel import / export
+
+**Route:** `/admin/records`
+
+**API:** `GET /api/evidence/export`, `POST /api/evidence/import`
+**Key files:** `src/components/admin/ExcelImportExportPanel.tsx`, `src/components/admin/RecordListPage.tsx`, `src/app/api/evidence/import/route.ts`, `src/app/api/evidence/export/route.ts`, `src/server/services/excelParseService.ts`, `src/server/services/validationService.ts`
+
+Allows signed-in administrators to maintain the evidence table in bulk using XLSX workbooks from the same protected records workspace.
+
+**Implemented:**
+- **Download template** — exports a blank `evidence-template.xlsx` workbook with the required ordered columns
+- **Export data** — downloads all active evidence records as `evidence-records.xlsx`
+- **Import Excel** — accepts one `.xlsx` workbook and validates its worksheet headers and row values
+- Preview phase classifies every row as **create**, **update**, or **invalid** before any database changes
+- New rows use a blank `id`; updates require the ID of an existing active evidence record
+- Invalid rows display row numbers and validation messages and prevent the import from being applied
+- Valid previews require administrator confirmation before records are created or updated
+- Successful imports refresh the records workspace and announce the created and updated totals
+- Import and export APIs require an authenticated administrator session and return structured error responses
 
 ---
 
