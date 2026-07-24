@@ -1,11 +1,17 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { LanguageSelector } from "@/components/language/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+const citation =
+  "Johnston, D., Nguyen, L., Liu, Y., Wei, X., Dai, J., Li, J., Zhang, Z., & Yang, Z. (2026). Consumer Rep Remuneration Tool [Web application]. i2i, UNSW Population Health and UNSW COMP9900/3900 Team T13C.";
+
 export function LandingPage() {
   const { t } = useLanguage();
+  const [citationStatus, setCitationStatus] = useState<"idle" | "copied" | "failed">("idle");
+  const citationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const featurePanels = [
     {
@@ -30,6 +36,41 @@ export function LandingPage() {
     },
   ];
 
+  useEffect(() => {
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+
+    if (!window.location.hash) {
+      window.scrollTo({ top: 0, left: 0 });
+    }
+
+    return () => {
+      window.history.scrollRestoration = previousScrollRestoration;
+
+      if (citationTimer.current) {
+        clearTimeout(citationTimer.current);
+      }
+    };
+  }, []);
+
+  async function copyCitation() {
+    if (window.location.hash) {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+
+    try {
+      await navigator.clipboard.writeText(citation);
+      setCitationStatus("copied");
+    } catch {
+      setCitationStatus("failed");
+    }
+
+    if (citationTimer.current) {
+      clearTimeout(citationTimer.current);
+    }
+    citationTimer.current = setTimeout(() => setCitationStatus("idle"), 1800);
+  }
+
   return (
     <main
       id="main-content"
@@ -41,8 +82,8 @@ export function LandingPage() {
           aria-hidden="true"
           className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,_rgba(153,246,228,0.22),_transparent_38%),linear-gradient(180deg,_rgba(15,118,110,0.08),_rgba(19,78,74,0.26))]"
         />
-        <div className="absolute right-4 top-4 z-10 rounded-lg bg-white px-3 py-1 shadow-sm sm:right-6 lg:right-8">
-          <LanguageSelector />
+        <div className="absolute right-4 top-4 z-10 sm:right-6 lg:right-8">
+          <LanguageSelector variant="hero" />
         </div>
         <div
           aria-hidden="true"
@@ -164,9 +205,9 @@ export function LandingPage() {
       </section>
 
       <section className="border-b border-teal-100 bg-teal-50">
-        <div className="mx-auto grid w-full max-w-7xl gap-6 px-6 py-9 sm:px-8 lg:grid-cols-[1.3fr_1fr_1fr_1.1fr_1.2fr] lg:items-center">
+        <div className="mx-auto grid w-full max-w-7xl gap-x-6 gap-y-5 px-6 py-7 sm:px-8 lg:grid-cols-[1.25fr_1.35fr_1.1fr_1.1fr_minmax(150px,0.7fr)] lg:items-center">
           <div>
-            <h2 className="font-[Georgia,serif] text-2xl text-teal-950">
+            <h2 className="whitespace-nowrap font-[Georgia,serif] text-2xl text-teal-950">
               Contact / Support
             </h2>
             <p className="mt-2 text-base text-slate-600">We&apos;re here to help.</p>
@@ -175,7 +216,7 @@ export function LandingPage() {
             <p className="text-sm text-slate-700">Email</p>
             <a
               href="mailto:deborah.johnston@unsw.edu.au"
-              className="mt-2 block text-sm font-semibold text-teal-800 transition hover:text-teal-950"
+              className="mt-2 block whitespace-nowrap text-sm font-semibold text-teal-800 transition hover:text-teal-950"
             >
               deborah.johnston@unsw.edu.au
             </a>
@@ -190,21 +231,35 @@ export function LandingPage() {
             </a>
           </div>
           <div className="border-slate-400/50 lg:border-l lg:pl-6">
-            <p className="text-sm text-slate-700">{t("feedbackLabel")}</p>
-            <Link
-              href="/feedback"
-              className="mt-2 inline-flex items-center gap-3 text-sm font-semibold text-teal-800 transition hover:text-teal-950"
+            <p className="text-sm text-slate-700">Cite</p>
+            <button
+              type="button"
+              onClick={copyCitation}
+              className="relative mt-2 inline-flex items-center gap-5 text-left text-sm font-semibold leading-tight text-teal-800 transition hover:text-teal-950 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-800"
             >
-              {t("openFeedback")}
+              <span className="whitespace-nowrap">Cite this tool</span>
               <span aria-hidden="true">&rarr;</span>
-            </Link>
+              {citationStatus !== "idle" ? (
+                <span
+                  role="status"
+                  className="absolute left-0 top-full z-10 mt-2 whitespace-nowrap rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white shadow-lg"
+                >
+                  {citationStatus === "copied" ? t("copied") : t("copyFailed")}
+                </span>
+              ) : null}
+            </button>
           </div>
           <Link
-            href="/privacy"
-            className="inline-flex min-h-12 items-center justify-center gap-3 border border-teal-800 px-5 py-3 text-sm font-semibold text-teal-900 transition hover:bg-teal-900 hover:text-white focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-teal-800"
+            href="/feedback"
+            className="inline-flex min-h-16 items-center justify-between gap-2 border border-teal-800 px-4 py-3 text-teal-900 transition hover:bg-teal-900 hover:text-white focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-teal-800"
           >
-            {t("privacyLabel")}
-            <span aria-hidden="true">↗</span>
+            <span className="font-[Georgia,serif] text-xl leading-tight">Feedback</span>
+            <span
+              aria-hidden="true"
+              className="text-lg leading-none"
+            >
+              ↗
+            </span>
           </Link>
         </div>
       </section>
@@ -218,11 +273,11 @@ export function LandingPage() {
           </Link>
           <span aria-hidden="true" className="hidden h-5 w-px bg-slate-700 md:block" />
           <Link href="/privacy" className="transition hover:text-white">
-            {t("privacyScope")}
+            Privacy &amp; data scope
           </Link>
           <span aria-hidden="true" className="hidden h-5 w-px bg-slate-700 md:block" />
           <Link href="/admin" className="transition hover:text-white">
-            {t("adminCentre")}
+            Administrator centre
           </Link>
         </div>
       </footer>
