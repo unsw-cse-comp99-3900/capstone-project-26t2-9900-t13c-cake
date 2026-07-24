@@ -38,12 +38,17 @@ export function AccountSettingsPanel() {
   });
 
   const [recoveryForm, setRecoveryForm] = useState({
+    activeEmail: "",
     email: "",
     currentPassword: "",
+    verificationCode: "",
+    maskedDestination: "",
+    verificationPending: false,
     error: "",
     success: "",
     isLoading: true,
     isSubmitting: false,
+    isVerifying: false,
   });
 
   useEffect(() => {
@@ -52,6 +57,8 @@ export function AccountSettingsPanel() {
         const response = await fetch("/api/auth/recovery/contacts");
         const data = (await response.json()) as {
           email?: string | null;
+          pendingEmail?: string | null;
+          maskedPendingEmail?: string | null;
           error?: string;
         };
         if (!response.ok) {
@@ -59,7 +66,10 @@ export function AccountSettingsPanel() {
         }
         setRecoveryForm((state) => ({
           ...state,
-          email: data.email ?? "",
+          activeEmail: data.email ?? "",
+          email: data.pendingEmail ?? "",
+          maskedDestination: data.maskedPendingEmail ?? "",
+          verificationPending: Boolean(data.pendingEmail),
           isLoading: false,
         }));
       } catch {
@@ -160,13 +170,13 @@ export function AccountSettingsPanel() {
     }
   }
 
-  async function handleRecoverySubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleRecoveryRequest(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setRecoveryForm((state) => ({ ...state, error: "", success: "", isSubmitting: true }));
 
     try {
-      const response = await fetch("/api/auth/recovery/contacts", {
-        method: "PUT",
+      const response = await fetch("/api/auth/recovery/contacts/request", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: recoveryForm.email,
@@ -174,7 +184,9 @@ export function AccountSettingsPanel() {
         }),
       });
       const data = (await response.json()) as {
-        email?: string | null;
+        pendingEmail?: string;
+        maskedDestination?: string;
+        expiresInMinutes?: number;
         error?: string;
       };
       if (!response.ok) {
@@ -188,10 +200,13 @@ export function AccountSettingsPanel() {
 
       setRecoveryForm((state) => ({
         ...state,
-        email: data.email ?? "",
+        email: data.pendingEmail ?? state.email,
         currentPassword: "",
+        verificationCode: "",
+        maskedDestination: data.maskedDestination ?? state.email,
+        verificationPending: true,
         error: "",
-        success: "Recovery contacts updated successfully.",
+        success: `A verification code was sent. It expires in ${data.expiresInMinutes ?? 10} minutes.`,
         isSubmitting: false,
       }));
     } catch {
@@ -201,6 +216,58 @@ export function AccountSettingsPanel() {
         isSubmitting: false,
       }));
     }
+  }
+
+  async function handleRecoveryVerify(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setRecoveryForm((state) => ({ ...state, error: "", success: "", isVerifying: true }));
+
+    try {
+      const response = await fetch("/api/auth/recovery/contacts/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ verificationCode: recoveryForm.verificationCode }),
+      });
+      const data = (await response.json()) as { email?: string; error?: string };
+      if (!response.ok) {
+        setRecoveryForm((state) => ({
+          ...state,
+          error: data.error ?? "Unable to verify the email address.",
+          isVerifying: false,
+        }));
+        return;
+      }
+
+      setRecoveryForm((state) => ({
+        ...state,
+        activeEmail: data.email ?? state.email,
+        email: "",
+        currentPassword: "",
+        verificationCode: "",
+        maskedDestination: "",
+        verificationPending: false,
+        error: "",
+        success: "Recovery email verified and updated.",
+        isVerifying: false,
+      }));
+    } catch {
+      setRecoveryForm((state) => ({
+        ...state,
+        error: "Unable to verify the email address. Please try again.",
+        isVerifying: false,
+      }));
+    }
+  }
+
+  function restartRecoveryEmailChange() {
+    setRecoveryForm((state) => ({
+      ...state,
+      currentPassword: "",
+      verificationCode: "",
+      verificationPending: false,
+      error: "",
+      success: "",
+    }));
   }
 
   return (
@@ -220,8 +287,8 @@ export function AccountSettingsPanel() {
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-2xl font-bold text-slate-900">Account settings</h2>
         <p className="mt-2 max-w-3xl text-base leading-7 text-slate-700">
-          Update your administrator username and password. You will stay signed in after a
-          successful change.
+          Update your administrator username, password, and verified recovery email. You will
+          stay signed in after a successful change.
         </p>
       </div>
 
@@ -421,75 +488,190 @@ export function AccountSettingsPanel() {
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 className="text-lg font-bold text-slate-900">Password recovery contacts</h3>
+        <h3 className="text-lg font-bold text-slate-900">Recovery email</h3>
         <p id="recovery-contact-help" className="mt-1 max-w-2xl text-base text-slate-700">
-          Enter the email address that should receive one-time recovery codes. To save it, enter
-          your current password.
+          Recovery codes are only sent to a verified email address. Enter a new address and your
+          current password, then confirm the six-digit code sent by email.
         </p>
 
-        <form
-          className="mt-5 max-w-lg space-y-4"
-          autoComplete="off"
-          aria-busy={recoveryForm.isLoading || recoveryForm.isSubmitting}
-          aria-describedby="recovery-contact-help"
-          onSubmit={handleRecoverySubmit}
-        >
-          <div>
-            <label htmlFor="recovery-email" className="block text-sm font-semibold text-slate-800">
-              Recovery email
-            </label>
-            <input
-              id="recovery-email"
-              type="email"
-              autoComplete="email"
-              value={recoveryForm.email}
-              disabled={recoveryForm.isLoading}
-              onChange={(event) =>
-                setRecoveryForm((state) => ({ ...state, email: event.target.value }))
-              }
-              className={inputClassName}
-            />
-          </div>
+        <div className="mt-5 max-w-lg">
+          <p className="text-sm font-semibold text-slate-800">Current verified email</p>
+          <p className="mt-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-base text-slate-700">
+            {recoveryForm.isLoading
+              ? "Loading…"
+              : recoveryForm.activeEmail || "No verified recovery email"}
+          </p>
+        </div>
 
-          <div>
-            <label
-              htmlFor="recovery-current-password"
-              className="block text-sm font-semibold text-slate-800"
-            >
-              Current password
-            </label>
-            <input
-              id="recovery-current-password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={recoveryForm.currentPassword}
-              onChange={(event) =>
-                setRecoveryForm((state) => ({ ...state, currentPassword: event.target.value }))
-              }
-              className={inputClassName}
-            />
-          </div>
-
-          {recoveryForm.error && (
-            <p role="alert" className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900">
-              {recoveryForm.error}
-            </p>
-          )}
-          {recoveryForm.success && (
-            <p role="status" className="rounded-lg bg-teal-50 px-3 py-2 text-sm font-medium text-teal-900">
-              {recoveryForm.success}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={recoveryForm.isLoading || recoveryForm.isSubmitting}
-            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#0b3b4a] px-4 py-2.5 text-base font-bold text-white transition hover:bg-[#0a3340] disabled:cursor-not-allowed disabled:opacity-70"
+        {!recoveryForm.verificationPending ? (
+          <form
+            className="mt-5 max-w-lg space-y-4"
+            autoComplete="off"
+            aria-busy={recoveryForm.isLoading || recoveryForm.isSubmitting}
+            aria-describedby="recovery-contact-help"
+            onSubmit={handleRecoveryRequest}
           >
-            {recoveryForm.isSubmitting ? "Saving…" : "Save recovery contacts"}
-          </button>
-        </form>
+            <div>
+              <label
+                htmlFor="recovery-email"
+                className="block text-sm font-semibold text-slate-800"
+              >
+                New recovery email
+              </label>
+              <input
+                id="recovery-email"
+                type="email"
+                autoComplete="email"
+                required
+                value={recoveryForm.email}
+                disabled={recoveryForm.isLoading}
+                onChange={(event) =>
+                  setRecoveryForm((state) => ({
+                    ...state,
+                    email: event.target.value,
+                    error: "",
+                    success: "",
+                  }))
+                }
+                className={inputClassName}
+              />
+              <p className="mt-1 text-sm text-slate-700">
+                This address cannot be cleared after it has been verified.
+              </p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="recovery-current-password"
+                className="block text-sm font-semibold text-slate-800"
+              >
+                Current password
+              </label>
+              <input
+                id="recovery-current-password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={recoveryForm.currentPassword}
+                onChange={(event) =>
+                  setRecoveryForm((state) => ({
+                    ...state,
+                    currentPassword: event.target.value,
+                    error: "",
+                    success: "",
+                  }))
+                }
+                className={inputClassName}
+              />
+            </div>
+
+            {recoveryForm.error && (
+              <p
+                role="alert"
+                className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900"
+              >
+                {recoveryForm.error}
+              </p>
+            )}
+            {recoveryForm.success && (
+              <p
+                role="status"
+                className="rounded-lg bg-teal-50 px-3 py-2 text-sm font-medium text-teal-900"
+              >
+                {recoveryForm.success}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={recoveryForm.isLoading || recoveryForm.isSubmitting}
+              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#0b3b4a] px-4 py-2.5 text-base font-bold text-white transition hover:bg-[#0a3340] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {recoveryForm.isSubmitting ? "Sending…" : "Send verification code"}
+            </button>
+          </form>
+        ) : (
+          <form
+            className="mt-5 max-w-lg space-y-4"
+            autoComplete="off"
+            aria-busy={recoveryForm.isVerifying}
+            aria-describedby="recovery-contact-help"
+            onSubmit={handleRecoveryVerify}
+          >
+            <div className="rounded-lg border border-teal-200 bg-teal-50 px-4 py-3">
+              <p className="text-sm font-semibold text-teal-950">Verification code sent</p>
+              <p className="mt-1 text-sm leading-6 text-teal-900">
+                Enter the six-digit code sent to{" "}
+                <span className="font-semibold">
+                  {recoveryForm.maskedDestination || recoveryForm.email}
+                </span>
+                . The current recovery email remains active until verification succeeds.
+              </p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="recovery-verification-code"
+                className="block text-sm font-semibold text-slate-800"
+              >
+                Verification code
+              </label>
+              <input
+                id="recovery-verification-code"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                pattern="[0-9]{6}"
+                maxLength={6}
+                required
+                value={recoveryForm.verificationCode}
+                onChange={(event) =>
+                  setRecoveryForm((state) => ({
+                    ...state,
+                    verificationCode: event.target.value.replace(/\D/g, "").slice(0, 6),
+                    error: "",
+                  }))
+                }
+                className={inputClassName}
+              />
+            </div>
+
+            {recoveryForm.error && (
+              <p
+                role="alert"
+                className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900"
+              >
+                {recoveryForm.error}
+              </p>
+            )}
+            {recoveryForm.success && (
+              <p
+                role="status"
+                className="rounded-lg bg-teal-50 px-3 py-2 text-sm font-medium text-teal-900"
+              >
+                {recoveryForm.success}
+              </p>
+            )}
+
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="submit"
+                disabled={recoveryForm.isVerifying}
+                className="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#0b3b4a] px-4 py-2.5 text-base font-bold text-white transition hover:bg-[#0a3340] disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {recoveryForm.isVerifying ? "Verifying…" : "Verify and save email"}
+              </button>
+              <button
+                type="button"
+                disabled={recoveryForm.isVerifying}
+                onClick={restartRecoveryEmailChange}
+                className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base font-bold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                Use a different email
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </section>
   );
