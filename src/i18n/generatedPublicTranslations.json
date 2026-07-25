@@ -132,7 +132,12 @@
     "submitting": "Soumettre...",
     "submitFeedback": "Soumettre les commentaires",
     "feedbackSuccess": "Je vous remercie. Vos commentaires anonymes ont été enregistrés.",
-    "feedbackError": "Aucun commentaire n'a pu être soumis."
+    "feedbackError": "Aucun commentaire n'a pu être soumis.",
+    "feedbackSavedLabel": "Commentaire enregistré",
+    "feedbackThankYouTitle": "Merci pour votre commentaire",
+    "feedbackThankYouText": "Votre commentaire anonyme a été enregistré et aidera l’équipe à améliorer l’outil.",
+    "returnHome": "Retour à l’accueil",
+    "submitMoreFeedback": "Envoyer un autre commentaire"
   },
   "es": {
     "language": "Idioma",
@@ -267,7 +272,12 @@
     "submitting": "Presentando...",
     "submitFeedback": "Presentar comentarios",
     "feedbackSuccess": "Gracias. Tus comentarios anónimos han sido salvados.",
-    "feedbackError": "No se pueden presentar comentarios."
+    "feedbackError": "No se pueden presentar comentarios.",
+    "feedbackSavedLabel": "Comentario guardado",
+    "feedbackThankYouTitle": "Gracias por tus comentarios",
+    "feedbackThankYouText": "Tus comentarios anónimos se han guardado y ayudarán al equipo a mejorar la herramienta.",
+    "returnHome": "Volver al inicio",
+    "submitMoreFeedback": "Enviar más comentarios"
   },
   "it": {
     "language": "Lingua",
@@ -402,7 +412,12 @@
     "submitting": "Inviare...",
     "submitFeedback": "Invia feedback",
     "feedbackSuccess": "Grazie. Il tuo feedback anonimo è stato salvato.",
-    "feedbackError": "Il feedback non potrebbe essere presentato."
+    "feedbackError": "Il feedback non potrebbe essere presentato.",
+    "feedbackSavedLabel": "Feedback salvato",
+    "feedbackThankYouTitle": "Grazie per il tuo feedback",
+    "feedbackThankYouText": "Il tuo feedback anonimo è stato salvato e aiuterà il team a migliorare lo strumento.",
+    "returnHome": "Torna alla home",
+    "submitMoreFeedback": "Invia un altro feedback"
   },
   "de": {
     "language": "Sprache",
@@ -537,7 +552,12 @@
     "submitting": "Einreichung...",
     "submitFeedback": "Feedback einreichen",
     "feedbackSuccess": "Vielen Dank. Ihr anonymes Feedback wurde gespeichert.",
-    "feedbackError": "Feedback konnte nicht eingereicht werden."
+    "feedbackError": "Feedback konnte nicht eingereicht werden.",
+    "feedbackSavedLabel": "Feedback gespeichert",
+    "feedbackThankYouTitle": "Vielen Dank für Ihr Feedback",
+    "feedbackThankYouText": "Ihr anonymes Feedback wurde gespeichert und hilft dem Team, das Tool zu verbessern.",
+    "returnHome": "Zur Startseite",
+    "submitMoreFeedback": "Weiteres Feedback senden"
   },
   "ja": {
     "language": "用語集",
@@ -672,7 +692,12 @@
     "submitting": "提出する...",
     "submitFeedback": "フィードバックを送信",
     "feedbackSuccess": "ありがとうございます。 匿名のフィードバックが保存されました。",
-    "feedbackError": "フィードバックは提出できませんでした。"
+    "feedbackError": "フィードバックは提出できませんでした。",
+    "feedbackSavedLabel": "フィードバックを保存しました",
+    "feedbackThankYouTitle": "フィードバックありがとうございます",
+    "feedbackThankYouText": "匿名のフィードバックを保存しました。ツールの改善に活用します。",
+    "returnHome": "ホームに戻る",
+    "submitMoreFeedback": "別のフィードバックを送信"
   },
   "ko": {
     "language": "* 이름",
@@ -807,7 +832,12 @@
     "submitting": "제출 ...",
     "submitFeedback": "자주 묻는 질문",
     "feedbackSuccess": "감사합니다. 익명의 피드백이 저장되었습니다.",
-    "feedbackError": "피드백은 제출할 수 없습니다."
+    "feedbackError": "피드백은 제출할 수 없습니다.",
+    "feedbackSavedLabel": "피드백이 저장되었습니다",
+    "feedbackThankYouTitle": "피드백을 보내주셔서 감사합니다",
+    "feedbackThankYouText": "익명 피드백이 저장되었으며 도구를 개선하는 데 활용됩니다.",
+    "returnHome": "홈으로 돌아가기",
+    "submitMoreFeedback": "피드백 더 보내기"
   },
   "th": {
     "language": "ภาษา",
@@ -942,7 +972,12 @@
     "submitting": "กําลังส่งข้อมูล...",
     "submitFeedback": "การตอบกลับแบบส่งข้อมูล",
     "feedbackSuccess": "ขอบคุณ การตอบรับโดยไม่ระบุชื่อของคุณได้รับการบันทึก",
-    "feedbackError": "ไม่สามารถส่งข้อมูลกลับได้"
+    "feedbackError": "ไม่สามารถส่งข้อมูลกลับได้",
+    "feedbackSavedLabel": "บันทึกความคิดเห็นแล้ว",
+    "feedbackThankYouTitle": "ขอบคุณสำหรับความคิดเห็นของคุณ",
+    "feedbackThankYouText": "บันทึกความคิดเห็นแบบไม่ระบุตัวตนแล้ว และทีมจะนำไปใช้ปรับปรุงเครื่องมือ",
+    "returnHome": "กลับหน้าหลัก",
+    "submitMoreFeedback": "ส่งความคิดเห็นเพิ่มเติม"
   },
   "vi": {
     "language": "Ngôn ngữ",
@@ -1077,6 +1112,11 @@
     "submitting": "Đang gửi...",
     "submitFeedback": "Gửi phản hồi",
     "feedbackSuccess": "Cảm ơn. Phản hồi nặc danh của anh đã được lưu.",
-    "feedbackError": "Không thể đệ trình trả lời."
+    "feedbackError": "Không thể đệ trình trả lời.",
+    "feedbackSavedLabel": "Đã lưu phản hồi",
+    "feedbackThankYouTitle": "Cảm ơn phản hồi của bạn",
+    "feedbackThankYouText": "Phản hồi ẩn danh của bạn đã được lưu và sẽ giúp nhóm cải thiện công cụ.",
+    "returnHome": "Về trang chủ",
+    "submitMoreFeedback": "Gửi thêm phản hồi"
   }
 }
