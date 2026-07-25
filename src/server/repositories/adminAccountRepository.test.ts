@@ -83,19 +83,62 @@ describe("adminAccountRepository (CAKE-10)", () => {
     expect(isValidRecoveryEmail("invalid-address")).toBe(false);
   });
 
-  it("updates the recovery email only with the current password", async () => {
+  it("requires the current password and a non-empty valid recovery email", async () => {
     await adminAccountRepository.getOrCreate();
 
     await expect(
-      adminAccountRepository.updateRecoveryContacts("wrong-password", "admin@example.com"),
+      adminAccountRepository.prepareRecoveryEmailChange(
+        "wrong-password",
+        "admin@example.com",
+      ),
     ).resolves.toEqual({ ok: false, error: "INVALID_PASSWORD" });
 
     await expect(
-      adminAccountRepository.updateRecoveryContacts("secret-pass", "Admin@Example.com"),
-    ).resolves.toEqual({
+      adminAccountRepository.prepareRecoveryEmailChange("secret-pass", ""),
+    ).resolves.toEqual({ ok: false, error: "INVALID_EMAIL" });
+
+    await expect(
+      adminAccountRepository.prepareRecoveryEmailChange(
+        "secret-pass",
+        "Admin@Example.com",
+      ),
+    ).resolves.toMatchObject({
       ok: true,
-      contacts: { email: "admin@example.com" },
+      email: "admin@example.com",
     });
+  });
+
+  it("only replaces the recovery email after a valid verification code", async () => {
+    await adminAccountRepository.getOrCreate();
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 10 * 60 * 1000);
+    await adminAccountRepository.saveRecoveryCode("old-password-code", expiresAt, now);
+    await adminAccountRepository.saveRecoveryEmailVerificationCode(
+      "admin@example.com",
+      "correct-email-code",
+      expiresAt,
+      now,
+    );
+
+    await expect(
+      adminAccountRepository.verifyAndApplyRecoveryEmailChange("wrong-email-code"),
+    ).resolves.toEqual({ ok: false, error: "INVALID_RECOVERY_CODE" });
+    await expect(adminAccountRepository.getRecoveryContacts()).resolves.toEqual({
+      email: null,
+    });
+
+    await expect(
+      adminAccountRepository.verifyAndApplyRecoveryEmailChange("correct-email-code"),
+    ).resolves.toEqual({ ok: true, email: "admin@example.com" });
+    await expect(adminAccountRepository.getRecoveryEmailVerificationState()).resolves.toEqual({
+      contacts: { email: "admin@example.com" },
+      pendingEmail: null,
+      codeSentAt: null,
+    });
+
+    const account = await prisma.adminAccount.findUnique({ where: { id: "default" } });
+    expect(account?.recoveryCodeHash).toBeNull();
+    expect(account?.recoveryCodeExpiresAt).toBeNull();
   });
 
   it("consumes a valid one-time code once and limits invalid attempts", async () => {
