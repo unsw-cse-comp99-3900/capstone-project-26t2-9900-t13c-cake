@@ -26,18 +26,6 @@ JURISDICTION_MAP = {
     "Western Australia": "WA",
 }
 
-ENGAGEMENT_MAP = {
-    "1": "Inform",
-    "2": "Consult",
-    "3": "Involve",
-    "4": "Collaborate",
-    "5": "Empower",
-    "6": "Extended roles",
-    "7": "Extended roles",
-    "11": "Extended roles",
-}
-
-
 def clean(value: object) -> str | None:
     if pd.isna(value):
         return None
@@ -95,7 +83,7 @@ def convert_excel(input_path: Path) -> list[dict]:
         jurisdiction = clean(row["Juristiction"])
         jurisdiction_code = JURISDICTION_MAP.get(jurisdiction, jurisdiction) if jurisdiction else "National"
         engagement_raw = clean(row["Consumer engagement levels"])
-        engagement_level = ENGAGEMENT_MAP.get(engagement_raw, engagement_raw) if engagement_raw else "Consult"
+        engagement_level = engagement_raw or "2"
 
         rows.append(
             {

@@ -18,33 +18,6 @@ type ContextStepProps = {
   onSubmit: () => void;
 };
 
-const ENGAGEMENT_LEVEL_DETAILS: Record<string, { label: string; description: string }> = {
-  Inform: {
-    label: "Level 1",
-    description: "One-way communication: consumers receive information.",
-  },
-  Consult: {
-    label: "Level 2",
-    description: "Two-way feedback on predefined options.",
-  },
-  Involve: {
-    label: "Level 3",
-    description: "Consumers work alongside staff throughout the process.",
-  },
-  Collaborate: {
-    label: "Level 4",
-    description: "Partnership in each aspect of the decision.",
-  },
-  Empower: {
-    label: "Level 5",
-    description: "Final decision rests with consumers.",
-  },
-  "Extended roles": {
-    label: "Levels 6-7",
-    description: "Governance or leadership-level consumer roles.",
-  },
-};
-
 /** CAKE-3 - ContextStep */
 export function ContextStep({
   contexts,
@@ -226,12 +199,22 @@ export function ContextStep({
                       </div>
                     ) : (
                       <fieldset className="mt-4">
-                        <legend className="text-sm font-bold text-slate-800">
-                          Consumer engagement level
+                        <legend className="flex items-center gap-2 text-sm font-bold text-slate-800">
+                          <span>Engagement level</span>
+                          <span
+                            tabIndex={0}
+                            aria-label="Engagement level explanation"
+                            className="group relative inline-grid size-5 place-items-center rounded-full border border-slate-300 bg-white text-xs font-bold text-slate-700 focus:outline-2 focus:outline-offset-2 focus:outline-teal-700"
+                          >
+                            ?
+                            <span className="pointer-events-none absolute left-1/2 top-7 z-10 hidden w-72 -translate-x-1/2 rounded-lg border border-slate-200 bg-white p-3 text-left text-xs font-medium leading-5 text-slate-700 shadow-lg group-hover:block group-focus-within:block">
+                              Engagement level means the number of categories of
+                              remuneration present within the document.
+                            </span>
+                          </span>
                         </legend>
-                        <div className="mt-2 grid gap-3 md:grid-cols-2">
+                        <div className="mt-2 flex flex-wrap gap-3">
                           {engagementLevels.map((engagementLevel) => {
-                            const details = ENGAGEMENT_LEVEL_DETAILS[engagementLevel];
                             const engagementId = `engagement-${selection.context}-${engagementLevel}`
                               .replace(/[^a-z0-9]+/gi, "-")
                               .toLowerCase();
@@ -243,41 +226,28 @@ export function ContextStep({
                                 key={engagementLevel}
                                 htmlFor={engagementId}
                                 className={[
-                                  "cursor-pointer rounded-xl border p-4 transition",
+                                  "grid size-14 cursor-pointer place-items-center rounded-lg border text-lg font-bold transition",
                                   "focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-teal-700",
                                   isSelected
-                                    ? "border-teal-600 bg-teal-50 shadow-sm"
-                                    : "border-slate-200 bg-white hover:border-teal-300 hover:bg-white",
+                                    ? "border-teal-700 bg-teal-700 text-white shadow-sm"
+                                    : "border-slate-300 bg-white text-slate-950 hover:border-teal-400 hover:bg-teal-50",
                                 ].join(" ")}
                               >
-                                <div className="flex items-start gap-4">
-                                  <input
-                                    id={engagementId}
-                                    type="radio"
-                                    name={`engagement-${selection.context}`}
-                                    value={engagementLevel}
-                                    checked={isSelected}
-                                    onChange={() =>
-                                      setSelectionEngagementLevel(
-                                        selection.context,
-                                        engagementLevel,
-                                      )
-                                    }
-                                    className="mt-1 size-5 border-slate-300 text-teal-700 accent-teal-700"
-                                  />
-                                  <span>
-                                    <span className="block text-sm font-bold text-teal-700">
-                                      {details?.label ?? "Additional level"}
-                                    </span>
-                                    <span className="mt-1 block text-base font-bold text-slate-950">
-                                      {engagementLevel}
-                                    </span>
-                                    <span className="mt-2 block text-sm leading-6 text-slate-600">
-                                      {details?.description ??
-                                        "Evidence-table engagement level."}
-                                    </span>
-                                  </span>
-                                </div>
+                                <input
+                                  id={engagementId}
+                                  type="radio"
+                                  name={`engagement-${selection.context}`}
+                                  value={engagementLevel}
+                                  checked={isSelected}
+                                  onChange={() =>
+                                    setSelectionEngagementLevel(
+                                      selection.context,
+                                      engagementLevel,
+                                    )
+                                  }
+                                  className="sr-only"
+                                />
+                                <span>{engagementLevel}</span>
                               </label>
                             );
                           })}
