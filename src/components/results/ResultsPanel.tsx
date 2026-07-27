@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
-import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
-import type { QuizFilters } from "@/lib/filter/filterService";
+import type {
+  FilteredEvidenceGroup,
+  MultiQuizFilters,
+} from "@/lib/filter/filterService";
 import {
   MAX_COMPARISON_RECORDS,
   toggleComparisonSelection,
@@ -31,10 +33,15 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
   const [selectedRecordIds, setSelectedRecordIds] = useState<string[]>([]);
   const [isComparing, setIsComparing] = useState(false);
 
+  const allRecords = useMemo(
+    () => records.flatMap((group) => group.records),
+    [records],
+  );
+  const totalRecords = allRecords.length;
   const selectedRecords = useMemo(() => {
     const selectedIds = new Set(selectedRecordIds);
-    return records.filter((record) => selectedIds.has(record.id));
-  }, [records, selectedRecordIds]);
+    return allRecords.filter((record) => selectedIds.has(record.id));
+  }, [allRecords, selectedRecordIds]);
 
   const canCompare = selectedRecordIds.length >= 2;
   const reachedComparisonLimit = selectedRecordIds.length >= MAX_COMPARISON_RECORDS;
@@ -110,7 +117,7 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
             Try again
           </button>
         </div>
-      ) : records.length === 0 ? (
+      ) : totalRecords === 0 ? (
         <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
           <h3 className="text-xl font-bold text-slate-950">No exact matches found</h3>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
@@ -131,17 +138,31 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
               ? `Select 2-${MAX_COMPARISON_RECORDS} results to compare side by side.`
               : `${selectedRecordIds.length} of ${MAX_COMPARISON_RECORDS} results selected for comparison.`}
           </div>
-          <div className="mt-4 grid gap-3">
-            {records.map((record) => (
-              <ResultCard
-                key={record.id}
-                record={record}
-                isSelectedForComparison={selectedRecordIds.includes(record.id)}
-                isComparisonDisabled={
-                  reachedComparisonLimit && !selectedRecordIds.includes(record.id)
-                }
-                onToggleComparison={handleToggleComparison}
-              />
+          <div className="mt-4 space-y-5">
+            {records.map((group) => (
+              <section
+                key={`${group.selection.context}-${group.selection.subCategory ?? ""}-${group.selection.engagementLevel}`}
+                className="space-y-3"
+              >
+                <div className="rounded-lg bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700">
+                  {group.selection.context}
+                  {group.selection.subCategory ? ` / ${group.selection.subCategory}` : ""}
+                  {` / Engagement level ${group.selection.engagementLevel}`}
+                </div>
+                <div className="grid gap-3">
+                  {group.records.map((record) => (
+                    <ResultCard
+                      key={record.id}
+                      record={record}
+                      isSelectedForComparison={selectedRecordIds.includes(record.id)}
+                      isComparisonDisabled={
+                        reachedComparisonLimit && !selectedRecordIds.includes(record.id)
+                      }
+                      onToggleComparison={handleToggleComparison}
+                    />
+                  ))}
+                </div>
+              </section>
             ))}
           </div>
         </>

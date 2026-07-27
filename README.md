@@ -221,7 +221,7 @@ Protected maintenance area for supervisors and i2i staff. Public users access th
 | `/admin/account` | Signed in | Change username and password |
 | `/admin/forgot-password` | Guest | Reset username and password with recovery code |
 | `/admin/records` | Signed in | Evidence CRUD workspace scaffold (CAKE-11 / CAKE-12) |
-| `/admin/analytics` | Signed in | Website usage scaffold |
+| `/admin/analytics` | Signed in | Anonymous website usage metrics |
 | `/admin/surveys` | Signed in | Anonymous survey data scaffold |
 
 Legacy paths `/admin/username` and `/admin/password` redirect to `/admin/account`. `/admin/import-export` redirects to `/admin/records`.
@@ -241,7 +241,7 @@ Signed-in administrators land on `/admin` and can open:
 
 - **Account settings** — update username or password (requires current password)
 - **Evidence records** — future CRUD + Excel import/export workspace
-- **Website usage** — future anonymised traffic insights
+- **Website usage** — anonymised page views, quiz starts, quiz completions, and completion rate
 - **Anonymous survey data** — future aggregated questionnaire usage
 
 ### Account recovery

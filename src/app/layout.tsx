@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { WebsiteUsageTracker } from "@/components/analytics/WebsiteUsageTracker";
 import "./globals.css";
 
 const inter = Inter({
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased`} suppressHydrationWarning>
+        <WebsiteUsageTracker />
         {children}
       </body>
     </html>

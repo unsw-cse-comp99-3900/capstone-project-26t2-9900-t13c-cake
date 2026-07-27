@@ -302,7 +302,7 @@ function SelectInput({
   label: string;
   value: string;
   onChange: (value: string) => void;
-  options: Array<{ value: string; label: string }>;
+  options: readonly { value: string; label: string }[];
   required?: boolean;
 }) {
   const id = `evidence-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
