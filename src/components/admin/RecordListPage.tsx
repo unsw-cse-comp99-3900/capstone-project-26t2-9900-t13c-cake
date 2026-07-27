@@ -66,6 +66,13 @@ function compareText(left: string, right: string): number {
   return left.localeCompare(right, "en-AU", { sensitivity: "base" });
 }
 
+function compareNumericText(left: string, right: string): number {
+  return left.localeCompare(right, "en-AU", {
+    numeric: true,
+    sensitivity: "base",
+  });
+}
+
 function maxRate(record: AdminEvidenceRecord): number {
   return record.maxHourlyRate ?? record.minHourlyRate ?? Number.NEGATIVE_INFINITY;
 }
@@ -134,7 +141,7 @@ export function RecordListPage() {
     return {
       jurisdictions: Array.from(jurisdictions).sort(compareText),
       contexts: Array.from(contexts).sort(compareText),
-      engagementLevels: Array.from(engagementLevels).sort(compareText),
+      engagementLevels: Array.from(engagementLevels).sort(compareNumericText),
     };
   }, [records]);
 
@@ -308,12 +315,12 @@ export function RecordListPage() {
               <div>
                 <h3 className="text-lg font-bold text-slate-900">Evidence table</h3>
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap items-start gap-3">
                 <ExcelImportExportPanel variant="buttons" onImportApplied={loadRecords} />
                 <button
                   type="button"
                   onClick={startCreate}
-                  className="inline-flex min-h-10 items-center justify-center rounded-lg bg-[#0b3b4a] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#0a3340]"
+                  className="inline-flex h-10 items-center justify-center rounded-lg bg-[#0b3b4a] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#0a3340]"
                 >
                   Add record
                 </button>
@@ -372,11 +379,11 @@ export function RecordListPage() {
                   <option value="rate_desc">Rate highest</option>
                 </select>
               </label>
-              <div className="flex items-end">
+              <div className="flex items-end lg:items-start lg:pt-6">
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="inline-flex min-h-10 w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 lg:w-auto"
+                  className="inline-flex min-h-[42px] w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 lg:w-auto"
                 >
                   Clear
                 </button>
