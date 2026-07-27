@@ -12,20 +12,26 @@ import {
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <AdminAuthProvider>
-      <div className="min-h-screen bg-slate-50 text-slate-900">
-        <header className="border-b border-slate-200 bg-white">
-          <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-white text-slate-900">
+        <header className="bg-[#004c45] text-white shadow-[0_10px_28px_rgba(0,36,33,0.18)]">
+          <div className="mx-auto flex min-h-[86px] w-full max-w-[1500px] flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-[75px]">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-teal-800">
-                Administrator
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#7fd8cf]">
+                ADMINISTRATOR
               </p>
-              <h1 className="text-xl font-bold text-slate-900">Account centre</h1>
+              <h1 className="mt-1 font-[Georgia,serif] text-2xl font-normal text-white sm:text-3xl">
+                Account centre
+              </h1>
             </div>
             <AdminHeaderActions />
           </div>
         </header>
 
-        <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-6xl px-4 py-8 outline-none sm:px-6 lg:px-8">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="mx-auto min-h-[calc(100vh-86px)] w-full max-w-[1500px] bg-[radial-gradient(circle_at_50%_0%,rgba(0,107,99,0.26)_0%,rgba(217,237,233,0.72)_35%,#ffffff_74%)] px-5 py-8 outline-none sm:px-8 lg:px-[75px] lg:py-9"
+        >
           <AdminLoginGate>{children}</AdminLoginGate>
         </main>
       </div>
@@ -41,7 +47,7 @@ function AdminHeaderActions() {
     <div className="flex flex-wrap items-center gap-3">
       <Link
         href="/"
-        className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-100"
+        className="inline-flex min-h-11 items-center justify-center border border-white/45 bg-transparent px-5 py-2 text-sm font-bold text-white transition hover:border-white/80 hover:bg-white/10 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-white"
       >
         Back to public tool
       </Link>
@@ -50,7 +56,7 @@ function AdminHeaderActions() {
           type="button"
           onClick={() => void logout()}
           disabled={isLoggingOut}
-          className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70"
+          className="inline-flex min-h-11 items-center justify-center border border-white/45 bg-transparent px-4 py-2 text-sm font-bold text-white transition hover:border-white/80 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-70 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           {isLoggingOut ? "Signing out…" : "Sign out"}
         </button>

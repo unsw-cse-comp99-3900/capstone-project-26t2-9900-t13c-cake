@@ -15,7 +15,7 @@ type ResultsExportActionsProps = {
 };
 
 const actionButtonClassName =
-  "min-h-10 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-60";
+  "min-h-11 rounded-[4px] border border-[#9fbab7] bg-white px-4 py-2 text-sm font-semibold text-[#003f3b] transition hover:border-[#006b63] hover:bg-[#f3fbf8] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-60";
 
 /** CAKE-14 — print and PDF export controls for the results panel */
 export function ResultsExportActions({
@@ -45,7 +45,7 @@ export function ResultsExportActions({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-3">
         <button
           type="button"
           onClick={printResults}

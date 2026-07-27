@@ -58,10 +58,12 @@ export function ResultsComparisonView({
   onClearSelection,
 }: ResultsComparisonViewProps) {
   return (
-    <div className="mt-4">
-      <div className="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mt-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="text-xl font-bold text-slate-950">Compare selected results</h3>
+          <h3 className="text-3xl font-bold text-[#051b1a]">
+            Compare selected results
+          </h3>
           <p className="mt-1 text-sm leading-6 text-slate-600">
             Review key remuneration fields across {records.length} selected sources.
           </p>
@@ -70,23 +72,23 @@ export function ResultsComparisonView({
           <button
             type="button"
             onClick={onClearSelection}
-            className="min-h-10 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            className="min-h-11 rounded-[4px] border border-[#9fbab7] px-4 py-2 text-sm font-semibold text-[#003f3b] transition hover:border-[#006b63] hover:bg-[#f3fbf8] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
           >
             Clear selection
           </button>
           <button
             type="button"
             onClick={onBack}
-            className="min-h-10 rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            className="min-h-11 rounded-[4px] border border-[#006b63] bg-[#006b63] px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-[#00524c] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
           >
             Back to results
           </button>
         </div>
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200">
-        <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-          <thead className="bg-slate-50">
+      <div className="mt-5 overflow-x-auto rounded-[8px] border border-[#dce6e4]">
+        <table className="min-w-full divide-y divide-[#dce6e4] text-left text-sm">
+          <thead className="bg-[#f7fbfa]">
             <tr>
               <th scope="col" className="w-44 px-4 py-3 font-bold text-slate-700">
                 Field
@@ -102,10 +104,10 @@ export function ResultsComparisonView({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 bg-white">
+          <tbody className="divide-y divide-[#dce6e4] bg-white">
             {comparisonRows.map((row) => (
               <tr key={row.label} className="align-top">
-                <th scope="row" className="bg-slate-50 px-4 py-3 font-bold text-slate-700">
+                <th scope="row" className="bg-[#f7fbfa] px-4 py-3 font-bold text-slate-700">
                   {row.label}
                 </th>
                 {records.map((record) => (
