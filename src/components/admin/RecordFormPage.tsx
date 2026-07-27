@@ -21,6 +21,45 @@ export type AdminEvidenceRecord = {
 
 export type EvidenceFormValues = Omit<AdminEvidenceRecord, "id" | "createdAt" | "updatedAt">;
 
+const ADMIN_JURISDICTION_OPTIONS = [
+  {
+    value: "ACT",
+    label: "Australian Capital Territory",
+  },
+  {
+    value: "National",
+    label: "National",
+  },
+  {
+    value: "NSW",
+    label: "New South Wales",
+  },
+  {
+    value: "QLD",
+    label: "Queensland",
+  },
+  {
+    value: "SA",
+    label: "South Australia",
+  },
+  {
+    value: "TAS",
+    label: "Tasmania",
+  },
+  {
+    value: "VIC",
+    label: "Victoria",
+  },
+  {
+    value: "WA",
+    label: "Western Australia",
+  },
+  {
+    value: "NT",
+    label: "Northern Territory",
+  },
+] as const;
+
 type RecordFormPageProps = {
   mode: "create" | "edit";
   value: EvidenceFormValues;
@@ -48,8 +87,12 @@ function hasRequiredFields(value: EvidenceFormValues): boolean {
       value.title.trim() &&
       value.jurisdictions.trim() &&
       value.context.trim() &&
-      value.engagementLevel.trim(),
+      isPositiveIntegerText(value.engagementLevel),
   );
+}
+
+function isPositiveIntegerText(value: string): boolean {
+  return /^[1-9]\d*$/.test(value.trim());
 }
 
 /** CAKE-11 - RecordFormPage */
@@ -104,12 +147,12 @@ export function RecordFormPage({
             onChange={(nextValue) => onChange(updateTextField(value, "link", nextValue))}
           />
         </div>
-        <TextInput
+        <SelectInput
           label="Jurisdictions"
           required
           value={value.jurisdictions}
-          placeholder="National,NSW"
-          onChange={(nextValue) => onChange(updateTextField(value, "jurisdictions", nextValue))}
+          onChange={(nextValue) => onChange({ ...value, jurisdictions: nextValue })}
+          options={ADMIN_JURISDICTION_OPTIONS}
         />
         <TextInput
           label="Context"
@@ -124,6 +167,9 @@ export function RecordFormPage({
         />
         <TextInput
           label="Engagement level"
+          type="number"
+          min="1"
+          step="1"
           required
           value={value.engagementLevel}
           onChange={(nextValue) => onChange(updateTextField(value, "engagementLevel", nextValue))}
@@ -242,6 +288,42 @@ function TextInput({
         onChange={(event) => onChange(event.target.value)}
         className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base font-normal text-slate-900 outline-none ring-teal-500 focus:border-teal-500 focus:ring-2"
       />
+    </label>
+  );
+}
+
+function SelectInput({
+  label,
+  value,
+  onChange,
+  options,
+  required = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: Array<{ value: string; label: string }>;
+  required?: boolean;
+}) {
+  const id = `evidence-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+
+  return (
+    <label htmlFor={id} className="block text-sm font-semibold text-slate-800">
+      {label}
+      {required ? <span className="ml-1 text-red-700">*</span> : null}
+      <select
+        id={id}
+        required={required}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base font-normal text-slate-900 outline-none ring-teal-500 focus:border-teal-500 focus:ring-2"
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
     </label>
   );
 }
