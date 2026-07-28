@@ -156,8 +156,6 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
         <div className="rounded-[24px] border border-[#a9d3cc] bg-white/92 p-5 shadow-[0_14px_34px_rgba(15,23,42,0.08)] sm:p-7 lg:p-10">
           <div className="no-print flex flex-col gap-4 border-b border-[#dce6e4] pb-6 xl:flex-row xl:items-center xl:justify-between">
             <ResultsExportActions
-              filters={filters}
-              records={flatRecords}
               disabled={!hasExportableResults}
               trailingActions={
                 <button
@@ -258,7 +256,7 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
         </div>
       )}
 
-          <div className="mt-5">
+          <div className="results-disclaimer-print mt-5">
         <DisclaimerBanner />
           </div>
 

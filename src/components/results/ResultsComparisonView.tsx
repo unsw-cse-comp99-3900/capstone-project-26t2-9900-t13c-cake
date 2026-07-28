@@ -58,7 +58,7 @@ export function ResultsComparisonView({
             href={record.link}
             target="_blank"
             rel="noreferrer"
-            className="font-bold text-teal-800 underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            className="result-source-link font-bold text-teal-800 underline-offset-4 hover:underline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
           >
             {t("openSource")}
           </a>
@@ -97,7 +97,7 @@ export function ResultsComparisonView({
         </div>
       </div>
 
-      <div className="mt-5 overflow-x-auto rounded-[8px] border border-[#dce6e4]">
+      <div className="results-comparison-print mt-5 overflow-x-auto rounded-[8px] border border-[#dce6e4]">
         <table className="min-w-full divide-y divide-[#dce6e4] text-left text-sm">
           <thead className="bg-[#f7fbfa]">
             <tr>

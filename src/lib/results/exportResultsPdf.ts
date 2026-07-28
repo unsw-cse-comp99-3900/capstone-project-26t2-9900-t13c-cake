@@ -1,159 +1,199 @@
-import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
-import type { MultiQuizFilters, QuizFilters } from "@/lib/filter/filterService";
-import {
-  RESULTS_DISCLAIMER,
-  TOOL_TITLE,
-  buildResultsPdfFilename,
-  formatBooleanGuidance,
-  formatFilterSummary,
-  formatRateRange,
-  formatResultSummary,
-} from "./resultFormatters";
+import { buildResultsPdfFilename } from "./resultFormatters";
+import { PRINT_AREA_ID } from "./printResults";
 
 type ExportResultsPdfInput = {
-  filters: QuizFilters | MultiQuizFilters;
-  records: EvidenceRecordDTO[];
   generatedAt?: Date;
 };
 
-const PAGE_MARGIN = 48;
-const LINE_HEIGHT = 14;
-const TITLE_SIZE = 16;
-const BODY_SIZE = 11;
-const SMALL_SIZE = 9;
+type ProtectedBlock = {
+  top: number;
+  bottom: number;
+};
 
-function addLines(
-  doc: import("jspdf").jsPDF,
-  lines: string[],
-  x: number,
-  y: number,
-  maxWidth: number,
-  pageHeight: number,
-): number {
-  let currentY = y;
+export type PdfPageSlice = {
+  start: number;
+  end: number;
+};
 
-  for (const line of lines) {
-    const wrapped = doc.splitTextToSize(line, maxWidth) as string[];
+const EXPORT_WIDTH = 794;
+const MIN_PAGE_FILL_RATIO = 0.35;
 
-    for (const wrappedLine of wrapped) {
-      if (currentY > pageHeight - PAGE_MARGIN) {
-        doc.addPage();
-        currentY = PAGE_MARGIN;
+export function calculatePdfPageSlices(
+  totalHeight: number,
+  maxPageHeight: number,
+  protectedBlocks: ProtectedBlock[],
+): PdfPageSlice[] {
+  if (totalHeight <= 0 || maxPageHeight <= 0) {
+    return [];
+  }
+
+  const blocks = [...protectedBlocks].sort((left, right) => left.top - right.top);
+  const slices: PdfPageSlice[] = [];
+  let start = 0;
+
+  while (start < totalHeight) {
+    const targetEnd = Math.min(start + maxPageHeight, totalHeight);
+    let end = targetEnd;
+
+    if (targetEnd < totalHeight) {
+      const crossingBlock = blocks.find(
+        (block) => block.top < targetEnd && block.bottom > targetEnd,
+      );
+
+      if (
+        crossingBlock &&
+        crossingBlock.top - start >= maxPageHeight * MIN_PAGE_FILL_RATIO
+      ) {
+        end = crossingBlock.top;
       }
-
-      doc.text(wrappedLine, x, currentY);
-      currentY += LINE_HEIGHT;
     }
+
+    if (end <= start) {
+      end = targetEnd;
+    }
+
+    slices.push({ start, end });
+    start = end;
   }
 
-  return currentY;
+  return slices;
 }
 
-function buildRecordLines(record: EvidenceRecordDTO): string[] {
-  const lines = [
-    record.publisher,
-    record.title,
-    [record.year ? `Year: ${record.year}` : null, `Jurisdictions: ${record.jurisdictions}`]
-      .filter(Boolean)
-      .join(" · "),
-    `Rate: ${formatRateRange(record)}`,
-    `Reimbursement guidance: ${formatBooleanGuidance(record.reimbursementGuidance)}`,
-    `Unpaid consumer engagement guidance: ${formatBooleanGuidance(record.unpaidEngagementGuidance)}`,
-  ];
+function prepareClone(source: HTMLElement): {
+  staging: HTMLDivElement;
+  clone: HTMLElement;
+} {
+  const staging = document.createElement("div");
+  staging.className = "pdf-export-staging";
+  staging.style.width = `${EXPORT_WIDTH}px`;
 
-  if (record.exampleOrganisations) {
-    lines.push(`Example organisations: ${record.exampleOrganisations}`);
-  }
+  const clone = source.cloneNode(true) as HTMLElement;
+  clone.removeAttribute("id");
+  clone.setAttribute("aria-hidden", "true");
 
-  if (record.link) {
-    lines.push(`Source: ${record.link}`);
-  }
+  clone
+    .querySelectorAll<HTMLAnchorElement>(".result-card-link, .result-source-link")
+    .forEach((link) => {
+      link.removeAttribute("target");
+      link.textContent = `${link.textContent?.trim() ?? "Source"} (${link.href})`;
+    });
 
-  return lines;
+  staging.appendChild(clone);
+  document.body.appendChild(staging);
+
+  return { staging, clone };
 }
 
-/** CAKE-14 — build and download a PDF summary of quiz results */
-export async function exportResultsPdf({
-  filters,
-  records,
-  generatedAt = new Date(),
-}: ExportResultsPdfInput): Promise<void> {
-  const { jsPDF } = await import("jspdf");
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const contentWidth = pageWidth - PAGE_MARGIN * 2;
+function collectProtectedBlocks(root: HTMLElement): ProtectedBlock[] {
+  const rootTop = root.getBoundingClientRect().top;
 
-  let y = PAGE_MARGIN;
+  return Array.from(
+    root.querySelectorAll<HTMLElement>(".result-card-print, .results-disclaimer-print"),
+  ).map((element) => {
+    const bounds = element.getBoundingClientRect();
+    return {
+      top: bounds.top - rootTop,
+      bottom: bounds.bottom - rootTop,
+    };
+  });
+}
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(TITLE_SIZE);
-  doc.text(TOOL_TITLE, PAGE_MARGIN, y);
-  y += LINE_HEIGHT + 4;
+function createPageImage(
+  source: HTMLCanvasElement,
+  start: number,
+  end: number,
+): HTMLCanvasElement {
+  const page = document.createElement("canvas");
+  page.width = source.width;
+  page.height = Math.max(1, end - start);
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(BODY_SIZE);
-  y = addLines(
-    doc,
-    [
-      "Results summary",
-      `Generated: ${generatedAt.toLocaleString()}`,
-      formatResultSummary(records.length),
-      formatFilterSummary(filters),
-    ],
-    PAGE_MARGIN,
-    y,
-    contentWidth,
-    pageHeight,
+  const context = page.getContext("2d");
+  if (!context) {
+    throw new Error("Unable to prepare the PDF page.");
+  }
+
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, page.width, page.height);
+  context.drawImage(
+    source,
+    0,
+    start,
+    source.width,
+    page.height,
+    0,
+    0,
+    source.width,
+    page.height,
   );
 
-  y += LINE_HEIGHT / 2;
+  return page;
+}
 
-  if (records.length === 0) {
-    doc.setFont("helvetica", "bold");
-    y = addLines(
-      doc,
-      ["No exact matches found"],
-      PAGE_MARGIN,
-      y,
-      contentWidth,
-      pageHeight,
-    );
-    doc.setFont("helvetica", "normal");
-    y = addLines(
-      doc,
-      [
-        "Try broadening the jurisdiction, removing the sub-category, or selecting a more general engagement context.",
-      ],
-      PAGE_MARGIN,
-      y,
-      contentWidth,
-      pageHeight,
-    );
-  } else {
-    records.forEach((record, index) => {
-      const recordLines = buildRecordLines(record);
-
-      if (index > 0) {
-        y += LINE_HEIGHT / 2;
-      }
-
-      if (y > pageHeight - PAGE_MARGIN - LINE_HEIGHT * 4) {
-        doc.addPage();
-        y = PAGE_MARGIN;
-      }
-
-      doc.setFont("helvetica", "bold");
-      y = addLines(doc, recordLines.slice(0, 2), PAGE_MARGIN, y, contentWidth, pageHeight);
-      doc.setFont("helvetica", "normal");
-      y = addLines(doc, recordLines.slice(2), PAGE_MARGIN, y, contentWidth, pageHeight);
-    });
+/** CAKE-14 - download the same results layout used by browser printing. */
+export async function exportResultsPdf({
+  generatedAt = new Date(),
+}: ExportResultsPdfInput = {}): Promise<void> {
+  const source = document.getElementById(PRINT_AREA_ID);
+  if (!source) {
+    throw new Error("Results are not available for export.");
   }
 
-  y += LINE_HEIGHT;
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(SMALL_SIZE);
-  addLines(doc, [`Important: ${RESULTS_DISCLAIMER}`], PAGE_MARGIN, y, contentWidth, pageHeight);
+  const { staging, clone } = prepareClone(source);
 
-  doc.save(buildResultsPdfFilename(generatedAt));
+  try {
+    await document.fonts.ready;
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+    const [{ jsPDF }, { default: html2canvas }] = await Promise.all([
+      import("jspdf"),
+      import("html2canvas"),
+    ]);
+
+    const doc = new jsPDF({ unit: "pt", format: "a4", orientation: "portrait" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const maxPageHeight = clone.offsetWidth * (pageHeight / pageWidth);
+    const slices = calculatePdfPageSlices(
+      clone.scrollHeight,
+      maxPageHeight,
+      collectProtectedBlocks(clone),
+    );
+
+    const canvas = await html2canvas(clone, {
+      backgroundColor: "#ffffff",
+      logging: false,
+      scale: 2,
+      useCORS: true,
+      width: clone.scrollWidth,
+      height: clone.scrollHeight,
+      windowWidth: EXPORT_WIDTH,
+    });
+    const pixelRatio = canvas.height / clone.scrollHeight;
+
+    slices.forEach((slice, index) => {
+      const start = Math.round(slice.start * pixelRatio);
+      const end = Math.min(canvas.height, Math.round(slice.end * pixelRatio));
+      const pageCanvas = createPageImage(canvas, start, end);
+      const renderedHeight = pageCanvas.height * (pageWidth / pageCanvas.width);
+
+      if (index > 0) {
+        doc.addPage();
+      }
+
+      doc.addImage(
+        pageCanvas.toDataURL("image/jpeg", 0.95),
+        "JPEG",
+        0,
+        0,
+        pageWidth,
+        renderedHeight,
+        undefined,
+        "FAST",
+      );
+    });
+
+    doc.save(buildResultsPdfFilename(generatedAt));
+  } finally {
+    staging.remove();
+  }
 }

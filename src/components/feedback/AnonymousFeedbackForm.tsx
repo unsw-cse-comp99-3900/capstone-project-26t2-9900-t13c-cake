@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/i18n/translations";
 
@@ -20,6 +21,7 @@ const toolAreas: Array<{ value: string; label: TranslationKey }> = [
 
 export function AnonymousFeedbackForm() {
   const { t } = useLanguage();
+  const router = useRouter();
   const [status, setStatus] = useState<FormStatus>({ type: "idle" });
   const [rating, setRating] = useState("");
   const [partOfTool, setPartOfTool] = useState("General experience");
@@ -55,6 +57,7 @@ export function AnonymousFeedbackForm() {
       setImprovement("");
       setConsentConfirmed(false);
       setStatus({ type: "success" });
+      router.push("/feedback/thank-you");
     } catch (error) {
       setStatus({
         type: "error",
@@ -188,11 +191,6 @@ export function AnonymousFeedbackForm() {
         >
           {status.type === "submitting" ? t("submitting") : t("submitFeedback")}
         </button>
-        {status.type === "success" && (
-          <p role="status" className="text-sm font-semibold text-[#006b63]">
-            {t("feedbackSuccess")}
-          </p>
-        )}
         {status.type === "error" && (
           <p role="alert" className="rounded-[8px] border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-900">
             {status.message}

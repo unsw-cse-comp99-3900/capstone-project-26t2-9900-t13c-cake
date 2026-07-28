@@ -1,15 +1,11 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
-import type { MultiQuizFilters, QuizFilters } from "@/lib/filter/filterService";
 import { exportResultsPdf } from "@/lib/results/exportResultsPdf";
 import { printResults } from "@/lib/results/printResults";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 type ResultsExportActionsProps = {
-  filters: QuizFilters | MultiQuizFilters;
-  records: EvidenceRecordDTO[];
   disabled?: boolean;
   trailingActions?: ReactNode;
 };
@@ -19,8 +15,6 @@ const actionButtonClassName =
 
 /** CAKE-14 — print and PDF export controls for the results panel */
 export function ResultsExportActions({
-  filters,
-  records,
   disabled = false,
   trailingActions,
 }: ResultsExportActionsProps) {
@@ -35,7 +29,7 @@ export function ResultsExportActions({
     setIsExporting(true);
 
     try {
-      await exportResultsPdf({ filters, records });
+      await exportResultsPdf();
     } catch {
       setExportError(t("exportError"));
     } finally {

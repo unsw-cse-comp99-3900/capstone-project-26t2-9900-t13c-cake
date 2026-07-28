@@ -181,6 +181,11 @@ const en = {
   submitting: "Submitting...",
   submitFeedback: "Submit feedback",
   feedbackSuccess: "Thank you. Your anonymous feedback has been saved.",
+  feedbackSavedLabel: "Feedback saved",
+  feedbackThankYouTitle: "Thank you for your feedback",
+  feedbackThankYouText: "Your anonymous feedback has been saved and will help the team improve the tool.",
+  returnHome: "Return home",
+  submitMoreFeedback: "Submit more feedback",
   feedbackError: "Feedback could not be submitted.",
   administrator: "Administrator",
   accountCentre: "Account centre",
@@ -470,6 +475,11 @@ const zh: Record<TranslationKey, string> = {
   submitting: "正在提交……",
   submitFeedback: "提交反馈",
   feedbackSuccess: "感谢您的反馈。匿名反馈已保存。",
+  feedbackSavedLabel: "反馈已保存",
+  feedbackThankYouTitle: "感谢您的反馈",
+  feedbackThankYouText: "您的匿名反馈已保存，并将帮助团队继续改进本工具。",
+  returnHome: "返回首页",
+  submitMoreFeedback: "继续提交反馈",
   feedbackError: "无法提交反馈。",
   administrator: "管理员",
   accountCentre: "账户中心",
@@ -675,6 +685,11 @@ const fr: Record<TranslationKey, string> = {
   openSource: "Ouvrir la source",
   important: "Important :",
   disclaimer: "Cet outil fournit uniquement des indications. Vérifiez toujours l’original anglais et confirmez auprès de l’organisme éditeur.",
+  feedbackSavedLabel: "Commentaire enregistré",
+  feedbackThankYouTitle: "Merci pour votre commentaire",
+  feedbackThankYouText: "Votre commentaire anonyme a été enregistré et aidera l’équipe à améliorer l’outil.",
+  returnHome: "Retour à l’accueil",
+  submitMoreFeedback: "Envoyer un autre commentaire",
 };
 
 const es: Record<TranslationKey, string> = {
@@ -759,6 +774,11 @@ const es: Record<TranslationKey, string> = {
   openSource: "Abrir fuente",
   important: "Importante:",
   disclaimer: "Esta herramienta solo ofrece orientación indicativa. Compruebe siempre el original en inglés y confirme con la organización editora.",
+  feedbackSavedLabel: "Comentario guardado",
+  feedbackThankYouTitle: "Gracias por tus comentarios",
+  feedbackThankYouText: "Tus comentarios anónimos se han guardado y ayudarán al equipo a mejorar la herramienta.",
+  returnHome: "Volver al inicio",
+  submitMoreFeedback: "Enviar más comentarios",
 };
 
 const it: Record<TranslationKey, string> = {
@@ -843,6 +863,11 @@ const it: Record<TranslationKey, string> = {
   openSource: "Apri fonte",
   important: "Importante:",
   disclaimer: "Questo strumento fornisce solo indicazioni. Verifica sempre l’originale inglese e conferma con l’organizzazione editrice.",
+  feedbackSavedLabel: "Feedback salvato",
+  feedbackThankYouTitle: "Grazie per il tuo feedback",
+  feedbackThankYouText: "Il tuo feedback anonimo è stato salvato e aiuterà il team a migliorare lo strumento.",
+  returnHome: "Torna alla home",
+  submitMoreFeedback: "Invia un altro feedback",
 };
 
 const de: Record<TranslationKey, string> = {
@@ -1011,6 +1036,11 @@ const de: Record<TranslationKey, string> = {
   noData: "Keine Daten",
   noComment: "Kein Kommentar",
   noFeedbackSubmitted: "Es wurde noch kein anonymes Feedback übermittelt.",
+  feedbackSavedLabel: "Feedback gespeichert",
+  feedbackThankYouTitle: "Vielen Dank für Ihr Feedback",
+  feedbackThankYouText: "Ihr anonymes Feedback wurde gespeichert und hilft dem Team, das Tool zu verbessern.",
+  returnHome: "Zur Startseite",
+  submitMoreFeedback: "Weiteres Feedback senden",
 };
 
 const ja: Record<TranslationKey, string> = {
@@ -1078,6 +1108,11 @@ const ja: Record<TranslationKey, string> = {
   exampleOrganisations: "組織例",
   openSource: "出典を開く",
   important: "重要：",
+  feedbackSavedLabel: "フィードバックを保存しました",
+  feedbackThankYouTitle: "フィードバックありがとうございます",
+  feedbackThankYouText: "匿名のフィードバックを保存しました。ツールの改善に活用します。",
+  returnHome: "ホームに戻る",
+  submitMoreFeedback: "別のフィードバックを送信",
 };
 
 const ko: Record<TranslationKey, string> = {
@@ -1145,6 +1180,11 @@ const ko: Record<TranslationKey, string> = {
   exampleOrganisations: "예시 기관",
   openSource: "출처 열기",
   important: "중요:",
+  feedbackSavedLabel: "피드백이 저장되었습니다",
+  feedbackThankYouTitle: "피드백을 보내주셔서 감사합니다",
+  feedbackThankYouText: "익명 피드백이 저장되었으며 도구를 개선하는 데 활용됩니다.",
+  returnHome: "홈으로 돌아가기",
+  submitMoreFeedback: "피드백 더 보내기",
 };
 
 const th: Record<TranslationKey, string> = {
@@ -1212,6 +1252,11 @@ const th: Record<TranslationKey, string> = {
   exampleOrganisations: "ตัวอย่างองค์กร",
   openSource: "เปิดแหล่งที่มา",
   important: "สำคัญ:",
+  feedbackSavedLabel: "บันทึกความคิดเห็นแล้ว",
+  feedbackThankYouTitle: "ขอบคุณสำหรับความคิดเห็นของคุณ",
+  feedbackThankYouText: "บันทึกความคิดเห็นแบบไม่ระบุตัวตนแล้ว และทีมจะนำไปใช้ปรับปรุงเครื่องมือ",
+  returnHome: "กลับหน้าหลัก",
+  submitMoreFeedback: "ส่งความคิดเห็นเพิ่มเติม",
 };
 
 const vi: Record<TranslationKey, string> = {
@@ -1279,6 +1324,11 @@ const vi: Record<TranslationKey, string> = {
   exampleOrganisations: "Tổ chức ví dụ",
   openSource: "Mở nguồn",
   important: "Quan trọng:",
+  feedbackSavedLabel: "Đã lưu phản hồi",
+  feedbackThankYouTitle: "Cảm ơn phản hồi của bạn",
+  feedbackThankYouText: "Phản hồi ẩn danh của bạn đã được lưu và sẽ giúp nhóm cải thiện công cụ.",
+  returnHome: "Về trang chủ",
+  submitMoreFeedback: "Gửi thêm phản hồi",
 };
 
 export const dictionaries: Record<Language, Record<TranslationKey, string>> = {
