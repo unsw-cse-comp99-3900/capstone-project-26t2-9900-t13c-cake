@@ -77,7 +77,7 @@ export function ContextStep({
   const selectionOptionsByContext = new Map(
     selectionOptions.map((options) => [options.context, options]),
   );
-  const jurisdictionLabels = new Map(
+  const jurisdictionLabels = new Map<string, string>(
     JURISDICTIONS.map((jurisdiction) => [
       jurisdiction.value,
       translateOption(language, jurisdiction.label),
@@ -109,18 +109,17 @@ export function ContextStep({
     >
       <div className="relative overflow-visible pb-2 md:sticky md:top-8 md:min-h-[520px] md:pb-48">
         <p className="relative z-10 text-xs font-bold uppercase tracking-[0.22em] text-[#006b63]">
-          Step 2
+          {t("stepTwoLabel")}
         </p>
         <h2
           id="context-heading"
           className="relative z-10 mt-3 max-w-2xl font-[Georgia,serif] text-3xl font-normal leading-tight tracking-tight text-[#051b1a] sm:text-4xl md:max-w-[230px] md:text-[2.35rem] lg:max-w-[285px] lg:text-[2.7rem] xl:mt-5 xl:max-w-[320px] xl:text-[2.82rem]"
         >
-          Define the research context
+          {t("contextHeroTitle")}
         </h2>
         <div className="relative z-10 mt-5 h-0.5 w-12 bg-[#006b63] md:mt-7 md:w-14" />
         <p className="relative z-10 mt-5 max-w-2xl text-base leading-7 text-slate-600 md:mt-7 md:max-w-[250px] md:text-sm md:leading-7 lg:max-w-[285px] lg:text-base lg:leading-8">
-          Choose each area of work, then refine the sub-category and consumer
-          engagement level.
+          {t("contextHeroHelp")}
         </p>
         <div className="relative z-10 mt-8 flex max-w-[260px] items-center gap-4 rounded-[10px] border border-[#a9d3cc] bg-[#edf8f5] px-4 py-4 text-sm leading-5 shadow-[0_14px_26px_rgba(0,79,72,0.06)]">
           <span
@@ -141,7 +140,7 @@ export function ContextStep({
             </svg>
           </span>
           <div className="min-w-0">
-            <p className="text-xs text-slate-600">Selected locations</p>
+            <p className="text-xs text-slate-600">{t("selectedLocations")}</p>
             <p className="mt-1 text-sm font-medium text-slate-950">
               {selectedJurisdictionText}
             </p>

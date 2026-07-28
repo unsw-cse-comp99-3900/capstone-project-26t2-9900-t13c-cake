@@ -7,6 +7,7 @@ import {
   useAdminAuth,
   useAdminLogout,
 } from "@/components/admin/AdminLoginGate";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 /** Admin layout shell (CAKE-10) */
 export function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -17,10 +18,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <div className="mx-auto flex min-h-[86px] w-full max-w-[1500px] flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-[75px]">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#7fd8cf]">
-                ADMINISTRATOR
+                <AdminHeaderEyebrow />
               </p>
               <h1 className="mt-1 font-[Georgia,serif] text-2xl font-normal text-white sm:text-3xl">
-                Account centre
+                <AdminHeaderTitle />
               </h1>
             </div>
             <AdminHeaderActions />
@@ -39,9 +40,22 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AdminHeaderEyebrow() {
+  const { t } = useLanguage();
+
+  return <>{t("administrator")}</>;
+}
+
+function AdminHeaderTitle() {
+  const { t } = useLanguage();
+
+  return <>{t("accountCentre")}</>;
+}
+
 function AdminHeaderActions() {
   const { session } = useAdminAuth();
   const { logout, isLoggingOut } = useAdminLogout();
+  const { t } = useLanguage();
 
   return (
     <div className="flex flex-wrap items-center gap-3">
@@ -49,7 +63,7 @@ function AdminHeaderActions() {
         href="/"
         className="inline-flex min-h-11 items-center justify-center border border-white/45 bg-transparent px-5 py-2 text-sm font-bold text-white transition hover:border-white/80 hover:bg-white/10 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-white"
       >
-        Back to public tool
+        {t("backPublicTool")}
       </Link>
       {session.status === "authenticated" && (
         <button
@@ -58,7 +72,7 @@ function AdminHeaderActions() {
           disabled={isLoggingOut}
           className="inline-flex min-h-11 items-center justify-center border border-white/45 bg-transparent px-4 py-2 text-sm font-bold text-white transition hover:border-white/80 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-70 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
-          {isLoggingOut ? "Signing out…" : "Sign out"}
+          {isLoggingOut ? t("signingOut") : t("signOut")}
         </button>
       )}
     </div>

@@ -19,18 +19,17 @@ export function JurisdictionStep() {
     >
       <div className="relative overflow-visible pb-2 md:sticky md:top-8 md:min-h-[520px] md:pb-48">
         <p className="relative z-10 text-xs font-bold uppercase tracking-[0.22em] text-[#006b63]">
-          Step 1
+          {t("stepOneLabel")}
         </p>
         <h2
           id="jurisdiction-heading"
           className="relative z-10 mt-3 max-w-2xl font-[Georgia,serif] text-3xl font-normal leading-tight tracking-tight text-[#051b1a] sm:text-4xl md:max-w-[230px] md:text-[2.35rem] lg:max-w-[285px] lg:text-[2.7rem] xl:mt-5 xl:max-w-[320px] xl:text-[2.82rem]"
         >
-          Select the locations covered by your project
+          {t("jurisdictionHeroTitle")}
         </h2>
         <div className="relative z-10 mt-5 h-0.5 w-12 bg-[#006b63] md:mt-7 md:w-14" />
         <p className="relative z-10 mt-5 max-w-2xl text-base leading-7 text-slate-600 md:mt-7 md:max-w-[250px] md:text-sm md:leading-7 lg:max-w-[285px] lg:text-base lg:leading-8">
-          You can choose more than one jurisdiction. Select National if the
-          project covers all of Australia.
+          {t("jurisdictionHeroHelp")}
         </p>
         <Image
           src="/decor/questionnaire-leaves.svg"

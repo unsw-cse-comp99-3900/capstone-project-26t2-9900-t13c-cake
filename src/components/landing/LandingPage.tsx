@@ -153,13 +153,13 @@ export function LandingPage() {
       >
         <div className="mx-auto w-full max-w-7xl px-6 pb-8 pt-12 text-center sm:px-8 sm:pt-14">
           <p className="landing-rise text-sm font-bold text-slate-700">
-            Evidence planning
+            {t("evidencePlanning")}
           </p>
           <h2
             id="overview-heading"
             className="landing-rise landing-rise-delay-1 mt-4 font-[Georgia,serif] text-4xl font-normal leading-tight text-teal-900 sm:text-5xl"
           >
-            Support fair remuneration planning
+            {t("supportFairPlanning")}
           </h2>
           <p className="landing-rise landing-rise-delay-2 mx-auto mt-5 max-w-4xl text-lg leading-8 text-slate-600">
             {t("whyDescription")}
@@ -208,12 +208,12 @@ export function LandingPage() {
         <div className="mx-auto grid w-full max-w-7xl gap-x-6 gap-y-5 px-6 py-7 sm:px-8 lg:grid-cols-[1.25fr_1.35fr_1.1fr_1.1fr_minmax(150px,0.7fr)] lg:items-center">
           <div>
             <h2 className="whitespace-nowrap font-[Georgia,serif] text-2xl text-teal-950">
-              Contact / Support
+              {t("contactSupport")}
             </h2>
-            <p className="mt-2 text-base text-slate-600">We&apos;re here to help.</p>
+            <p className="mt-2 text-base text-slate-600">{t("hereToHelp")}</p>
           </div>
           <div className="border-slate-400/50 lg:border-l lg:pl-6">
-            <p className="text-sm text-slate-700">Email</p>
+            <p className="text-sm text-slate-700">{t("email")}</p>
             <a
               href="mailto:deborah.johnston@unsw.edu.au"
               className="mt-2 block whitespace-nowrap text-sm font-semibold text-teal-800 transition hover:text-teal-950"
@@ -222,7 +222,7 @@ export function LandingPage() {
             </a>
           </div>
           <div className="border-slate-400/50 lg:border-l lg:pl-6">
-            <p className="text-sm text-slate-700">Phone</p>
+            <p className="text-sm text-slate-700">{t("phone")}</p>
             <a
               href="tel:+610290659414"
               className="mt-2 block text-sm font-semibold text-teal-800 transition hover:text-teal-950"
@@ -231,13 +231,13 @@ export function LandingPage() {
             </a>
           </div>
           <div className="border-slate-400/50 lg:border-l lg:pl-6">
-            <p className="text-sm text-slate-700">Cite</p>
+            <p className="text-sm text-slate-700">{t("cite")}</p>
             <button
               type="button"
               onClick={copyCitation}
               className="relative mt-2 inline-flex items-center gap-5 text-left text-sm font-semibold leading-tight text-teal-800 transition hover:text-teal-950 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-800"
             >
-              <span className="whitespace-nowrap">Cite this tool</span>
+              <span className="whitespace-nowrap">{t("citeThisTool")}</span>
               <span aria-hidden="true">&rarr;</span>
               {citationStatus !== "idle" ? (
                 <span
@@ -253,7 +253,7 @@ export function LandingPage() {
             href="/feedback"
             className="inline-flex min-h-16 items-center justify-between gap-2 border border-teal-800 px-4 py-3 text-teal-900 transition hover:bg-teal-900 hover:text-white focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-teal-800"
           >
-            <span className="font-[Georgia,serif] text-xl leading-tight">Feedback</span>
+            <span className="font-[Georgia,serif] text-xl leading-tight">{t("feedbackLabel")}</span>
             <span
               aria-hidden="true"
               className="text-lg leading-none"
@@ -273,11 +273,11 @@ export function LandingPage() {
           </Link>
           <span aria-hidden="true" className="hidden h-5 w-px bg-slate-700 md:block" />
           <Link href="/privacy" className="transition hover:text-white">
-            Privacy &amp; data scope
+            {t("privacyLabel").replace(" and ", " & ")}
           </Link>
           <span aria-hidden="true" className="hidden h-5 w-px bg-slate-700 md:block" />
           <Link href="/admin" className="transition hover:text-white">
-            Administrator centre
+            {t("administratorCentre")}
           </Link>
         </div>
       </footer>

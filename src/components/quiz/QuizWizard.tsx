@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
 import { useQuizState } from "@/contexts/QuizStateContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { fetchEvidenceRecords } from "@/lib/api/evidenceApiClient";
 import {
   filterEvidenceGroups,
@@ -64,6 +65,7 @@ function recordMatchesSelectedJurisdiction(
 /** CAKE-3 - QuizWizard */
 export function QuizWizard() {
   const { answers, currentStep, resetAnswers } = useQuizState();
+  const { t } = useLanguage();
   const [evidenceRecords, setEvidenceRecords] = useState<EvidenceRecordDTO[] | null>(null);
   const [results, setResults] = useState<FilteredEvidenceGroup[] | null>(null);
   const [submittedFilters, setSubmittedFilters] = useState<MultiQuizFilters | null>(null);
@@ -159,12 +161,12 @@ export function QuizWizard() {
       setEvidenceRecords(records);
       return records;
     } catch {
-      setOptionsError("Failed to load context options from the evidence database.");
+      setOptionsError(t("optionsLoadError"));
       return null;
     } finally {
       setIsLoadingOptions(false);
     }
-  }, [evidenceRecords]);
+  }, [evidenceRecords, t]);
 
   useEffect(() => {
     if (currentStep === 2 && !evidenceRecords && !isLoadingOptions && !optionsError) {
@@ -180,7 +182,7 @@ export function QuizWizard() {
     const records = await loadEvidenceRecords();
     if (!records) {
       setResults([]);
-      setError("Failed to load evidence records. Please check the API and try again.");
+      setError(t("evidenceLoadError"));
       setIsSubmitting(false);
       return;
     }

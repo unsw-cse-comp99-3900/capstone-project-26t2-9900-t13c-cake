@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { ADMIN_FORGOT_PASSWORD_PATH, ADMIN_HOME_PATH, ADMIN_RESET_MESSAGE_KEY } from "@/lib/admin/adminNavigation";
 
 function redirectToAdminHome() {
@@ -92,6 +93,7 @@ type AdminLoginGateProps = {
 /** CAKE-10 — AdminLoginGate */
 export function AdminLoginGate({ children }: AdminLoginGateProps) {
   const { session } = useAdminAuth();
+  const { t } = useLanguage();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -123,7 +125,7 @@ export function AdminLoginGate({ children }: AdminLoginGateProps) {
       const data = (await response.json()) as { error?: string };
 
       if (!response.ok) {
-        setError(data.error ?? "Invalid credentials");
+        setError(data.error ?? t("invalidCredentials"));
         return;
       }
 
@@ -131,7 +133,7 @@ export function AdminLoginGate({ children }: AdminLoginGateProps) {
       redirectToAdminHome();
       return;
     } catch {
-      setError("Unable to sign in. Please try again.");
+      setError(t("signInError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -144,7 +146,7 @@ export function AdminLoginGate({ children }: AdminLoginGateProps) {
         aria-live="polite"
         className="flex min-h-[50vh] items-center justify-center text-base font-medium text-slate-700"
       >
-        Checking administrator access…
+        {t("checkingAdmin")}
       </div>
     );
   }
@@ -152,9 +154,9 @@ export function AdminLoginGate({ children }: AdminLoginGateProps) {
   if (session.status === "unconfigured") {
     return (
       <div className="mx-auto max-w-xl rounded-[8px] border border-amber-200 bg-[#fff8e8] p-6 text-slate-800 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
-        <h2 className="text-xl font-bold text-slate-900">Admin sign-in unavailable</h2>
+        <h2 className="text-xl font-bold text-slate-900">{t("adminUnavailable")}</h2>
         <p className="mt-3 text-base leading-7 text-slate-700">
-          Administrator credentials are not configured for this environment. Set{" "}
+          {t("adminUnavailableText")} Set{" "}
           <code className="rounded bg-white px-1.5 py-0.5 text-sm">ADMIN_USERNAME</code>,{" "}
           <code className="rounded bg-white px-1.5 py-0.5 text-sm">ADMIN_PASSWORD</code>, and{" "}
           <code className="rounded bg-white px-1.5 py-0.5 text-sm">SESSION_SECRET</code> in{" "}
@@ -169,26 +171,25 @@ export function AdminLoginGate({ children }: AdminLoginGateProps) {
       <div className="mx-auto flex min-h-[calc(100vh-158px)] w-full max-w-5xl flex-col justify-center">
         <div className="text-center">
           <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#006b63]">
-            Administrator access
+            {t("privacyAdminTitle")}
           </p>
           <h2 className="mt-3 font-[Georgia,serif] text-4xl font-normal leading-tight tracking-tight text-[#051b1a] sm:text-[3rem]">
-            Evidence table maintenance
+            {t("evidenceMaintenance")}
           </h2>
           <div className="mx-auto mt-5 h-0.5 w-14 bg-[#006b63]" />
           <p className="mx-auto mt-5 max-w-3xl text-base leading-7 text-slate-600">
-            Sign in to update remuneration guidance records and maintain the evidence base used by
-            the public questionnaire.
+            {t("signInMaintenanceIntro")}
           </p>
         </div>
 
         <div className="mx-auto mt-7 w-full max-w-[500px] rounded-[24px] border border-[#a9d3cc] bg-white p-7 shadow-[0_22px_46px_rgba(15,23,42,0.10)] sm:p-8">
-          <h3 className="text-2xl font-bold text-[#051b1a]">Sign in</h3>
-          <p className="mt-2 text-sm leading-6 text-slate-500">Authorised administrators only.</p>
+          <h3 className="text-2xl font-bold text-[#051b1a]">{t("signIn")}</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-500">{t("authorisedAdminsOnly")}</p>
 
           <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="admin-username" className="block text-sm font-semibold text-slate-800">
-                Username
+                {t("username")}
               </label>
               <input
                 id="admin-username"
@@ -206,7 +207,7 @@ export function AdminLoginGate({ children }: AdminLoginGateProps) {
 
             <div>
               <label htmlFor="admin-password" className="block text-sm font-semibold text-slate-800">
-                Password
+                {t("password")}
               </label>
               <input
                 id="admin-password"
@@ -225,7 +226,7 @@ export function AdminLoginGate({ children }: AdminLoginGateProps) {
                   href={ADMIN_FORGOT_PASSWORD_PATH}
                   className="font-semibold text-[#006b63] hover:text-[#003f3b]"
                 >
-                  Forgot password?
+                  {t("forgotPassword")}
                 </Link>
               </p>
             </div>
@@ -254,13 +255,13 @@ export function AdminLoginGate({ children }: AdminLoginGateProps) {
               disabled={isSubmitting}
               className="inline-flex min-h-11 w-full items-center justify-center rounded-[4px] border border-[#006b63] bg-[#006b63] px-4 py-2.5 text-base font-bold text-white transition hover:bg-[#00524c] disabled:cursor-not-allowed disabled:opacity-70 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
             >
-              {isSubmitting ? "Signing in…" : "Sign in"}
+              {isSubmitting ? t("signingIn") : t("signIn")}
             </button>
           </form>
         </div>
 
         <p id="admin-login-help" className="mx-auto mt-5 w-full max-w-[500px] rounded-[10px] border border-[#a9d3cc] bg-[#edf8f5] px-5 py-3 text-center text-sm leading-6 text-slate-700">
-          Researchers can use the public questionnaire without signing in.
+          {t("publicQuestionnaireNoSignIn")}
         </p>
       </div>
     );
