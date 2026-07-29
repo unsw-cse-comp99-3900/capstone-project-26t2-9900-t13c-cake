@@ -1,12 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { WebsiteUsageSummary } from "@/server/services/websiteUsageService";
+import type {
+  WebsiteUsagePeriodDays,
+  WebsiteUsageSummary,
+} from "@/server/services/websiteUsageService";
 
 type LoadState =
   | { status: "loading" }
   | { status: "error"; message: string }
   | { status: "ready"; summary: WebsiteUsageSummary };
+
+const PERIOD_OPTIONS: WebsiteUsagePeriodDays[] = [30, 90, 180];
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
@@ -21,13 +26,13 @@ function toDateKey(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-function buildLastThirtyDays(summary: WebsiteUsageSummary) {
+function buildUsageDays(summary: WebsiteUsageSummary, periodDays: WebsiteUsagePeriodDays) {
   const countsByDate = new Map(summary.dailyUsage.map((day) => [day.date, day]));
   const today = new Date();
 
-  return Array.from({ length: 30 }, (_, index) => {
+  return Array.from({ length: periodDays }, (_, index) => {
     const date = new Date(today);
-    date.setDate(today.getDate() - (29 - index));
+    date.setDate(today.getDate() - (periodDays - 1 - index));
     const dateKey = toDateKey(date);
     const day = countsByDate.get(dateKey);
 
@@ -71,7 +76,7 @@ function niceMax(value: number): number {
 }
 
 function DailyLineChart({ summary }: { summary: WebsiteUsageSummary }) {
-  const days = buildLastThirtyDays(summary);
+  const days = buildUsageDays(summary, summary.periodDays);
   const maxCount = niceMax(
     Math.max(
       0,
@@ -130,7 +135,7 @@ function DailyLineChart({ summary }: { summary: WebsiteUsageSummary }) {
       <div>
         <svg
           role="img"
-          aria-label="Line chart of page views, quiz starts, and quiz completions over the last 30 days"
+          aria-label={`Line chart of page views, quiz starts, and quiz completions over the last ${summary.periodDays} days`}
           viewBox={`0 0 ${width} ${height}`}
           className="aspect-[8/3] w-full rounded-lg border border-slate-200 bg-white"
         >
@@ -203,17 +208,11 @@ function DailyLineChart({ summary }: { summary: WebsiteUsageSummary }) {
               ))}
             </g>
           ))}
-          {days
-            .filter((_, index) => index === 0 || index === 14 || index === 29)
-            .map((day, index) => {
-              const x =
-                index === 0
-                  ? xForIndex(0)
-                  : index === 1
-                    ? xForIndex(14)
-                    : xForIndex(29);
+          {[0, Math.floor((days.length - 1) / 2), days.length - 1].map((dayIndex) => {
+            const day = days[dayIndex];
+            const x = xForIndex(dayIndex);
 
-              return (
+            return (
               <text
                 key={day.date}
                 x={x}
@@ -229,8 +228,8 @@ function DailyLineChart({ summary }: { summary: WebsiteUsageSummary }) {
               >
                 {day.label}
               </text>
-              );
-            })}
+            );
+          })}
         </svg>
       </div>
       {total === 0 ? (
@@ -341,7 +340,40 @@ function PieChart({
   );
 }
 
+function PeriodSelector({
+  selectedPeriod,
+  onSelectPeriod,
+}: {
+  selectedPeriod: WebsiteUsagePeriodDays;
+  onSelectPeriod: (periodDays: WebsiteUsagePeriodDays) => void;
+}) {
+  return (
+    <div className="inline-flex rounded-lg border border-slate-200 bg-white p-1">
+      {PERIOD_OPTIONS.map((periodDays) => {
+        const isSelected = periodDays === selectedPeriod;
+
+        return (
+          <button
+            key={periodDays}
+            type="button"
+            onClick={() => onSelectPeriod(periodDays)}
+            aria-pressed={isSelected}
+            className={`rounded-md px-3 py-1.5 text-sm font-semibold transition ${
+              isSelected
+                ? "bg-slate-900 text-white"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+            }`}
+          >
+            {periodDays} days
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function WebsiteUsagePage() {
+  const [selectedPeriod, setSelectedPeriod] = useState<WebsiteUsagePeriodDays>(30);
   const [state, setState] = useState<LoadState>({ status: "loading" });
 
   useEffect(() => {
@@ -349,7 +381,8 @@ export function WebsiteUsagePage() {
 
     async function loadUsage() {
       try {
-        const response = await fetch("/api/usage", { cache: "no-store" });
+        setState({ status: "loading" });
+        const response = await fetch(`/api/usage?days=${selectedPeriod}`, { cache: "no-store" });
         const data = (await response.json()) as WebsiteUsageSummary | { error?: string };
 
         if (!response.ok) {
@@ -374,23 +407,38 @@ export function WebsiteUsagePage() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [selectedPeriod]);
+
+  const header = (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <h3 className="text-lg font-bold text-slate-900">Last {selectedPeriod} days</h3>
+      <PeriodSelector selectedPeriod={selectedPeriod} onSelectPeriod={setSelectedPeriod} />
+    </div>
+  );
 
   if (state.status === "loading") {
-    return <p>Loading anonymised usage metrics...</p>;
+    return (
+      <div className="space-y-6">
+        {header}
+        <p>Loading anonymised usage metrics...</p>
+      </div>
+    );
   }
 
   if (state.status === "error") {
-    return <p role="alert">{state.message}</p>;
+    return (
+      <div className="space-y-6">
+        {header}
+        <p role="alert">{state.message}</p>
+      </div>
+    );
   }
 
   const { summary } = state;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-bold text-slate-900">Last 30 days</h3>
-      </div>
+      {header}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard label="Page views" value={summary.totals.pageViews.toString()} />

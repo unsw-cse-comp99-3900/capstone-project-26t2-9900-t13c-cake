@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/server/middleware/authMiddleware";
-import { websiteUsageService } from "@/server/services/websiteUsageService";
+import {
+  parseWebsiteUsagePeriodDays,
+  websiteUsageService,
+} from "@/server/services/websiteUsageService";
 
 /** Anonymous usage write endpoint and admin-only usage summary. */
 export async function POST(request: Request) {
@@ -21,7 +24,9 @@ export async function GET(request: Request) {
   }
 
   try {
-    const summary = await websiteUsageService.getSummary();
+    const { searchParams } = new URL(request.url);
+    const periodDays = parseWebsiteUsagePeriodDays(searchParams.get("days"));
+    const summary = await websiteUsageService.getSummary(periodDays);
     return NextResponse.json(summary);
   } catch (error) {
     console.error("[GET /api/usage]", error);

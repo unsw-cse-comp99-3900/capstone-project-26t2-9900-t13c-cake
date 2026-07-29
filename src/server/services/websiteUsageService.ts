@@ -7,6 +7,7 @@ export type WebsiteUsageEventType =
   | "questionnaire_complete";
 
 export type WebsiteUsageSummary = {
+  periodDays: WebsiteUsagePeriodDays;
   totals: {
     pageViews: number;
     questionnaireStarts: number;
@@ -48,6 +49,14 @@ const EVENT_TYPES = new Set<WebsiteUsageEventType>([
   "questionnaire_start",
   "questionnaire_complete",
 ]);
+
+export const WEBSITE_USAGE_PERIOD_DAYS = [30, 90, 180] as const;
+export type WebsiteUsagePeriodDays = (typeof WEBSITE_USAGE_PERIOD_DAYS)[number];
+
+const WEBSITE_USAGE_RETENTION_DAYS = 180;
+const USAGE_CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
+
+let lastUsageCleanupAt = 0;
 
 type CountRow = {
   count: bigint | number;
@@ -109,6 +118,19 @@ function validateEventType(value: unknown): WebsiteUsageEventType {
     throw new Error("eventType is not supported");
   }
   return value as WebsiteUsageEventType;
+}
+
+export function parseWebsiteUsagePeriodDays(value: unknown): WebsiteUsagePeriodDays {
+  const parsed = typeof value === "string" ? Number(value) : value;
+
+  if (
+    typeof parsed === "number" &&
+    WEBSITE_USAGE_PERIOD_DAYS.includes(parsed as WebsiteUsagePeriodDays)
+  ) {
+    return parsed as WebsiteUsagePeriodDays;
+  }
+
+  return 30;
 }
 
 function validatePath(value: unknown): string {
@@ -214,6 +236,26 @@ function parseDailyUsage(rows: DailyUsageRow[]) {
   );
 }
 
+async function deleteExpiredUsageEvents({ force = false }: { force?: boolean } = {}) {
+  const now = Date.now();
+  if (!force && now - lastUsageCleanupAt < USAGE_CLEANUP_INTERVAL_MS) {
+    return;
+  }
+
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - WEBSITE_USAGE_RETENTION_DAYS);
+  const cutoffIso = cutoff.toISOString();
+
+  await prisma.$executeRaw`
+    DELETE FROM website_usage_events
+    WHERE CASE
+      WHEN typeof(createdAt) = 'integer' THEN datetime(createdAt / 1000, 'unixepoch')
+      ELSE datetime(createdAt)
+    END < datetime(${cutoffIso})
+  `;
+  lastUsageCleanupAt = now;
+}
+
 /** Website usage metrics use anonymous aggregate events only. */
 export const websiteUsageService = {
   async recordEvent(payload: unknown): Promise<void> {
@@ -227,17 +269,19 @@ export const websiteUsageService = {
     const metadata = stringifyMetadata(record.metadata);
 
     await ensureUsageTable();
+    await deleteExpiredUsageEvents();
     await prisma.$executeRaw`
       INSERT INTO website_usage_events (id, eventType, path, metadata)
       VALUES (${randomUUID()}, ${eventType}, ${path}, ${metadata})
     `;
   },
 
-  async getSummary(): Promise<WebsiteUsageSummary> {
+  async getSummary(periodDays: WebsiteUsagePeriodDays = 30): Promise<WebsiteUsageSummary> {
     await ensureUsageTable();
+    await deleteExpiredUsageEvents({ force: true });
 
     const since = new Date();
-    since.setDate(since.getDate() - 30);
+    since.setDate(since.getDate() - periodDays);
     const sinceIso = since.toISOString();
 
     const [pageViews] = await prisma.$queryRaw<CountRow[]>`
@@ -332,6 +376,7 @@ export const websiteUsageService = {
     const selectionBreakdowns = parseSelectionBreakdowns(completionMetadata);
 
     return {
+      periodDays,
       totals: {
         pageViews: toNumber(pageViews?.count ?? 0),
         questionnaireStarts: startCount,
