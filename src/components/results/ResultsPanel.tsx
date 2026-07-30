@@ -49,7 +49,7 @@ function flattenUniqueRecords(groups: FilteredEvidenceGroup[]): EvidenceRecordDT
   return unique;
 }
 
-/** CAKE-5 / CAKE-14 — ResultsPanel with grouped filters, print/export, and comparison */
+/** CAKE-5 / CAKE-14 - ResultsPanel with grouped filters, print/export, and comparison */
 export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: ResultsPanelProps) {
   const { language, t } = useLanguage();
   const [selectedRecordIds, setSelectedRecordIds] = useState<string[]>([]);
@@ -179,7 +179,10 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
             <div className="no-print text-sm leading-6 text-slate-600" aria-live="polite">
               {selectedRecordCount === 0
                 ? t("selectionHint", { max: MAX_COMPARISON_RECORDS })
-                : t("selectedForComparison", { count: selectedRecordCount, max: MAX_COMPARISON_RECORDS })}
+                : t("selectedForComparison", {
+                    count: selectedRecordCount,
+                    max: MAX_COMPARISON_RECORDS,
+                  })}
             </div>
           )}
 

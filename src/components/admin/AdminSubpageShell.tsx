@@ -29,9 +29,15 @@ export function AdminSubpageShell({ item, children }: AdminSubpageShellProps) {
             <h2 className="text-2xl font-bold text-slate-900">{item.title}</h2>
             <p className="mt-2 max-w-3xl text-base leading-7 text-slate-600">{item.description}</p>
           </div>
-          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">
-            Coming soon
-          </span>
+          {item.status === "available" ? (
+            <span className="rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-800">
+              Available
+            </span>
+          ) : (
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">
+              Coming soon
+            </span>
+          )}
         </div>
 
         <div className="mt-6 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-base leading-7 text-slate-600">

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { AccessibilityShell } from "@/components/accessibility/AccessibilityShell";
+import { WebsiteUsageTracker } from "@/components/analytics/WebsiteUsageTracker";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import "./globals.css";
 
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body className={`${inter.variable} antialiased`} suppressHydrationWarning>
         <LanguageProvider>
+          <WebsiteUsageTracker />
           <AccessibilityShell>{children}</AccessibilityShell>
         </LanguageProvider>
       </body>

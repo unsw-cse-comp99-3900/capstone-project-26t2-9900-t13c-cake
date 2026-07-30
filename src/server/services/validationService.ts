@@ -1,7 +1,12 @@
 import type { Prisma } from "@prisma/client";
+import { JURISDICTIONS } from "@/lib/constants/quizOptions";
 import type { ExcelEvidenceRow } from "@/server/services/excelParseService";
 
 export type EvidencePayload = Prisma.EvidenceRecordCreateInput;
+
+const JURISDICTION_VALUES = new Set<string>(
+  JURISDICTIONS.map((jurisdiction) => jurisdiction.value),
+);
 
 function isRecord(payload: unknown): payload is Record<string, unknown> {
   return typeof payload === "object" && payload !== null && !Array.isArray(payload);
@@ -76,6 +81,22 @@ function hasValidHttpUrl(value: string): boolean {
   }
 }
 
+function readJurisdiction(payload: Record<string, unknown>): string {
+  const jurisdiction = readRequiredString(payload, "jurisdictions");
+  if (!JURISDICTION_VALUES.has(jurisdiction)) {
+    throw new Error("jurisdictions must be one of the supported jurisdiction options");
+  }
+  return jurisdiction;
+}
+
+function readPositiveIntegerText(payload: Record<string, unknown>, field: string): string {
+  const value = readRequiredString(payload, field);
+  if (!/^[1-9]\d*$/.test(value)) {
+    throw new Error(`${field} must be a positive whole number`);
+  }
+  return value;
+}
+
 /** Layer 3 — ValidationService (CAKE-11) */
 export const validationService = {
   validateEvidencePayload(payload: unknown): EvidencePayload {
@@ -101,10 +122,10 @@ export const validationService = {
       title: readRequiredString(payload, "title"),
       year: readOptionalInteger(payload, "year"),
       link: readOptionalString(payload, "link"),
-      jurisdictions: readRequiredString(payload, "jurisdictions"),
+      jurisdictions: readJurisdiction(payload),
       context: readRequiredString(payload, "context"),
       subCategory: readOptionalString(payload, "subCategory"),
-      engagementLevel: readRequiredString(payload, "engagementLevel"),
+      engagementLevel: readPositiveIntegerText(payload, "engagementLevel"),
       minHourlyRate,
       maxHourlyRate,
       reimbursementGuidance: readBoolean(payload, "reimbursementGuidance"),

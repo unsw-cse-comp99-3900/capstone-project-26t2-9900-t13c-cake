@@ -67,3 +67,16 @@ model AdminAccount {
 
   @@map("admin_account")
 }
+
+/// Anonymous public website usage events for administrator analytics.
+model WebsiteUsageEvent {
+  id        String   @id
+  eventType String
+  path      String
+  metadata  String?
+  createdAt DateTime @default(now())
+
+  @@index([eventType, createdAt])
+  @@index([path, createdAt])
+  @@map("website_usage_events")
+}

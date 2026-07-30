@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
+import { trackWebsiteUsage } from "@/components/analytics/WebsiteUsageTracker";
 import { useQuizState } from "@/contexts/QuizStateContext";
 import { fetchEvidenceRecords } from "@/lib/api/evidenceApiClient";
 import {
@@ -14,15 +15,6 @@ import { ContextStep } from "./ContextStep";
 import { JurisdictionStep } from "./JurisdictionStep";
 import { QuizProgress } from "./QuizProgress";
 
-const ENGAGEMENT_LEVEL_ORDER = [
-  "Inform",
-  "Consult",
-  "Involve",
-  "Collaborate",
-  "Empower",
-  "Extended roles",
-] as const;
-
 const NATIONAL = "national";
 
 function normalize(value: string): string {
@@ -30,17 +22,19 @@ function normalize(value: string): string {
 }
 
 function compareEngagementLevel(left: string, right: string): number {
-  const leftIndex = ENGAGEMENT_LEVEL_ORDER.findIndex((level) => level === left);
-  const rightIndex = ENGAGEMENT_LEVEL_ORDER.findIndex((level) => level === right);
+  const leftNumber = Number(left);
+  const rightNumber = Number(right);
+  const leftIsNumber = Number.isFinite(leftNumber);
+  const rightIsNumber = Number.isFinite(rightNumber);
 
-  if (leftIndex !== -1 || rightIndex !== -1) {
-    if (leftIndex === -1) {
+  if (leftIsNumber || rightIsNumber) {
+    if (!leftIsNumber) {
       return 1;
     }
-    if (rightIndex === -1) {
+    if (!rightIsNumber) {
       return -1;
     }
-    return leftIndex - rightIndex;
+    return leftNumber - rightNumber;
   }
 
   return left.localeCompare(right);
@@ -71,6 +65,7 @@ export function QuizWizard() {
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasTrackedStart, setHasTrackedStart] = useState(false);
 
   const filters = useMemo<MultiQuizFilters | null>(() => {
     const selections = answers.selections
@@ -172,6 +167,15 @@ export function QuizWizard() {
     }
   }, [currentStep, evidenceRecords, isLoadingOptions, loadEvidenceRecords, optionsError]);
 
+  useEffect(() => {
+    if (currentStep === 1 && !hasTrackedStart) {
+      trackWebsiteUsage("questionnaire_start", {
+        jurisdictions: answers.jurisdictions.length,
+      });
+      setHasTrackedStart(true);
+    }
+  }, [answers.jurisdictions.length, currentStep, hasTrackedStart]);
+
   async function loadResults(nextFilters: MultiQuizFilters) {
     setIsSubmitting(true);
     setError(null);
@@ -185,7 +189,14 @@ export function QuizWizard() {
       return;
     }
 
-    setResults(filterEvidenceGroups(records, nextFilters));
+    const nextResults = filterEvidenceGroups(records, nextFilters);
+    setResults(nextResults);
+    trackWebsiteUsage("questionnaire_complete", {
+      jurisdictions: nextFilters.jurisdictions,
+      contexts: nextFilters.selections.map((selection) => selection.context),
+      selections: nextFilters.selections.length,
+      resultCount: nextResults.reduce((total, group) => total + group.records.length, 0),
+    });
     setIsSubmitting(false);
   }
 
@@ -201,6 +212,7 @@ export function QuizWizard() {
     setResults(null);
     setSubmittedFilters(null);
     setError(null);
+    setHasTrackedStart(false);
     resetAnswers();
   }
 
