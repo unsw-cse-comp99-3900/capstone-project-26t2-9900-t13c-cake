@@ -22,40 +22,89 @@ type ContextStepProps = {
   onSubmit: () => void;
 };
 
-const ENGAGEMENT_LEVEL_DETAILS: Record<string, { label: string; description: string }> = {
+const ENGAGEMENT_LEVEL_DETAILS: Record<
+  string,
+  { label: string; categoryCount: number; description: string }
+> = {
   "1": {
     label: "Level 1",
-    description: "Evidence-table engagement level.",
+    categoryCount: 1,
+    description: "1 remuneration category present within the document.",
   },
   "2": {
     label: "Level 2",
-    description: "Evidence-table engagement level.",
+    categoryCount: 2,
+    description: "2 remuneration categories present within the document.",
   },
   "3": {
     label: "Level 3",
-    description: "Evidence-table engagement level.",
+    categoryCount: 3,
+    description: "3 remuneration categories present within the document.",
   },
   "4": {
     label: "Level 4",
-    description: "Evidence-table engagement level.",
+    categoryCount: 4,
+    description: "4 remuneration categories present within the document.",
   },
   "5": {
     label: "Level 5",
-    description: "Evidence-table engagement level.",
+    categoryCount: 5,
+    description: "5 remuneration categories present within the document.",
   },
   "6": {
     label: "Level 6",
-    description: "Evidence-table engagement level.",
+    categoryCount: 6,
+    description: "6 remuneration categories present within the document.",
   },
   "7": {
     label: "Level 7",
-    description: "Evidence-table engagement level.",
+    categoryCount: 7,
+    description: "7 remuneration categories present within the document.",
   },
   "11": {
     label: "Level 11",
-    description: "Evidence-table engagement level.",
+    categoryCount: 11,
+    description: "11 remuneration categories present within the document.",
+  },
+  Inform: {
+    label: "Level 1",
+    categoryCount: 1,
+    description: "1 remuneration category present within the document.",
+  },
+  Consult: {
+    label: "Level 2",
+    categoryCount: 2,
+    description: "2 remuneration categories present within the document.",
+  },
+  Involve: {
+    label: "Level 3",
+    categoryCount: 3,
+    description: "3 remuneration categories present within the document.",
+  },
+  Collaborate: {
+    label: "Level 4",
+    categoryCount: 4,
+    description: "4 remuneration categories present within the document.",
+  },
+  Empower: {
+    label: "Level 5",
+    categoryCount: 5,
+    description: "5 remuneration categories present within the document.",
+  },
+  "Extended roles": {
+    label: "Level 6",
+    categoryCount: 6,
+    description: "6 remuneration categories present within the document.",
   },
 };
+
+function formatCategoryCount(language: string, count: number): string {
+  if (language === "zh-CN") {
+    return `覆盖 ${count} 个类别`;
+  }
+
+  return `${count} ${count === 1 ? "category" : "categories"} covered`;
+}
 
 function slug(value: string): string {
   return value.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
@@ -323,8 +372,19 @@ export function ContextStep({
                         </div>
                       ) : (
                         <fieldset className="mt-5">
-                          <legend className="text-sm font-bold text-slate-800">
-                            {t("engagementLevel")}
+                          <legend className="flex items-center gap-2 text-sm font-bold text-slate-800">
+                            <span>{t("engagementLevel")}</span>
+                            <span
+                              tabIndex={0}
+                              aria-label="Engagement level explanation"
+                              className="group relative inline-grid size-6 place-items-center rounded-full border border-[#cbd8df] bg-white text-sm font-bold text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.05)] focus:outline-2 focus:outline-offset-2 focus:outline-teal-700"
+                            >
+                              ?
+                              <span className="pointer-events-none absolute left-1/2 top-8 z-20 hidden w-72 -translate-x-1/2 rounded-[6px] border border-[#dce6e4] bg-white p-3 text-left text-xs font-medium leading-5 text-slate-700 shadow-lg group-hover:block group-focus-within:block">
+                                Engagement level means the number of categories of
+                                remuneration present within the document.
+                              </span>
+                            </span>
                           </legend>
                           <div className="mt-3 grid gap-4 md:grid-cols-2">
                             {engagementLevels.map((engagementLevel) => {
@@ -380,12 +440,9 @@ export function ContextStep({
                                           : t("additionalLevel")}
                                       </span>
                                       <span className="mt-1 block text-base font-bold text-slate-950">
-                                        {translateOption(language, engagementLevel)}
-                                      </span>
-                                      <span className="mt-2 block text-sm leading-6 text-slate-600">
-                                        {language === "en"
-                                          ? details?.description ?? t("evidenceLevel")
-                                          : t("evidenceLevel")}
+                                        {details
+                                          ? formatCategoryCount(language, details.categoryCount)
+                                          : engagementLevel}
                                       </span>
                                     </span>
                                   </div>
