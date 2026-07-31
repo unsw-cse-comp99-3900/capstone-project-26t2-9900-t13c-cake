@@ -12,7 +12,16 @@ type RecoveryOptions = {
 };
 
 const inputClassName =
-  "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 outline-none ring-teal-500 focus:border-teal-500 focus:ring-2";
+  "mt-1 w-full rounded-[4px] border border-[#8f9aa3] bg-white px-3 py-2 text-base text-slate-900 shadow-[inset_0_1px_1px_rgba(15,23,42,0.04)] outline-none focus:outline-3 focus:outline-offset-2 focus:outline-teal-700";
+
+const primaryButtonClassName =
+  "inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-[4px] border border-[#006b63] bg-[#006b63] px-4 py-2.5 font-bold text-white transition hover:bg-[#00524c] disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-400 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700";
+
+const secondaryButtonClassName =
+  "w-full cursor-pointer rounded-[4px] border border-[#006b63] bg-white px-4 py-2.5 text-sm font-bold text-[#004c45] transition hover:bg-[#f3fbf8] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700";
+
+const methodButtonClassName =
+  "w-full cursor-pointer rounded-[4px] border border-[#006b63] bg-white px-4 py-3 text-left font-bold text-[#004c45] transition hover:bg-[#f3fbf8] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700";
 
 /** Keep in sync with RECOVERY_CODE_RESEND_SECONDS on the server. */
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -276,7 +285,7 @@ export function AccountRecoveryForm() {
 
   return (
     <section className="mx-auto w-full max-w-md" aria-busy={isSubmitting || isResending}>
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <div className="rounded-[8px] border border-[#dce6e4] bg-white p-6 shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:p-8">
         <h2 className="text-2xl font-bold text-slate-900">Reset administrator password</h2>
         <p id="recovery-help" className="mt-2 text-base leading-7 text-slate-700">
           Choose email or a supervisor code. Email codes contain 6 digits and expire after 10
@@ -295,7 +304,7 @@ export function AccountRecoveryForm() {
                 <button
                   type="button"
                   onClick={() => void requestCode()}
-                  className="w-full cursor-pointer rounded-lg border border-slate-300 px-4 py-3 text-left font-semibold text-slate-800 hover:bg-slate-50"
+                  className={methodButtonClassName}
                 >
                   Email code to {options.email.masked}
                 </button>
@@ -304,7 +313,7 @@ export function AccountRecoveryForm() {
                 <button
                   type="button"
                   onClick={chooseSupervisorCode}
-                  className="w-full cursor-pointer rounded-lg border border-slate-300 px-4 py-3 text-left font-semibold text-slate-800 hover:bg-slate-50"
+                  className={methodButtonClassName}
                 >
                   Use supervisor recovery code
                 </button>
@@ -336,14 +345,14 @@ export function AccountRecoveryForm() {
                   aria-invalid={Boolean(error)}
                   value={code}
                   onChange={(event) => setCode(event.target.value)}
-                  className="w-full rounded-lg border border-slate-300 py-2 pl-3 pr-28 text-base text-slate-900 outline-none ring-teal-500 focus:border-teal-500 focus:ring-2"
+                  className="w-full rounded-[4px] border border-[#8f9aa3] bg-white py-2 pl-3 pr-28 text-base text-slate-900 shadow-[inset_0_1px_1px_rgba(15,23,42,0.04)] outline-none focus:outline-3 focus:outline-offset-2 focus:outline-teal-700"
                 />
                 <div className="absolute inset-y-1 right-1 flex items-center gap-1">
                   <button
                     type="button"
                     onClick={() => void resendCode()}
                     disabled={!canResend}
-                    className="inline-flex cursor-pointer items-center rounded-md px-3 text-sm font-semibold text-teal-800 hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent"
+                    className="inline-flex cursor-pointer items-center rounded-[4px] px-3 text-sm font-bold text-[#006b63] hover:bg-[#f3fbf8] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent"
                   >
                     {isResending ? "Sending…" : "Resend"}
                   </button>
@@ -359,14 +368,14 @@ export function AccountRecoveryForm() {
             <button
               type="submit"
               disabled={isSubmitting || isResending}
-              className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-[#0b3b4a] px-4 py-2.5 font-bold text-white transition hover:bg-[#0a3340] disabled:cursor-not-allowed disabled:opacity-70"
+              className={primaryButtonClassName}
             >
               {isSubmitting ? "Verifying…" : "Continue"}
             </button>
             <button
               type="button"
               onClick={startOver}
-              className="w-full cursor-pointer text-sm font-semibold text-teal-800"
+              className={secondaryButtonClassName}
             >
               Choose another recovery method
             </button>
@@ -425,14 +434,14 @@ export function AccountRecoveryForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-[#0b3b4a] px-4 py-2.5 font-bold text-white transition hover:bg-[#0a3340] disabled:cursor-not-allowed disabled:opacity-70"
+              className={primaryButtonClassName}
             >
               {isSubmitting ? "Resetting…" : "Reset password"}
             </button>
             <button
               type="button"
               onClick={startOver}
-              className="w-full cursor-pointer text-sm font-semibold text-teal-800"
+              className={secondaryButtonClassName}
             >
               Choose another recovery method
             </button>
@@ -458,14 +467,14 @@ export function AccountRecoveryForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-[#0b3b4a] px-4 py-2.5 font-bold text-white transition hover:bg-[#0a3340] disabled:cursor-not-allowed disabled:opacity-70"
+              className={primaryButtonClassName}
             >
               {isSubmitting ? "Verifying…" : "Continue"}
             </button>
             <button
               type="button"
               onClick={startOver}
-              className="w-full cursor-pointer text-sm font-semibold text-teal-800"
+              className={secondaryButtonClassName}
             >
               Choose another recovery method
             </button>
@@ -525,14 +534,14 @@ export function AccountRecoveryForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-[#0b3b4a] px-4 py-2.5 font-bold text-white transition hover:bg-[#0a3340] disabled:cursor-not-allowed disabled:opacity-70"
+              className={primaryButtonClassName}
             >
               {isSubmitting ? "Resetting…" : "Reset password"}
             </button>
             <button
               type="button"
               onClick={startOver}
-              className="w-full cursor-pointer text-sm font-semibold text-teal-800"
+              className={secondaryButtonClassName}
             >
               Choose another recovery method
             </button>

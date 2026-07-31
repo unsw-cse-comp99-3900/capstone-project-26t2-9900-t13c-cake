@@ -58,6 +58,11 @@ export function AnonymousFeedbackForm() {
       setConsentConfirmed(false);
       setStatus({ type: "success" });
       router.push("/feedback/thank-you");
+      window.setTimeout(() => {
+        if (window.location.pathname !== "/feedback/thank-you") {
+          window.location.assign("/feedback/thank-you");
+        }
+      }, 150);
     } catch (error) {
       setStatus({
         type: "error",
