@@ -16,7 +16,7 @@ const sampleRecord: EvidenceRecordDTO = {
   jurisdictions: "NSW",
   context: "Committees and boards",
   subCategory: null,
-  engagementLevel: "Consult",
+  engagementLevel: "2",
   minHourlyRate: 45,
   maxHourlyRate: 65,
   reimbursementGuidance: true,
@@ -39,9 +39,9 @@ describe("resultFormatters (CAKE-14)", () => {
         jurisdictions: ["NSW", "VIC"],
         context: "Committees and boards",
         subCategory: "Advisory group",
-        engagementLevel: "Consult",
+        engagementLevel: "2",
       }),
-    ).toBe("NSW, VIC / Committees and boards / Advisory group / Consult");
+    ).toBe("NSW, VIC / Committees and boards / Advisory group / 2");
   });
 
   it("formats hourly rate ranges", () => {

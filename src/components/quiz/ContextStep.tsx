@@ -23,36 +23,43 @@ type ContextStepProps = {
 };
 
 const ENGAGEMENT_LEVEL_DETAILS: Record<string, { label: string; description: string }> = {
-  Inform: {
+  "1": {
     label: "Level 1",
-    description: "One-way communication: consumers receive information.",
+    description: "Evidence-table engagement level.",
   },
-  Consult: {
+  "2": {
     label: "Level 2",
-    description: "Two-way feedback on predefined options.",
+    description: "Evidence-table engagement level.",
   },
-  Involve: {
+  "3": {
     label: "Level 3",
-    description: "Consumers work alongside staff throughout the process.",
+    description: "Evidence-table engagement level.",
   },
-  Collaborate: {
+  "4": {
     label: "Level 4",
-    description: "Partnership in each aspect of the decision.",
+    description: "Evidence-table engagement level.",
   },
-  Empower: {
+  "5": {
     label: "Level 5",
-    description: "Final decision rests with consumers.",
+    description: "Evidence-table engagement level.",
   },
-  "Extended roles": {
-    label: "Levels 6-7",
-    description: "Governance or leadership-level consumer roles.",
+  "6": {
+    label: "Level 6",
+    description: "Evidence-table engagement level.",
+  },
+  "7": {
+    label: "Level 7",
+    description: "Evidence-table engagement level.",
+  },
+  "11": {
+    label: "Level 11",
+    description: "Evidence-table engagement level.",
   },
 };
 
 function slug(value: string): string {
   return value.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
 }
-
 /** CAKE-3 - ContextStep */
 export function ContextStep({
   contexts,

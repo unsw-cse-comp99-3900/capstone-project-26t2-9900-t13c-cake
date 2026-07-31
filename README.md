@@ -67,7 +67,7 @@ Stores 71 supervisor evidence-table rows in SQLite (local dev) and exposes them 
 | `jurisdictions` | string | Jurisdiction code (e.g. `NSW`, `National`) |
 | `context` | string | Health/research context |
 | `subCategory` | string? | Optional sub-category |
-| `engagementLevel` | string | Consumer engagement level |
+| `engagementLevel` | string | Engagement level |
 | `minHourlyRate` / `maxHourlyRate` | float? | Indicative hourly rate range (AUD) |
 | `reimbursementGuidance` | boolean | Reimbursement guidance included |
 | `unpaidEngagementGuidance` | boolean | Unpaid engagement guidance included |
@@ -109,7 +109,7 @@ Returns all non-deleted evidence records as JSON.
     "jurisdictions": "ACT",
     "context": "General Public",
     "subCategory": null,
-    "engagementLevel": "Inform",
+    "engagementLevel": "1",
     "minHourlyRate": 50,
     "maxHourlyRate": 100,
     "reimbursementGuidance": true,
@@ -275,7 +275,7 @@ Protected maintenance area for supervisors and i2i staff. Public users access th
 | `/admin/account` | Signed in | Change username, password, and recovery email |
 | `/admin/forgot-password` | Guest | Reset password by email code or supervisor recovery code |
 | `/admin/records` | Signed in | Evidence CRUD workspace scaffold (CAKE-11 / CAKE-12) |
-| `/admin/analytics` | Signed in | Website usage scaffold |
+| `/admin/analytics` | Signed in | Anonymous website usage metrics |
 | `/admin/surveys` | Signed in | Anonymous feedback survey data |
 
 Legacy paths `/admin/username` and `/admin/password` redirect to `/admin/account`. `/admin/import-export` redirects to `/admin/records`.
@@ -295,8 +295,8 @@ Signed-in administrators land on `/admin` and can open:
 
 - **Account settings** — update username or password (requires current password)
 - **Evidence records** — future CRUD + Excel import/export workspace
-- **Website usage** — future anonymised traffic insights
 - **Anonymous survey data** — review anonymous feedback survey responses
+- **Website usage** — anonymised page views, quiz starts, quiz completions, and completion rate
 
 ### Account recovery
 
