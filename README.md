@@ -295,8 +295,8 @@ Signed-in administrators land on `/admin` and can open:
 
 - **Account settings** — update username or password (requires current password)
 - **Evidence records** — future CRUD + Excel import/export workspace
-- **Website usage** — anonymised page views, quiz starts, quiz completions, and completion rate
 - **Anonymous survey data** — review anonymous feedback survey responses
+- **Website usage** — anonymised page views, quiz starts, quiz completions, and completion rate
 
 ### Account recovery
 

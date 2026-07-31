@@ -22,20 +22,26 @@ export function ResultCard({
   return (
     <article
       className={[
-        "result-card-print rounded-xl border bg-white p-4 shadow-sm transition",
-        isSelectedForComparison ? "border-teal-600 ring-2 ring-teal-100" : "border-slate-200",
+        "result-card-print rounded-[8px] border bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.05)] transition",
+        isSelectedForComparison
+          ? "border-[#006b63] bg-[#f4fbf9] ring-1 ring-[#006b63]"
+          : "border-[#dce6e4] hover:border-[#b8d9d4]",
       ].join(" ")}
     >
       <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
         <div className="min-w-0">
-          <p className="text-sm font-bold text-teal-800">{record.publisher}</p>
-          <h3 className="mt-1 text-lg font-bold leading-6 text-slate-950">{record.title}</h3>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#006b63]">
+            {record.publisher}
+          </p>
+          <h3 className="mt-2 text-xl font-bold leading-7 text-[#050817]">
+            {record.title}
+          </h3>
         </div>
         <div className="flex shrink-0 flex-wrap justify-start gap-2 text-sm font-semibold text-slate-700 sm:w-48 sm:justify-end">
           {record.year ? (
-            <span className="rounded-full bg-slate-100 px-3 py-1">{record.year}</span>
+            <span className="rounded-full bg-[#f0f4f4] px-3 py-1">{record.year}</span>
           ) : null}
-          <span className="rounded-full bg-teal-50 px-3 py-1 text-teal-800">
+          <span className="rounded-full bg-[#e8f7f3] px-3 py-1 text-[#006b63]">
             {record.jurisdictions}
           </span>
         </div>
@@ -45,12 +51,12 @@ export function ResultCard({
         <label
           htmlFor={comparisonInputId}
           className={[
-            "no-print mt-4 flex min-h-10 cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm font-semibold transition",
+            "no-print mt-4 flex min-h-11 cursor-pointer items-center gap-3 rounded-[4px] border px-3 py-2 text-sm font-semibold transition",
             isSelectedForComparison
-              ? "border-teal-600 bg-teal-50 text-teal-900"
-              : "border-slate-200 bg-slate-50 text-slate-700 hover:border-teal-300",
+              ? "border-[#006b63] bg-[#e8f7f3] text-[#003f3b]"
+              : "border-[#dce6e4] bg-[#f8faf9] text-slate-700 hover:border-[#b8d9d4]",
             isComparisonDisabled && !isSelectedForComparison
-              ? "cursor-not-allowed opacity-50 hover:border-slate-200"
+              ? "cursor-not-allowed opacity-50 hover:border-[#dce6e4]"
               : "",
           ].join(" ")}
         >
@@ -66,25 +72,25 @@ export function ResultCard({
         </label>
       ) : null}
 
-      <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <div>
-          <dt className="text-xs font-bold uppercase tracking-wide text-slate-700">{t("rate")}</dt>
+      <dl className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="rounded-[6px] bg-[#f8faf9] px-4 py-3">
+          <dt className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">{t("rate")}</dt>
           <dd className="mt-1 text-base font-bold text-slate-950">
             {record.minHourlyRate === null && record.maxHourlyRate === null
               ? t("notSpecified")
               : formatRateRange(record)}
           </dd>
         </div>
-        <div>
-          <dt className="text-xs font-bold uppercase tracking-wide text-slate-700">
+        <div className="rounded-[6px] bg-[#f8faf9] px-4 py-3">
+          <dt className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
             {t("reimbursement")}
           </dt>
           <dd className="mt-1 text-base font-semibold text-slate-800">
             {language !== "en" ? t(record.reimbursementGuidance ? "included" : "notIncluded") : formatBoolean(record.reimbursementGuidance)}
           </dd>
         </div>
-        <div>
-          <dt className="text-xs font-bold uppercase tracking-wide text-slate-700">
+        <div className="rounded-[6px] bg-[#f8faf9] px-4 py-3">
+          <dt className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
             {t("unpaid")}
           </dt>
           <dd className="mt-1 text-base font-semibold text-slate-800">
@@ -94,7 +100,7 @@ export function ResultCard({
       </dl>
 
       {record.exampleOrganisations || record.link ? (
-        <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-5 flex flex-col gap-3 border-t border-[#dce6e4] pt-4 sm:flex-row sm:items-center sm:justify-between">
           {record.exampleOrganisations ? (
             <p className="text-sm leading-6 text-slate-600">
               {t("exampleOrganisations")}: {record.exampleOrganisations}
@@ -108,7 +114,7 @@ export function ResultCard({
               target="_blank"
               rel="noreferrer"
               aria-label={`Open source for ${record.title} in a new tab`}
-              className="result-card-link inline-flex min-h-9 items-center justify-center rounded-lg border border-teal-700 px-3 py-1.5 text-sm font-bold text-teal-800 transition hover:bg-teal-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+              className="result-card-link inline-flex min-h-10 items-center justify-center rounded-[4px] border border-[#006b63] px-4 py-1.5 text-sm font-bold text-[#003f3b] transition hover:bg-[#f3fbf8] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
             >
               {t("openSource")}
             </a>

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
 import { trackWebsiteUsage } from "@/components/analytics/WebsiteUsageTracker";
 import { useQuizState } from "@/contexts/QuizStateContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { fetchEvidenceRecords } from "@/lib/api/evidenceApiClient";
 import {
   filterEvidenceGroups,
@@ -58,6 +59,7 @@ function recordMatchesSelectedJurisdiction(
 /** CAKE-3 - QuizWizard */
 export function QuizWizard() {
   const { answers, currentStep, resetAnswers } = useQuizState();
+  const { t } = useLanguage();
   const [evidenceRecords, setEvidenceRecords] = useState<EvidenceRecordDTO[] | null>(null);
   const [results, setResults] = useState<FilteredEvidenceGroup[] | null>(null);
   const [submittedFilters, setSubmittedFilters] = useState<MultiQuizFilters | null>(null);
@@ -154,12 +156,12 @@ export function QuizWizard() {
       setEvidenceRecords(records);
       return records;
     } catch {
-      setOptionsError("Failed to load context options from the evidence database.");
+      setOptionsError(t("optionsLoadError"));
       return null;
     } finally {
       setIsLoadingOptions(false);
     }
-  }, [evidenceRecords]);
+  }, [evidenceRecords, t]);
 
   useEffect(() => {
     if (currentStep === 2 && !evidenceRecords && !isLoadingOptions && !optionsError) {
@@ -184,7 +186,7 @@ export function QuizWizard() {
     const records = await loadEvidenceRecords();
     if (!records) {
       setResults([]);
-      setError("Failed to load evidence records. Please check the API and try again.");
+      setError(t("evidenceLoadError"));
       setIsSubmitting(false);
       return;
     }
@@ -217,8 +219,8 @@ export function QuizWizard() {
   }
 
   return (
-    <div className="quiz-shell mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-      <div className="quiz-shell-inner rounded-2xl bg-slate-100 p-3 sm:p-4 lg:p-5">
+    <div className="quiz-shell w-full bg-gradient-to-br from-[#eff8f5] via-[#fbfcfa] to-[#fbfcfa] px-5 py-6 sm:px-8 sm:py-8 lg:px-[75px]">
+      <div className="quiz-shell-inner">
         {submittedFilters && results !== null ? (
           <ResultsPanel
             filters={submittedFilters}

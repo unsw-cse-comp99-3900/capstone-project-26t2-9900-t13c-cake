@@ -43,6 +43,63 @@ body {
   color: #ffffff;
 }
 
+.landing-rise {
+  animation: landing-rise 700ms ease-out both;
+}
+
+.landing-rise-delay-1 {
+  animation-delay: 110ms;
+}
+
+.landing-rise-delay-2 {
+  animation-delay: 220ms;
+}
+
+.landing-rise-delay-3 {
+  animation-delay: 330ms;
+}
+
+.landing-rise-delay-4 {
+  animation-delay: 440ms;
+}
+
+.landing-rise-delay-5 {
+  animation-delay: 550ms;
+}
+
+.landing-rise-delay-6 {
+  animation-delay: 660ms;
+}
+
+.landing-line {
+  animation: landing-line 720ms ease-out both;
+  transform-origin: center;
+}
+
+@keyframes landing-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-line {
+  from {
+    opacity: 0;
+    transform: scaleX(0.72);
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
 @media (prefers-contrast: more) {
   :where(button, input, select, textarea) {
     border-color: #334155;
