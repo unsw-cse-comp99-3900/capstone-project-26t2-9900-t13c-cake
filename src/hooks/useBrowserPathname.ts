@@ -8,7 +8,11 @@ let originalPushState: History["pushState"] | null = null;
 let originalReplaceState: History["replaceState"] | null = null;
 
 function emitLocationChange() {
-  window.dispatchEvent(new Event(LOCATION_EVENT));
+  // Next.js may call history.replaceState inside useInsertionEffect.
+  // Defer so listeners never setState during that phase.
+  queueMicrotask(() => {
+    window.dispatchEvent(new Event(LOCATION_EVENT));
+  });
 }
 
 function ensureHistoryPatched() {
@@ -45,7 +49,11 @@ export function useBrowserPathname() {
   const [pathname, setPathname] = useState("/");
 
   useEffect(() => {
-    const sync = () => setPathname(window.location.pathname);
+    const sync = () => {
+      const next = window.location.pathname;
+      setPathname((prev) => (prev === next ? prev : next));
+    };
+
     ensureHistoryPatched();
     sync();
 
