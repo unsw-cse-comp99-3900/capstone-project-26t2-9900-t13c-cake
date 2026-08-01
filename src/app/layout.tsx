@@ -22,7 +22,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${inter.variable} antialiased`} suppressHydrationWarning>
         <LanguageProvider>
           <WebsiteUsageTracker />
-          <AccessibilityShell>{children}</AccessibilityShell>
+          <AccessibilityShell />
+          {children}
         </LanguageProvider>
       </body>
     </html>

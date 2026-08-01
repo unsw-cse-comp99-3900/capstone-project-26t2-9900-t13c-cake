@@ -21,7 +21,7 @@ const routeNames: Record<string, string> = {
 };
 
 /** CAKE-8: shared keyboard and screen-reader support on public and admin routes. */
-export function AccessibilityShell({ children }: { children: React.ReactNode }) {
+export function AccessibilityShell() {
   const pathname = usePathname();
   const { language } = useLanguage();
 
@@ -32,6 +32,9 @@ export function AccessibilityShell({ children }: { children: React.ReactNode }) 
       : `${routeName} | Consumer Rep Remuneration Tool`;
   }, [language, pathname]);
 
+  // Keep as a sibling of `{children}` in the root layout — wrapping the
+  // App Router segment tree with a client boundary that reads navigation
+  // state can trigger "invariant expected layout router to be mounted".
   return (
     <>
       <a className="skip-link" href="#main-content">
@@ -40,7 +43,6 @@ export function AccessibilityShell({ children }: { children: React.ReactNode }) 
       <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {language === "zh-CN" ? "页面已加载" : routeNames[pathname] ?? "Page loaded"}
       </p>
-      {children}
     </>
   );
 }
