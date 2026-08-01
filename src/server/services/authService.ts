@@ -66,12 +66,22 @@ export const authService = {
     secure: boolean;
     path: string;
   } {
+    // Secure cookies are dropped by browsers on plain HTTP. For HTTPS set
+    // AUTH_COOKIE_SECURE=true; for HTTP demos (e.g. Azure *.cloudapp.azure.com) use false.
+    const cookieSecureEnv = process.env.AUTH_COOKIE_SECURE?.trim().toLowerCase();
+    const secure =
+      cookieSecureEnv === "true"
+        ? true
+        : cookieSecureEnv === "false"
+          ? false
+          : process.env.NODE_ENV === "production";
+
     return {
       name: ADMIN_SESSION_COOKIE,
       maxAge: SESSION_MAX_AGE_SECONDS,
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      secure,
       path: "/",
     };
   },
