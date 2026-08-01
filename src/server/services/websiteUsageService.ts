@@ -93,24 +93,9 @@ function toNumber(value: bigint | number): number {
   return typeof value === "bigint" ? Number(value) : value;
 }
 
+/** Table is created by Prisma migrations (PostgreSQL). */
 async function ensureUsageTable() {
-  await prisma.$executeRaw`
-    CREATE TABLE IF NOT EXISTS website_usage_events (
-      id TEXT PRIMARY KEY NOT NULL,
-      eventType TEXT NOT NULL,
-      path TEXT NOT NULL,
-      metadata TEXT,
-      createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `;
-  await prisma.$executeRaw`
-    CREATE INDEX IF NOT EXISTS website_usage_events_eventType_createdAt_idx
-    ON website_usage_events(eventType, createdAt)
-  `;
-  await prisma.$executeRaw`
-    CREATE INDEX IF NOT EXISTS website_usage_events_path_createdAt_idx
-    ON website_usage_events(path, createdAt)
-  `;
+  // no-op: kept so call sites stay stable
 }
 
 function validateEventType(value: unknown): WebsiteUsageEventType {
@@ -248,10 +233,7 @@ async function deleteExpiredUsageEvents({ force = false }: { force?: boolean } =
 
   await prisma.$executeRaw`
     DELETE FROM website_usage_events
-    WHERE CASE
-      WHEN typeof(createdAt) = 'integer' THEN datetime(createdAt / 1000, 'unixepoch')
-      ELSE datetime(createdAt)
-    END < datetime(${cutoffIso})
+    WHERE "createdAt" < ${cutoffIso}::timestamptz
   `;
   lastUsageCleanupAt = now;
 }
@@ -271,7 +253,7 @@ export const websiteUsageService = {
     await ensureUsageTable();
     await deleteExpiredUsageEvents();
     await prisma.$executeRaw`
-      INSERT INTO website_usage_events (id, eventType, path, metadata)
+      INSERT INTO website_usage_events (id, "eventType", path, metadata)
       VALUES (${randomUUID()}, ${eventType}, ${path}, ${metadata})
     `;
   },
@@ -287,88 +269,61 @@ export const websiteUsageService = {
     const [pageViews] = await prisma.$queryRaw<CountRow[]>`
       SELECT COUNT(*) AS count
       FROM website_usage_events
-      WHERE eventType = 'page_view'
-        AND CASE
-          WHEN typeof(createdAt) = 'integer' THEN datetime(createdAt / 1000, 'unixepoch')
-          ELSE datetime(createdAt)
-        END >= datetime(${sinceIso})
+      WHERE "eventType" = 'page_view'
+        AND "createdAt" >= ${sinceIso}::timestamptz
     `;
     const [starts] = await prisma.$queryRaw<CountRow[]>`
       SELECT COUNT(*) AS count
       FROM website_usage_events
-      WHERE eventType = 'questionnaire_start'
-        AND CASE
-          WHEN typeof(createdAt) = 'integer' THEN datetime(createdAt / 1000, 'unixepoch')
-          ELSE datetime(createdAt)
-        END >= datetime(${sinceIso})
+      WHERE "eventType" = 'questionnaire_start'
+        AND "createdAt" >= ${sinceIso}::timestamptz
     `;
     const [completions] = await prisma.$queryRaw<CountRow[]>`
       SELECT COUNT(*) AS count
       FROM website_usage_events
-      WHERE eventType = 'questionnaire_complete'
-        AND CASE
-          WHEN typeof(createdAt) = 'integer' THEN datetime(createdAt / 1000, 'unixepoch')
-          ELSE datetime(createdAt)
-        END >= datetime(${sinceIso})
+      WHERE "eventType" = 'questionnaire_complete'
+        AND "createdAt" >= ${sinceIso}::timestamptz
     `;
 
     const dailyPageViews = await prisma.$queryRaw<DailyRow[]>`
-      SELECT CASE
-          WHEN typeof(createdAt) = 'integer' THEN date(createdAt / 1000, 'unixepoch')
-          ELSE date(createdAt)
-        END AS date,
+      SELECT to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') AS date,
         COUNT(*) AS count
       FROM website_usage_events
-      WHERE eventType = 'page_view'
-        AND CASE
-          WHEN typeof(createdAt) = 'integer' THEN datetime(createdAt / 1000, 'unixepoch')
-          ELSE datetime(createdAt)
-        END >= datetime(${sinceIso})
+      WHERE "eventType" = 'page_view'
+        AND "createdAt" >= ${sinceIso}::timestamptz
       GROUP BY date
       ORDER BY date ASC
     `;
     const dailyUsageRows = await prisma.$queryRaw<DailyUsageRow[]>`
-      SELECT CASE
-          WHEN typeof(createdAt) = 'integer' THEN date(createdAt / 1000, 'unixepoch')
-          ELSE date(createdAt)
-        END AS date,
-        eventType,
+      SELECT to_char(date_trunc('day', "createdAt"), 'YYYY-MM-DD') AS date,
+        "eventType" AS "eventType",
         COUNT(*) AS count
       FROM website_usage_events
-      WHERE eventType IN ('page_view', 'questionnaire_start', 'questionnaire_complete')
-        AND CASE
-          WHEN typeof(createdAt) = 'integer' THEN datetime(createdAt / 1000, 'unixepoch')
-          ELSE datetime(createdAt)
-        END >= datetime(${sinceIso})
-      GROUP BY date, eventType
+      WHERE "eventType" IN ('page_view', 'questionnaire_start', 'questionnaire_complete')
+        AND "createdAt" >= ${sinceIso}::timestamptz
+      GROUP BY date, "eventType"
       ORDER BY date ASC
     `;
     const topPages = await prisma.$queryRaw<TopPageRow[]>`
       SELECT path, COUNT(*) AS count
       FROM website_usage_events
-      WHERE eventType = 'page_view'
-        AND CASE
-          WHEN typeof(createdAt) = 'integer' THEN datetime(createdAt / 1000, 'unixepoch')
-          ELSE datetime(createdAt)
-        END >= datetime(${sinceIso})
+      WHERE "eventType" = 'page_view'
+        AND "createdAt" >= ${sinceIso}::timestamptz
       GROUP BY path
       ORDER BY count DESC, path ASC
       LIMIT 5
     `;
     const recentEvents = await prisma.$queryRaw<RecentEventRow[]>`
-      SELECT id, eventType, path, createdAt
+      SELECT id, "eventType" AS "eventType", path, "createdAt" AS "createdAt"
       FROM website_usage_events
-      ORDER BY createdAt DESC
+      ORDER BY "createdAt" DESC
       LIMIT 10
     `;
     const completionMetadata = await prisma.$queryRaw<MetadataRow[]>`
       SELECT metadata
       FROM website_usage_events
-      WHERE eventType = 'questionnaire_complete'
-        AND CASE
-          WHEN typeof(createdAt) = 'integer' THEN datetime(createdAt / 1000, 'unixepoch')
-          ELSE datetime(createdAt)
-        END >= datetime(${sinceIso})
+      WHERE "eventType" = 'questionnaire_complete'
+        AND "createdAt" >= ${sinceIso}::timestamptz
     `;
 
     const startCount = toNumber(starts?.count ?? 0);
