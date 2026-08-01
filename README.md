@@ -2,10 +2,27 @@
 
 ## Quick start
 
+### Option A — Docker (recommended for client handover)
+
+```bash
+cp .env.example .env
+# edit ADMIN_* / SESSION_SECRET as needed
+docker compose up --build
+```
+
+App: [http://localhost:3000](http://localhost:3000)  
+Postgres: `localhost:5432` (user/password/db: `cake`)
+
+First boot runs migrations and seeds evidence data (`RUN_SEED=true`).  
+Set `RUN_SEED=false` afterwards to avoid re-seeding on every restart.
+
+### Option B — Local Node (PostgreSQL required)
+
 ```bash
 npm install
 cp .env.example .env
-npx prisma migrate dev
+# start Postgres (e.g. docker compose up db -d)
+npx prisma migrate deploy
 npm run db:seed
 npm run dev
 ```
@@ -54,7 +71,7 @@ The public entry point introduces the tool and links users into the questionnair
 **API:** `GET /api/evidence`  
 **Key files:** `prisma/`, `src/server/repositories/evidenceRepository.ts`, `src/app/api/evidence/route.ts`
 
-Stores 71 supervisor evidence-table rows in SQLite (local dev) and exposes them through a public read API.
+Stores supervisor evidence-table rows in **PostgreSQL** (Docker Compose or hosted) and exposes them through a public read API.
 
 ### Schema
 
@@ -283,7 +300,7 @@ Legacy paths `/admin/username` and `/admin/password` redirect to `/admin/account
 ### Authentication
 
 - Session-based sign-in using a signed **httpOnly** cookie (`admin_session`, 8-hour expiry)
-- Credentials stored in the `admin_account` SQLite table after first bootstrap
+- Credentials stored in the `admin_account` PostgreSQL table after first bootstrap
 - `.env` values `ADMIN_USERNAME` and `ADMIN_PASSWORD` are used only when the table is empty
 - `AdminLoginGate` shows the login form for guests and protects child routes when authenticated
 - **Sign out** and successful **sign in** redirect to `/admin`
@@ -425,6 +442,18 @@ Stores optional anonymous feedback without asking for contact or identity inform
 | `npm run db:import-excel` | Regenerate `seed-data.json` from Excel |
 | `npm run db:studio` | Open Prisma Studio |
 | `npm run reset:next` | Clear Next.js build cache |
+| `docker compose up --build` | Build and run app + PostgreSQL |
+| `docker compose up db -d` | Start only PostgreSQL for local Node dev |
+
+## Docker / production handover
+
+| File | Purpose |
+|------|---------|
+| `Dockerfile` | Multi-stage Next.js production image (`output: "standalone"`) |
+| `docker-compose.yml` | App + PostgreSQL 16 |
+| `docker/entrypoint.sh` | `prisma migrate deploy`, optional seed, then `node server.js` |
+
+**Client deploy:** copy the repo (or image), set environment variables from `.env.example`, run `docker compose up --build -d`.
 
 ## Branch strategy
 
