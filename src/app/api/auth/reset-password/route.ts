@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-import { authService } from "@/server/services/authService";
 import { accountRecoveryService } from "@/server/services/accountRecoveryService";
 
 type ResetPasswordBody = {
-  recoveryCode?: string;
   verificationCode?: string;
   backupRecoveryCode?: string;
   newUsername?: string;
@@ -12,7 +10,6 @@ type ResetPasswordBody = {
 };
 
 const ERROR_MESSAGES: Record<string, string> = {
-  RECOVERY_NOT_CONFIGURED: "Password recovery is not configured for this environment.",
   INVALID_RECOVERY_CODE: "Recovery code is incorrect.",
   INVALID_USERNAME:
     "Username must be 3–32 characters and use letters, numbers, dots, dashes, or underscores.",
@@ -31,7 +28,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const recoveryCode = body.recoveryCode ?? "";
   const newUsername = body.newUsername ?? "";
   const newPassword = body.newPassword ?? "";
   const confirmPassword = body.confirmPassword ?? "";
@@ -75,43 +71,26 @@ export async function POST(request: Request) {
     );
   }
 
-  if (body.verificationCode !== undefined) {
-    const result = await accountRecoveryService.resetPassword(
-      body.verificationCode,
-      newUsername,
-      newPassword,
+  if (body.verificationCode === undefined) {
+    return NextResponse.json(
+      { error: "A verification code or backup recovery code is required." },
+      { status: 400 },
     );
-    if (!result.ok) {
-      return NextResponse.json(
-        { error: ERROR_MESSAGES[result.error] ?? "Unable to reset administrator password." },
-        { status: result.error === "NOT_CONFIGURED" ? 503 : 400 },
-      );
-    }
-
-    return NextResponse.json({ success: true, username: result.username });
   }
 
   if (!newUsername.trim()) {
     return NextResponse.json({ error: "New username is required." }, { status: 400 });
   }
 
-  if (!recoveryCode) {
-    return NextResponse.json(
-      { error: "Recovery code is required." },
-      { status: 400 },
-    );
-  }
-
-  const result = await authService.resetAccountWithRecovery(
-    recoveryCode,
+  const result = await accountRecoveryService.resetPassword(
+    body.verificationCode,
     newUsername,
     newPassword,
   );
   if (!result.ok) {
-    const status = result.error === "RECOVERY_NOT_CONFIGURED" ? 503 : 400;
     return NextResponse.json(
-      { error: ERROR_MESSAGES[result.error] ?? "Unable to reset administrator account." },
-      { status },
+      { error: ERROR_MESSAGES[result.error] ?? "Unable to reset administrator password." },
+      { status: result.error === "NOT_CONFIGURED" ? 503 : 400 },
     );
   }
 

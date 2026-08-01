@@ -27,7 +27,6 @@ export const accountRecoveryService = {
         contacts?.email && recoveryDeliveryService.isConfigured()
           ? { available: true, masked: maskEmail(contacts.email) }
           : { available: false, masked: null },
-      supervisorCode: Boolean(process.env.ADMIN_RECOVERY_CODE?.trim()),
       backupRecoveryCode: Boolean(backupStatus && !backupStatus.setupRequired),
     };
   },

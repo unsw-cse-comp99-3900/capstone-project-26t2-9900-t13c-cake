@@ -182,8 +182,8 @@ export const adminAccountRepository = {
         account.backupRecoveryCodeHash &&
         account.backupRecoveryCodeConfirmedAt
       ),
-      createdAt: account.backupRecoveryCodeCreatedAt,
-      confirmedAt: account.backupRecoveryCodeConfirmedAt,
+      createdAt: account.backupRecoveryCodeCreatedAt ?? null,
+      confirmedAt: account.backupRecoveryCodeConfirmedAt ?? null,
     };
   },
 

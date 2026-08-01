@@ -1,10 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { authService } from "@/server/services/authService";
 import { adminAccountRepository } from "@/server/repositories/adminAccountRepository";
-import {
-  isRecoveryConfigured,
-  verifyRecoveryCode,
-} from "@/server/utils/recoveryCodeUtils";
 import { ADMIN_SESSION_COOKIE, createSessionToken } from "@/server/services/sessionService";
 
 vi.mock("@/server/repositories/adminAccountRepository", () => ({
@@ -12,13 +8,7 @@ vi.mock("@/server/repositories/adminAccountRepository", () => ({
     verifyCredentials: vi.fn(),
     changeUsername: vi.fn(),
     changePassword: vi.fn(),
-    resetAccount: vi.fn(),
   },
-}));
-
-vi.mock("@/server/utils/recoveryCodeUtils", () => ({
-  isRecoveryConfigured: vi.fn(),
-  verifyRecoveryCode: vi.fn(),
 }));
 
 describe("authService (CAKE-10)", () => {
@@ -29,9 +19,6 @@ describe("authService (CAKE-10)", () => {
     vi.mocked(adminAccountRepository.verifyCredentials).mockReset();
     vi.mocked(adminAccountRepository.changeUsername).mockReset();
     vi.mocked(adminAccountRepository.changePassword).mockReset();
-    vi.mocked(adminAccountRepository.resetAccount).mockReset();
-    vi.mocked(isRecoveryConfigured).mockReset();
-    vi.mocked(verifyRecoveryCode).mockReset();
   });
 
   afterEach(() => {
@@ -92,27 +79,5 @@ describe("authService (CAKE-10)", () => {
     await expect(authService.changePassword("secret-pass", "new-secret-pass")).resolves.toEqual({
       ok: true,
     });
-  });
-
-  it("resets the account when the recovery code is valid", async () => {
-    vi.mocked(isRecoveryConfigured).mockReturnValue(true);
-    vi.mocked(verifyRecoveryCode).mockReturnValue(true);
-    vi.mocked(adminAccountRepository.resetAccount).mockResolvedValue({
-      ok: true,
-      username: "admin",
-    });
-
-    await expect(
-      authService.resetAccountWithRecovery("recovery-code", "admin", "new-secret-pass"),
-    ).resolves.toEqual({ ok: true, username: "admin" });
-  });
-
-  it("rejects account reset when the recovery code is invalid", async () => {
-    vi.mocked(isRecoveryConfigured).mockReturnValue(true);
-    vi.mocked(verifyRecoveryCode).mockReturnValue(false);
-
-    await expect(
-      authService.resetAccountWithRecovery("wrong-code", "admin", "new-secret-pass"),
-    ).resolves.toEqual({ ok: false, error: "INVALID_RECOVERY_CODE" });
   });
 });

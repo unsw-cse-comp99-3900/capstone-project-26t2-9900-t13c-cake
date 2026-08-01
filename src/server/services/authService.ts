@@ -1,9 +1,5 @@
 import { adminAccountRepository } from "@/server/repositories/adminAccountRepository";
 import {
-  isRecoveryConfigured,
-  verifyRecoveryCode,
-} from "@/server/utils/recoveryCodeUtils";
-import {
   ADMIN_SESSION_COOKIE,
   createSessionToken,
   SESSION_MAX_AGE_SECONDS,
@@ -52,38 +48,6 @@ export const authService = {
 
   async changePassword(currentPassword: string, newPassword: string) {
     return adminAccountRepository.changePassword(currentPassword, newPassword);
-  },
-
-  isRecoveryConfigured(): boolean {
-    return isRecoveryConfigured();
-  },
-
-  verifySupervisorRecoveryCode(recoveryCode: string) {
-    if (!isRecoveryConfigured()) {
-      return { ok: false as const, error: "RECOVERY_NOT_CONFIGURED" as const };
-    }
-
-    if (!verifyRecoveryCode(recoveryCode)) {
-      return { ok: false as const, error: "INVALID_RECOVERY_CODE" as const };
-    }
-
-    return { ok: true as const };
-  },
-
-  async resetAccountWithRecovery(
-    recoveryCode: string,
-    newUsername: string,
-    newPassword: string,
-  ) {
-    if (!isRecoveryConfigured()) {
-      return { ok: false as const, error: "RECOVERY_NOT_CONFIGURED" as const };
-    }
-
-    if (!verifyRecoveryCode(recoveryCode)) {
-      return { ok: false as const, error: "INVALID_RECOVERY_CODE" as const };
-    }
-
-    return adminAccountRepository.resetAccount(newUsername, newPassword);
   },
 
   createSessionToken(username: string): string {

@@ -273,7 +273,7 @@ Protected maintenance area for supervisors and i2i staff. Public users access th
 |-------|--------|---------|
 | `/admin` | Guest or signed in | Login form, then account centre hub |
 | `/admin/account` | Signed in | Change username, password, and recovery email |
-| `/admin/forgot-password` | Guest | Reset password by email code or supervisor recovery code |
+| `/admin/forgot-password` | Guest | Reset password by email code or saved backup recovery code |
 | `/admin/records` | Signed in | Evidence CRUD workspace scaffold (CAKE-11 / CAKE-12) |
 | `/admin/analytics` | Signed in | Anonymous website usage metrics |
 | `/admin/surveys` | Signed in | Anonymous feedback survey data |
@@ -305,9 +305,9 @@ Signed-in administrators first configure a recovery email address in **Account s
 On **Forgot password?**, administrators can:
 
 - receive a six-digit code at the configured recovery email (SMTP), verify the code, then set a new password;
-- use the supervisor `ADMIN_RECOVERY_CODE` as a fallback.
+- use a **saved backup recovery code** generated after first admin login (hashed in the database; single-use after reset).
 
-One-time codes expire after 10 minutes, can be requested once per minute, are stored only as HMAC hashes, and are invalidated after a successful reset. Five incorrect attempts require a new code. Email recovery changes only the password; supervisor recovery can reset both username and password.
+One-time email codes expire after 10 minutes, can be requested once per minute, are stored only as HMAC hashes, and are invalidated after a successful reset. Five incorrect attempts require a new code. Backup recovery codes are confirmed during setup and cleared after a successful password reset.
 
 #### Design justification: why email-only (no SMS recovery)
 
@@ -316,7 +316,7 @@ SMS delivery of recovery codes was prototyped with Twilio and deliberately remov
 1. **Australian regulatory barrier.** Since the ACMA SMS Sender ID register came into effect, sending SMS to Australian (+61) numbers through providers such as Twilio requires a registered business identity (ABN and sender ID registration). A student capstone team cannot complete this registration, so delivery to the client's own jurisdiction fails outright (Twilio error `60250: Australian destination requires a business registration`).
 2. **Unreliable international delivery.** Delivery to other jurisdictions (for example Chinese +86 numbers) is aggressively filtered by carriers; even Twilio's own number-verification SMS frequently failed during testing. A recovery channel that fails unpredictably is worse than no channel, because it blocks an administrator precisely when they are locked out.
 3. **Cost and account constraints.** Trial SMS accounts only deliver to pre-verified numbers and prepend trial banners; production use would introduce an ongoing paid dependency for the client with no maintainer.
-4. **Email meets the actual requirement.** The tool has a single administrator account. A recovery email via standard SMTP is free, provider-agnostic, reliable, and easy for i2i staff to reconfigure at handover. Combined with the offline supervisor recovery code (`ADMIN_RECOVERY_CODE`), there are already two independent recovery paths, so SMS added operational cost without adding meaningful resilience.
+4. **Email meets the actual requirement.** The tool has a single administrator account. A recovery email via standard SMTP is free, provider-agnostic, reliable, and easy for i2i staff to reconfigure at handover. Combined with the offline **backup recovery code** (generated once after login and stored hashed), there are already two independent recovery paths, so SMS added operational cost without adding meaningful resilience.
 
 The delivery layer (`recoveryDeliveryService`) remains a separate module, so an SMS or other channel can be reinstated later by an organisation that holds the required sender registration, without changing the recovery workflow.
 
@@ -340,7 +340,6 @@ The delivery layer (`recoveryDeliveryService`) remains a separate module, so an 
 | `ADMIN_USERNAME` | Bootstrap username when `admin_account` is empty |
 | `ADMIN_PASSWORD` | Bootstrap password when `admin_account` is empty |
 | `SESSION_SECRET` | Signs admin session cookies |
-| `ADMIN_RECOVERY_CODE` | Supervisor recovery code for `/admin/forgot-password` |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | SMTP email recovery delivery |
 
 **Configure locally:**

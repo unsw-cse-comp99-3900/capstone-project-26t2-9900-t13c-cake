@@ -2,12 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/auth/reset-password/route";
 import { accountRecoveryService } from "@/server/services/accountRecoveryService";
 
-vi.mock("@/server/services/authService", () => ({
-  authService: {
-    resetAccountWithRecovery: vi.fn(),
-  },
-}));
-
 vi.mock("@/server/services/accountRecoveryService", () => ({
   accountRecoveryService: {
     resetPassword: vi.fn(),
