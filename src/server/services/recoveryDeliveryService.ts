@@ -1,7 +1,19 @@
 import nodemailer from "nodemailer";
 
-const MESSAGE =
-  "Your Consumer Rep Remuneration Tool administrator recovery code is {{CODE}}. It expires in 10 minutes.";
+type RecoveryEmailPurpose = "password-recovery" | "recovery-email-verification";
+
+const EMAIL_CONTENT: Record<RecoveryEmailPurpose, { subject: string; message: string }> = {
+  "password-recovery": {
+    subject: "Administrator password recovery code",
+    message:
+      "Your Consumer Rep Remuneration Tool administrator recovery code is {{CODE}}. It expires in 10 minutes.",
+  },
+  "recovery-email-verification": {
+    subject: "Verify your administrator recovery email",
+    message:
+      "Your Consumer Rep Remuneration Tool recovery email verification code is {{CODE}}. It expires in 10 minutes. If you did not request this change, you can ignore this email.",
+  },
+};
 
 function readSmtpConfig() {
   const host = process.env.SMTP_HOST?.trim();
@@ -22,7 +34,11 @@ export const recoveryDeliveryService = {
     return Boolean(readSmtpConfig());
   },
 
-  async sendEmail(to: string, code: string): Promise<void> {
+  async sendEmail(
+    to: string,
+    code: string,
+    purpose: RecoveryEmailPurpose = "password-recovery",
+  ): Promise<void> {
     const config = readSmtpConfig();
     if (!config) {
       throw new Error("SMTP recovery delivery is not configured.");
@@ -43,11 +59,12 @@ export const recoveryDeliveryService = {
     });
 
     try {
+      const content = EMAIL_CONTENT[purpose];
       await transporter.sendMail({
         from: config.from,
         to,
-        subject: "Administrator password recovery code",
-        text: MESSAGE.replace("{{CODE}}", code),
+        subject: content.subject,
+        text: content.message.replace("{{CODE}}", code),
       });
     } finally {
       transporter.close();

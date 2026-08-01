@@ -13,7 +13,7 @@ const baseFilters: QuizFilters = {
   jurisdictions: ["NSW"],
   context: "Mental Health",
   subCategory: null,
-  engagementLevel: "Consult",
+  engagementLevel: "2",
 };
 
 function evidence(
@@ -29,7 +29,7 @@ function evidence(
     jurisdictions: "NSW",
     context: "Mental Health",
     subCategory: null,
-    engagementLevel: "Consult",
+    engagementLevel: "2",
     minHourlyRate: 40,
     maxHourlyRate: 80,
     reimbursementGuidance: true,
@@ -151,7 +151,7 @@ test("applies context, sub-category, and engagement filters with AND logic", () 
     evidence("wrong-sub-category", { subCategory: "Carers" }),
     evidence("wrong-engagement", {
       subCategory: "Suicide",
-      engagementLevel: "Inform",
+      engagementLevel: "1",
     }),
   ];
 
@@ -203,12 +203,12 @@ test("filters multiple research context selections independently", () => {
     evidence("cancer-involve", {
       context: "Medical Conditions",
       subCategory: "Cancer",
-      engagementLevel: "Involve",
+      engagementLevel: "3",
     }),
     evidence("cancer-consult", {
       context: "Medical Conditions",
       subCategory: "Cancer",
-      engagementLevel: "Consult",
+      engagementLevel: "2",
     }),
   ];
 
@@ -218,12 +218,12 @@ test("filters multiple research context selections independently", () => {
       {
         context: "Mental Health",
         subCategory: null,
-        engagementLevel: "Consult",
+        engagementLevel: "2",
       },
       {
         context: "Medical Conditions",
         subCategory: "Cancer",
-        engagementLevel: "Involve",
+        engagementLevel: "3",
       },
     ],
   });
@@ -301,7 +301,7 @@ test("matches normalized values without using partial matches", () => {
     evidence("normalized", {
       jurisdictions: " nsw ",
       context: "mental health",
-      engagementLevel: "consult",
+      engagementLevel: "2",
     }),
     evidence("partial", { context: "Mental Health Services" }),
   ];
@@ -310,7 +310,7 @@ test("matches normalized values without using partial matches", () => {
     ...baseFilters,
     jurisdictions: [" nSw "],
     context: " MENTAL HEALTH ",
-    engagementLevel: " CONSULT ",
+    engagementLevel: " 2 ",
   });
 
   assert.deepEqual(
@@ -319,15 +319,8 @@ test("matches normalized values without using partial matches", () => {
   );
 });
 
-test("supports all six grouped engagement levels", () => {
-  const levels = [
-    "Inform",
-    "Consult",
-    "Involve",
-    "Collaborate",
-    "Empower",
-    "Extended roles",
-  ];
+test("supports numeric engagement levels", () => {
+  const levels = ["1", "2", "3", "4", "5", "6", "7", "11"];
   const records = levels.map((engagementLevel, index) =>
     evidence(String(index), { engagementLevel }),
   );

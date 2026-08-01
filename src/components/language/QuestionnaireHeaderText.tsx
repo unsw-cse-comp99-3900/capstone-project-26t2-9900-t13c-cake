@@ -9,7 +9,7 @@ export function QuestionnaireHeaderText({ homeOnly = false }: { homeOnly?: boole
   return (
     <Link
       href="/"
-      className="font-bold text-teal-800 transition hover:text-teal-950 focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-teal-700"
+      className="font-[Georgia,serif] text-3xl font-normal tracking-tight text-white transition hover:text-teal-100 focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-white"
     >
       {t("toolTitle")}
     </Link>

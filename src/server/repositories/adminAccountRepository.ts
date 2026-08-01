@@ -1,4 +1,5 @@
 import { prisma } from "@/server/db/prisma";
+import { verifyBackupRecoveryCode } from "@/server/utils/backupRecoveryCodeUtils";
 import { hashPassword, verifyPassword } from "@/server/utils/passwordUtils";
 
 const SINGLETON_ID = "default";
@@ -12,6 +13,14 @@ export type AdminAccountRecord = {
   recoveryCodeExpiresAt: Date | null;
   recoveryCodeSentAt: Date | null;
   recoveryCodeAttempts: number;
+  pendingRecoveryEmail: string | null;
+  recoveryEmailVerificationCodeHash: string | null;
+  recoveryEmailVerificationCodeExpiresAt: Date | null;
+  recoveryEmailVerificationCodeSentAt: Date | null;
+  recoveryEmailVerificationCodeAttempts: number;
+  backupRecoveryCodeHash: string | null;
+  backupRecoveryCodeCreatedAt: Date | null;
+  backupRecoveryCodeConfirmedAt: Date | null;
 };
 
 export type RecoveryContacts = {
@@ -33,9 +42,27 @@ export type ResetPasswordResult =
   | { ok: true; username: string }
   | { ok: false; error: "INVALID_USERNAME" | "INVALID_NEW_PASSWORD" | "NOT_CONFIGURED" };
 
-export type UpdateRecoveryContactsResult =
-  | { ok: true; contacts: RecoveryContacts }
-  | { ok: false; error: "INVALID_PASSWORD" | "INVALID_EMAIL" | "NOT_CONFIGURED" };
+export type PrepareRecoveryEmailChangeResult =
+  | { ok: true; email: string; codeSentAt: Date | null }
+  | {
+      ok: false;
+      error:
+        | "INVALID_PASSWORD"
+        | "INVALID_EMAIL"
+        | "EMAIL_UNCHANGED"
+        | "NOT_CONFIGURED";
+    };
+
+export type VerifyRecoveryEmailChangeResult =
+  | { ok: true; email: string }
+  | {
+      ok: false;
+      error:
+        | "INVALID_RECOVERY_CODE"
+        | "RECOVERY_CODE_EXPIRED"
+        | "TOO_MANY_ATTEMPTS"
+        | "NOT_CONFIGURED";
+    };
 
 export type ResetPasswordWithCodeResult =
   | { ok: true; username: string }
@@ -55,6 +82,27 @@ export type VerifyRecoveryCodeResult =
   | {
       ok: false;
       error: "INVALID_RECOVERY_CODE" | "RECOVERY_CODE_EXPIRED" | "TOO_MANY_ATTEMPTS" | "NOT_CONFIGURED";
+    };
+
+export type BackupRecoveryStatus = {
+  setupRequired: boolean;
+  createdAt: Date | null;
+  confirmedAt: Date | null;
+};
+
+export type ConfirmBackupRecoveryCodeResult =
+  | { ok: true }
+  | { ok: false; error: "RECOVERY_CODE_UNAVAILABLE" };
+
+export type ResetPasswordWithBackupRecoveryCodeResult =
+  | { ok: true; username: string }
+  | {
+      ok: false;
+      error:
+        | "INVALID_USERNAME"
+        | "INVALID_NEW_PASSWORD"
+        | "INVALID_RECOVERY_CODE"
+        | "NOT_CONFIGURED";
     };
 
 function readBootstrapConfig(): { username: string; password: string } | null {
@@ -121,6 +169,105 @@ export const adminAccountRepository = {
       account.username === normalizedUsername &&
       verifyPassword(password, account.passwordHash)
     );
+  },
+
+  async getBackupRecoveryStatus(): Promise<BackupRecoveryStatus | null> {
+    const account = await this.getOrCreate();
+    if (!account) {
+      return null;
+    }
+
+    return {
+      setupRequired: !(
+        account.backupRecoveryCodeHash &&
+        account.backupRecoveryCodeConfirmedAt
+      ),
+      createdAt: account.backupRecoveryCodeCreatedAt ?? null,
+      confirmedAt: account.backupRecoveryCodeConfirmedAt ?? null,
+    };
+  },
+
+  async saveBackupRecoveryCode(codeHash: string, createdAt = new Date()): Promise<void> {
+    await this.getOrCreate();
+    await prisma.adminAccount.update({
+      where: { id: SINGLETON_ID },
+      data: {
+        backupRecoveryCodeHash: codeHash,
+        backupRecoveryCodeCreatedAt: createdAt,
+        backupRecoveryCodeConfirmedAt: null,
+      },
+    });
+  },
+
+  async confirmBackupRecoveryCode(
+    createdAt: Date,
+    confirmedAt = new Date(),
+  ): Promise<ConfirmBackupRecoveryCodeResult> {
+    const result = await prisma.adminAccount.updateMany({
+      where: {
+        id: SINGLETON_ID,
+        backupRecoveryCodeHash: { not: null },
+        backupRecoveryCodeCreatedAt: createdAt,
+      },
+      data: {
+        backupRecoveryCodeConfirmedAt: confirmedAt,
+      },
+    });
+
+    return result.count === 1
+      ? { ok: true }
+      : { ok: false, error: "RECOVERY_CODE_UNAVAILABLE" };
+  },
+
+  async resetPasswordWithBackupRecoveryCode(
+    recoveryCode: string,
+    newUsername: string,
+    newPassword: string,
+  ): Promise<ResetPasswordWithBackupRecoveryCodeResult> {
+    const account = await this.getOrCreate();
+    if (!account) {
+      return { ok: false, error: "NOT_CONFIGURED" };
+    }
+
+    const trimmedUsername = newUsername.trim();
+    if (!isValidAdminUsername(trimmedUsername)) {
+      return { ok: false, error: "INVALID_USERNAME" };
+    }
+
+    if (!isValidAdminPassword(newPassword)) {
+      return { ok: false, error: "INVALID_NEW_PASSWORD" };
+    }
+
+    if (
+      !account.backupRecoveryCodeHash ||
+      !account.backupRecoveryCodeConfirmedAt ||
+      !verifyBackupRecoveryCode(recoveryCode, account.backupRecoveryCodeHash)
+    ) {
+      return { ok: false, error: "INVALID_RECOVERY_CODE" };
+    }
+
+    const updated = await prisma.adminAccount.updateMany({
+      where: {
+        id: SINGLETON_ID,
+        backupRecoveryCodeHash: account.backupRecoveryCodeHash,
+        backupRecoveryCodeConfirmedAt: { not: null },
+      },
+      data: {
+        username: trimmedUsername,
+        passwordHash: hashPassword(newPassword),
+        backupRecoveryCodeHash: null,
+        backupRecoveryCodeCreatedAt: null,
+        backupRecoveryCodeConfirmedAt: null,
+        recoveryCodeHash: null,
+        recoveryCodeExpiresAt: null,
+        recoveryCodeSentAt: null,
+        recoveryCodeAttempts: 0,
+      },
+    });
+
+    return updated.count === 1
+      ? { ok: true, username: trimmedUsername }
+      : { ok: false, error: "INVALID_RECOVERY_CODE" };
   },
 
   async changeUsername(
@@ -239,10 +386,29 @@ export const adminAccountRepository = {
     };
   },
 
-  async updateRecoveryContacts(
+  async getRecoveryEmailVerificationState(): Promise<{
+    contacts: RecoveryContacts;
+    pendingEmail: string | null;
+    codeSentAt: Date | null;
+  } | null> {
+    const account = await this.getOrCreate();
+    if (!account) {
+      return null;
+    }
+
+    return {
+      contacts: {
+        email: account.recoveryEmail,
+      },
+      pendingEmail: account.pendingRecoveryEmail,
+      codeSentAt: account.recoveryEmailVerificationCodeSentAt,
+    };
+  },
+
+  async prepareRecoveryEmailChange(
     currentPassword: string,
     email: string,
-  ): Promise<UpdateRecoveryContactsResult> {
+  ): Promise<PrepareRecoveryEmailChangeResult> {
     const account = await this.getOrCreate();
     if (!account) {
       return { ok: false, error: "NOT_CONFIGURED" };
@@ -254,14 +420,82 @@ export const adminAccountRepository = {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    if (normalizedEmail && !isValidRecoveryEmail(normalizedEmail)) {
+    if (!normalizedEmail || !isValidRecoveryEmail(normalizedEmail)) {
       return { ok: false, error: "INVALID_EMAIL" };
     }
 
-    const updated = await prisma.adminAccount.update({
+    if (normalizedEmail === account.recoveryEmail) {
+      return { ok: false, error: "EMAIL_UNCHANGED" };
+    }
+
+    return {
+      ok: true,
+      email: normalizedEmail,
+      codeSentAt: account.recoveryEmailVerificationCodeSentAt,
+    };
+  },
+
+  async saveRecoveryEmailVerificationCode(
+    email: string,
+    codeHash: string,
+    expiresAt: Date,
+    sentAt: Date,
+  ): Promise<void> {
+    await prisma.adminAccount.update({
       where: { id: SINGLETON_ID },
       data: {
-        recoveryEmail: normalizedEmail || null,
+        pendingRecoveryEmail: email,
+        recoveryEmailVerificationCodeHash: codeHash,
+        recoveryEmailVerificationCodeExpiresAt: expiresAt,
+        recoveryEmailVerificationCodeSentAt: sentAt,
+        recoveryEmailVerificationCodeAttempts: 0,
+      },
+    });
+  },
+
+  async verifyAndApplyRecoveryEmailChange(
+    codeHash: string,
+    now = new Date(),
+  ): Promise<VerifyRecoveryEmailChangeResult> {
+    const account = await this.getOrCreate();
+    if (!account) {
+      return { ok: false, error: "NOT_CONFIGURED" };
+    }
+
+    if (account.recoveryEmailVerificationCodeAttempts >= 5) {
+      return { ok: false, error: "TOO_MANY_ATTEMPTS" };
+    }
+
+    if (
+      !account.pendingRecoveryEmail ||
+      !account.recoveryEmailVerificationCodeHash ||
+      !account.recoveryEmailVerificationCodeExpiresAt
+    ) {
+      return { ok: false, error: "INVALID_RECOVERY_CODE" };
+    }
+
+    if (account.recoveryEmailVerificationCodeExpiresAt <= now) {
+      return { ok: false, error: "RECOVERY_CODE_EXPIRED" };
+    }
+
+    if (account.recoveryEmailVerificationCodeHash !== codeHash) {
+      await prisma.adminAccount.update({
+        where: { id: SINGLETON_ID },
+        data: { recoveryEmailVerificationCodeAttempts: { increment: 1 } },
+      });
+      return { ok: false, error: "INVALID_RECOVERY_CODE" };
+    }
+
+    const email = account.pendingRecoveryEmail;
+    await prisma.adminAccount.update({
+      where: { id: SINGLETON_ID },
+      data: {
+        recoveryEmail: email,
+        pendingRecoveryEmail: null,
+        recoveryEmailVerificationCodeHash: null,
+        recoveryEmailVerificationCodeExpiresAt: null,
+        recoveryEmailVerificationCodeSentAt: null,
+        recoveryEmailVerificationCodeAttempts: 0,
         recoveryCodeHash: null,
         recoveryCodeExpiresAt: null,
         recoveryCodeSentAt: null,
@@ -269,12 +503,7 @@ export const adminAccountRepository = {
       },
     });
 
-    return {
-      ok: true,
-      contacts: {
-        email: updated.recoveryEmail,
-      },
-    };
+    return { ok: true, email };
   },
 
   async saveRecoveryCode(

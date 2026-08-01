@@ -177,7 +177,7 @@ export function ExcelImportExportPanel({
 
   if (variant === "buttons") {
     return (
-      <div className="space-y-2">
+      <div className="self-start space-y-2">
         {controls}
         {message && (
           <p role="status" aria-live="polite" className="max-w-xl text-sm font-medium text-slate-800">

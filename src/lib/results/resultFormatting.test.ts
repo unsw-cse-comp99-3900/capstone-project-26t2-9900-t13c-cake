@@ -17,7 +17,7 @@ function evidence(overrides: Partial<EvidenceRecordDTO> = {}): EvidenceRecordDTO
     jurisdictions: "NSW",
     context: "General Public",
     subCategory: null,
-    engagementLevel: "Consult",
+    engagementLevel: "2",
     minHourlyRate: 50,
     maxHourlyRate: 100,
     reimbursementGuidance: true,

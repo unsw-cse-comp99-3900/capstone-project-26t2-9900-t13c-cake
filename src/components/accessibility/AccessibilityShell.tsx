@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useBrowserPathname } from "@/hooks/useBrowserPathname";
 
 const routeNames: Record<string, string> = {
   "/": "Home",
@@ -21,8 +21,8 @@ const routeNames: Record<string, string> = {
 };
 
 /** CAKE-8: shared keyboard and screen-reader support on public and admin routes. */
-export function AccessibilityShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+export function AccessibilityShell() {
+  const pathname = useBrowserPathname();
   const { language } = useLanguage();
 
   useEffect(() => {
@@ -40,7 +40,6 @@ export function AccessibilityShell({ children }: { children: React.ReactNode }) 
       <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {language === "zh-CN" ? "页面已加载" : routeNames[pathname] ?? "Page loaded"}
       </p>
-      {children}
     </>
   );
 }

@@ -36,9 +36,9 @@ export const adminNavigation: AdminNavItem[] = [
     id: "analytics",
     title: "Website usage",
     description:
-      "View anonymised traffic trends such as page visits, questionnaire starts, and completion rates.",
+      "View anonymised traffic trends such as page visits, quiz starts, and quiz completion rates.",
     href: "/admin/analytics",
-    status: "coming_soon",
+    status: "available",
   },
   {
     id: "surveys",

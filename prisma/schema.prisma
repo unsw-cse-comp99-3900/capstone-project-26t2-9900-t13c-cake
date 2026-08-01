@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -49,16 +49,37 @@ model AnonymousFeedback {
 
 /// Singleton administrator credentials (CAKE-10).
 model AdminAccount {
-  id                    String    @id @default("default")
-  username              String    @unique
-  passwordHash          String
-  recoveryEmail         String?
-  recoveryCodeHash      String?
-  recoveryCodeExpiresAt DateTime?
-  recoveryCodeSentAt    DateTime?
-  recoveryCodeAttempts  Int       @default(0)
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  id                                     String    @id @default("default")
+  username                               String    @unique
+  passwordHash                           String
+  recoveryEmail                          String?
+  recoveryCodeHash                       String?
+  recoveryCodeExpiresAt                  DateTime?
+  recoveryCodeSentAt                     DateTime?
+  recoveryCodeAttempts                   Int       @default(0)
+  pendingRecoveryEmail                   String?
+  recoveryEmailVerificationCodeHash      String?
+  recoveryEmailVerificationCodeExpiresAt DateTime?
+  recoveryEmailVerificationCodeSentAt    DateTime?
+  recoveryEmailVerificationCodeAttempts  Int       @default(0)
+  backupRecoveryCodeHash                 String?
+  backupRecoveryCodeCreatedAt            DateTime?
+  backupRecoveryCodeConfirmedAt          DateTime?
+  createdAt                              DateTime  @default(now())
+  updatedAt                              DateTime  @updatedAt
 
   @@map("admin_account")
+}
+
+/// Anonymous public website usage events for administrator analytics.
+model WebsiteUsageEvent {
+  id        String   @id
+  eventType String
+  path      String
+  metadata  String?
+  createdAt DateTime @default(now())
+
+  @@index([eventType, createdAt])
+  @@index([path, createdAt])
+  @@map("website_usage_events")
 }

@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { EvidenceRecordDTO } from "@/server/repositories/evidenceRepository";
+import { trackWebsiteUsage } from "@/components/analytics/WebsiteUsageTracker";
 import { useQuizState } from "@/contexts/QuizStateContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { fetchEvidenceRecords } from "@/lib/api/evidenceApiClient";
 import {
   filterEvidenceGroups,
@@ -14,15 +16,6 @@ import { ContextStep } from "./ContextStep";
 import { JurisdictionStep } from "./JurisdictionStep";
 import { QuizProgress } from "./QuizProgress";
 
-const ENGAGEMENT_LEVEL_ORDER = [
-  "Inform",
-  "Consult",
-  "Involve",
-  "Collaborate",
-  "Empower",
-  "Extended roles",
-] as const;
-
 const NATIONAL = "national";
 
 function normalize(value: string): string {
@@ -30,17 +23,19 @@ function normalize(value: string): string {
 }
 
 function compareEngagementLevel(left: string, right: string): number {
-  const leftIndex = ENGAGEMENT_LEVEL_ORDER.findIndex((level) => level === left);
-  const rightIndex = ENGAGEMENT_LEVEL_ORDER.findIndex((level) => level === right);
+  const leftNumber = Number(left);
+  const rightNumber = Number(right);
+  const leftIsNumber = Number.isFinite(leftNumber);
+  const rightIsNumber = Number.isFinite(rightNumber);
 
-  if (leftIndex !== -1 || rightIndex !== -1) {
-    if (leftIndex === -1) {
+  if (leftIsNumber || rightIsNumber) {
+    if (!leftIsNumber) {
       return 1;
     }
-    if (rightIndex === -1) {
+    if (!rightIsNumber) {
       return -1;
     }
-    return leftIndex - rightIndex;
+    return leftNumber - rightNumber;
   }
 
   return left.localeCompare(right);
@@ -64,6 +59,7 @@ function recordMatchesSelectedJurisdiction(
 /** CAKE-3 - QuizWizard */
 export function QuizWizard() {
   const { answers, currentStep, resetAnswers } = useQuizState();
+  const { t } = useLanguage();
   const [evidenceRecords, setEvidenceRecords] = useState<EvidenceRecordDTO[] | null>(null);
   const [results, setResults] = useState<FilteredEvidenceGroup[] | null>(null);
   const [submittedFilters, setSubmittedFilters] = useState<MultiQuizFilters | null>(null);
@@ -71,6 +67,7 @@ export function QuizWizard() {
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasTrackedStart, setHasTrackedStart] = useState(false);
 
   const filters = useMemo<MultiQuizFilters | null>(() => {
     const selections = answers.selections
@@ -159,18 +156,27 @@ export function QuizWizard() {
       setEvidenceRecords(records);
       return records;
     } catch {
-      setOptionsError("Failed to load context options from the evidence database.");
+      setOptionsError(t("optionsLoadError"));
       return null;
     } finally {
       setIsLoadingOptions(false);
     }
-  }, [evidenceRecords]);
+  }, [evidenceRecords, t]);
 
   useEffect(() => {
     if (currentStep === 2 && !evidenceRecords && !isLoadingOptions && !optionsError) {
       void loadEvidenceRecords();
     }
   }, [currentStep, evidenceRecords, isLoadingOptions, loadEvidenceRecords, optionsError]);
+
+  useEffect(() => {
+    if (currentStep === 1 && !hasTrackedStart) {
+      trackWebsiteUsage("questionnaire_start", {
+        jurisdictions: answers.jurisdictions.length,
+      });
+      setHasTrackedStart(true);
+    }
+  }, [answers.jurisdictions.length, currentStep, hasTrackedStart]);
 
   async function loadResults(nextFilters: MultiQuizFilters) {
     setIsSubmitting(true);
@@ -180,12 +186,19 @@ export function QuizWizard() {
     const records = await loadEvidenceRecords();
     if (!records) {
       setResults([]);
-      setError("Failed to load evidence records. Please check the API and try again.");
+      setError(t("evidenceLoadError"));
       setIsSubmitting(false);
       return;
     }
 
-    setResults(filterEvidenceGroups(records, nextFilters));
+    const nextResults = filterEvidenceGroups(records, nextFilters);
+    setResults(nextResults);
+    trackWebsiteUsage("questionnaire_complete", {
+      jurisdictions: nextFilters.jurisdictions,
+      contexts: nextFilters.selections.map((selection) => selection.context),
+      selections: nextFilters.selections.length,
+      resultCount: nextResults.reduce((total, group) => total + group.records.length, 0),
+    });
     setIsSubmitting(false);
   }
 
@@ -201,12 +214,13 @@ export function QuizWizard() {
     setResults(null);
     setSubmittedFilters(null);
     setError(null);
+    setHasTrackedStart(false);
     resetAnswers();
   }
 
   return (
-    <div className="quiz-shell mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-      <div className="quiz-shell-inner rounded-2xl bg-slate-100 p-3 sm:p-4 lg:p-5">
+    <div className="quiz-shell w-full bg-gradient-to-br from-[#eff8f5] via-[#fbfcfa] to-[#fbfcfa] px-5 py-6 sm:px-8 sm:py-8 lg:px-[75px]">
+      <div className="quiz-shell-inner">
         {submittedFilters && results !== null ? (
           <ResultsPanel
             filters={submittedFilters}

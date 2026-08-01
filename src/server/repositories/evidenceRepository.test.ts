@@ -1,24 +1,20 @@
 import { execSync } from "node:child_process";
-import { existsSync, unlinkSync } from "node:fs";
-import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { PrismaClient } from "@prisma/client";
 import { EXPECTED_SEED_RECORD_COUNT } from "../../../prisma/seed-data.validation";
 
-const testDbPath = path.join(process.cwd(), "prisma", "test.db");
-const testDbUrl = "file:./test.db";
+const testDbUrl =
+  process.env.TEST_DATABASE_URL ??
+  process.env.DATABASE_URL ??
+  "postgresql://cake:cake@localhost:5432/cake_test?schema=public";
 
 describe("evidence repository and seed migration (CAKE-2)", () => {
   let prisma: PrismaClient;
 
   beforeAll(() => {
-    if (existsSync(testDbPath)) {
-      unlinkSync(testDbPath);
-    }
-
     process.env.DATABASE_URL = testDbUrl;
 
-    execSync("npx prisma db push --skip-generate", {
+    execSync("npx prisma db push --skip-generate --accept-data-loss", {
       stdio: "ignore",
       env: { ...process.env, DATABASE_URL: testDbUrl },
     });
@@ -31,13 +27,10 @@ describe("evidence repository and seed migration (CAKE-2)", () => {
     prisma = new PrismaClient({
       datasources: { db: { url: testDbUrl } },
     });
-  });
+  }, 120_000);
 
   afterAll(async () => {
     await prisma.$disconnect();
-    if (existsSync(testDbPath)) {
-      unlinkSync(testDbPath);
-    }
   });
 
   it("seeds the expected record count", async () => {
@@ -46,7 +39,7 @@ describe("evidence repository and seed migration (CAKE-2)", () => {
   });
 
   it("excludes soft-deleted records from active queries", async () => {
-    const first = await prisma.evidenceRecord.findFirst();
+    const first = await prisma.evidenceRecord.findFirst({ where: { deletedAt: null } });
     expect(first).not.toBeNull();
 
     await prisma.evidenceRecord.update({

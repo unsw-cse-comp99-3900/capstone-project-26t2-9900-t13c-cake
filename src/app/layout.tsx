@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { AccessibilityShell } from "@/components/accessibility/AccessibilityShell";
+import { WebsiteUsageTracker } from "@/components/analytics/WebsiteUsageTracker";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import "./globals.css";
 
@@ -13,6 +14,11 @@ export const metadata: Metadata = {
   title: "Consumer Rep Remuneration Tool",
   description:
     "Interactive decision tool to support remuneration for health consumer representatives in Australia.",
+  applicationName: "Consumer Rep Remuneration Tool",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-icon.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -20,7 +26,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body className={`${inter.variable} antialiased`} suppressHydrationWarning>
         <LanguageProvider>
-          <AccessibilityShell>{children}</AccessibilityShell>
+          <WebsiteUsageTracker />
+          <AccessibilityShell />
+          {children}
         </LanguageProvider>
       </body>
     </html>

@@ -7,6 +7,7 @@ import {
   RECOVERY_CODE_RESEND_SECONDS,
   RECOVERY_CODE_TTL_MINUTES,
 } from "@/server/utils/recoveryCodeUtils";
+import { normalizeBackupRecoveryCode } from "@/server/utils/backupRecoveryCodeUtils";
 
 function maskEmail(email: string): string {
   const [local, domain] = email.split("@");
@@ -16,14 +17,17 @@ function maskEmail(email: string): string {
 
 export const accountRecoveryService = {
   async getPublicOptions() {
-    const contacts = await adminAccountRepository.getRecoveryContacts();
+    const [contacts, backupStatus] = await Promise.all([
+      adminAccountRepository.getRecoveryContacts(),
+      adminAccountRepository.getBackupRecoveryStatus(),
+    ]);
 
     return {
       email:
         contacts?.email && recoveryDeliveryService.isConfigured()
           ? { available: true, masked: maskEmail(contacts.email) }
           : { available: false, masked: null },
-      supervisorCode: Boolean(process.env.ADMIN_RECOVERY_CODE?.trim()),
+      backupRecoveryCode: Boolean(backupStatus && !backupStatus.setupRequired),
     };
   },
 
@@ -93,5 +97,21 @@ export const accountRecoveryService = {
     }
 
     return adminAccountRepository.verifyRecoveryCode(hashOneTimeRecoveryCode(code));
+  },
+
+  async resetPasswordWithBackupCode(
+    code: string,
+    newUsername: string,
+    newPassword: string,
+  ) {
+    if (!normalizeBackupRecoveryCode(code)) {
+      return { ok: false as const, error: "INVALID_RECOVERY_CODE" as const };
+    }
+
+    return adminAccountRepository.resetPasswordWithBackupRecoveryCode(
+      code,
+      newUsername,
+      newPassword,
+    );
   },
 };

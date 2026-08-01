@@ -10,6 +10,7 @@ import {
 } from "@/lib/results/resultFormatting";
 import { TOOL_TITLE } from "@/lib/results/resultFormatters";
 import { PRINT_AREA_ID } from "@/lib/results/printResults";
+import { JURISDICTIONS } from "@/lib/constants/quizOptions";
 import { DisclaimerBanner } from "./DisclaimerBanner";
 import { ResultCard } from "./ResultCard";
 import { ResultsComparisonView } from "./ResultsComparisonView";
@@ -49,6 +50,17 @@ function flattenUniqueRecords(groups: FilteredEvidenceGroup[]): EvidenceRecordDT
   return unique;
 }
 
+function formatJurisdictions(values: string[], language: ReturnType<typeof useLanguage>["language"]): string {
+  const labels = new Map<string, string>(
+    JURISDICTIONS.map((jurisdiction) => [
+      jurisdiction.value,
+      translateOption(language, jurisdiction.label),
+    ]),
+  );
+
+  return values.map((value) => labels.get(value) ?? value).join(", ");
+}
+
 /** CAKE-5 / CAKE-14 — ResultsPanel with grouped filters, print/export, and comparison */
 export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: ResultsPanelProps) {
   const { language, t } = useLanguage();
@@ -72,6 +84,7 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
   const selectedRecordCount = selectedRecords.length;
   const canCompare = selectedRecordCount >= 2;
   const reachedComparisonLimit = selectedRecordCount >= MAX_COMPARISON_RECORDS;
+  const jurisdictionSummary = formatJurisdictions(filters.jurisdictions, language);
 
   function handleToggleComparison(recordId: string) {
     setIsComparing(false);
@@ -97,67 +110,80 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
     <section
       id={PRINT_AREA_ID}
       aria-labelledby="results-heading"
-      className="results-print-area rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-6"
+      className="results-print-area py-2"
     >
       <div className="print-only mb-4 border-b border-slate-300 pb-3">
         <p className="text-lg font-bold text-slate-950">{TOOL_TITLE}</p>
-        <p className="mt-1 text-sm text-slate-600">Results summary</p>
+        <p className="mt-1 text-sm text-slate-600">{t("resultsSummaryLabel")}</p>
       </div>
 
-      <div>
-        <h2
-          id="results-heading"
-          tabIndex={-1}
-          autoFocus
-          aria-live="polite"
-          className="text-2xl font-bold tracking-tight text-slate-950 outline-none sm:text-3xl"
-        >
-          {error
-            ? t("unableResults")
-            : language !== "en"
-              ? t("resultSummary", { count: totalRecords, groups: records.length })
-              : formatResultSummary(totalRecords, records.length)}
-        </h2>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-          {t("researchSelections", {
-            jurisdictions: filters.jurisdictions.join(", "),
-            count: filters.selections.length,
-          })}
-        </p>
-      </div>
+      <div className="grid gap-8 lg:grid-cols-[minmax(240px,0.34fr)_minmax(0,1fr)] lg:items-start lg:gap-12">
+        <div className="lg:sticky lg:top-8">
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#006b63]">
+            {t("resultsKicker")}
+          </p>
+          <h2
+            id="results-heading"
+            tabIndex={-1}
+            autoFocus
+            aria-live="polite"
+            className="mt-3 max-w-3xl font-[Georgia,serif] text-4xl font-normal leading-tight tracking-tight text-[#051b1a] outline-none sm:text-5xl lg:max-w-[330px]"
+          >
+            {error ? t("unableResults") : t("matchedEvidenceGuidance")}
+          </h2>
+          <div className="mt-6 h-0.5 w-14 bg-[#006b63]" />
+          <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 lg:max-w-[310px]">
+            {error
+              ? t("resultsLookupError")
+              : language !== "en"
+                ? t("resultSummary", { count: totalRecords, groups: records.length })
+                : formatResultSummary(totalRecords, records.length)}
+          </p>
 
-      <div className="no-print mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <ResultsExportActions
-          filters={filters}
-          records={flatRecords}
-          disabled={!hasExportableResults}
-          trailingActions={
+          <div className="no-print mt-8 rounded-[10px] border border-[#a9d3cc] bg-[#edf8f5] px-4 py-4 shadow-[0_14px_26px_rgba(0,79,72,0.06)]">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#006b63]">
+              {t("yourSelections")}
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-700">
+              {jurisdictionSummary}
+            </p>
+            <p className="mt-2 text-sm font-semibold text-[#003f3b]">
+              {t("researchContextSelectionCount", { count: filters.selections.length })}
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-[24px] border border-[#a9d3cc] bg-white/92 p-5 shadow-[0_14px_34px_rgba(15,23,42,0.08)] sm:p-7 lg:p-10">
+          <div className="no-print flex flex-col gap-4 border-b border-[#dce6e4] pb-6 xl:flex-row xl:items-center xl:justify-between">
+            <ResultsExportActions
+              disabled={!hasExportableResults}
+              trailingActions={
+                <button
+                  type="button"
+                  disabled={!canCompare || Boolean(error)}
+                  onClick={() => setIsComparing(true)}
+                  className="min-h-11 rounded-[4px] border border-[#006b63] px-4 py-2 text-sm font-bold text-[#003f3b] transition hover:bg-[#f3fbf8] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-500 disabled:opacity-70 disabled:hover:bg-transparent"
+                >
+                  {t("compare")}
+                </button>
+              }
+            />
             <button
               type="button"
-              disabled={!canCompare || Boolean(error)}
-              onClick={() => setIsComparing(true)}
-              className="min-h-10 rounded-lg border border-teal-700 px-4 py-2 text-sm font-bold text-teal-800 transition hover:bg-teal-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-500 disabled:opacity-70 disabled:hover:bg-transparent"
+              onClick={handleStartOverClick}
+              className="min-h-11 rounded-[4px] border border-[#006b63] bg-[#006b63] px-5 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-[#00524c] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
             >
-              {t("compare")}
+              {t("startOver")}
             </button>
-          }
-        />
-        <button
-          type="button"
-          onClick={handleStartOverClick}
-          className="min-h-10 rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-        >
-          {t("startOver")}
-        </button>
-      </div>
+          </div>
 
-      {error ? (
-        <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-red-950">
+          {error ? (
+        <div role="alert" className="mt-6 rounded-[8px] border border-red-200 bg-red-50 p-4 text-red-950">
           <p className="font-semibold">{error}</p>
           <button
             type="button"
             onClick={onRetry}
-            className="no-print mt-4 min-h-10 rounded-lg bg-red-700 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-red-700"
+            className="no-print mt-4 min-h-10 rounded-[4px] bg-red-700 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-red-700"
           >
             {t("tryAgain")}
           </button>
@@ -169,16 +195,16 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
           onClearSelection={handleClearSelection}
         />
       ) : (
-        <div className="mt-4 space-y-5">
+        <div className="mt-6 space-y-5">
           {totalRecords === 0 ? (
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="text-xl font-bold text-slate-950">{t("noMatches")}</h3>
+            <div className="rounded-[8px] border border-[#dce6e4] bg-[#f8faf9] p-5">
+              <h3 className="text-2xl font-bold text-slate-950">{t("noMatches")}</h3>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
                 {t("broadenSearch")}
               </p>
             </div>
           ) : (
-            <div className="no-print text-sm leading-6 text-slate-600" aria-live="polite">
+            <div className="no-print rounded-[8px] border border-[#dce6e4] bg-[#f8faf9] px-4 py-3 text-sm leading-6 text-slate-600" aria-live="polite">
               {selectedRecordCount === 0
                 ? t("selectionHint", { max: MAX_COMPARISON_RECORDS })
                 : t("selectedForComparison", { count: selectedRecordCount, max: MAX_COMPARISON_RECORDS })}
@@ -188,13 +214,13 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
           {records.map((group) => (
             <section
               key={`${group.selection.context}-${group.selection.subCategory ?? "none"}-${group.selection.engagementLevel}`}
-              className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+              className="rounded-[12px] border border-[#dce6e4] bg-[#f7fbfa] p-4 lg:p-5"
             >
               <div>
-                <h3 className="text-lg font-bold text-slate-950">
+                <h3 className="text-2xl font-bold text-[#051b1a]">
                   {translateOption(language, group.selection.context)}
                 </h3>
-                <p className="mt-1 text-sm leading-6 text-slate-600">
+                <p className="mt-2 text-sm leading-6 text-slate-600">
                   {group.selection.subCategory
                     ? translateOption(language, group.selection.subCategory)
                     : t("noSubCategory")} /{" "}
@@ -207,11 +233,11 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
               </div>
 
               {group.records.length === 0 ? (
-                <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-950">
+                <div className="mt-4 rounded-[8px] border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-950">
                   {t("noCombination")}
                 </div>
               ) : (
-                <div className="mt-3 grid gap-3">
+                <div className="mt-4 grid gap-4">
                   {group.records.map((record) => (
                     <ResultCard
                       key={record.id}
@@ -230,8 +256,41 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
         </div>
       )}
 
-      <div className="mt-4">
+          <div className="results-disclaimer-print mt-5">
         <DisclaimerBanner />
+          </div>
+
+          <aside className="no-print mt-5 border border-[#a9d3cc] bg-[#edf8f5] px-5 py-5">
+        <div className="grid gap-4 md:grid-cols-[0.45fr_1fr] md:items-center">
+          <div>
+            <h3 className="text-2xl font-bold text-[#051b1a]">{t("contactSupport")}</h3>
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              {t("resultsSupportHelp")}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold text-slate-700 md:justify-end">
+            <a
+              href="mailto:deborah.johnston@unsw.edu.au"
+              className="text-teal-800 underline underline-offset-4 transition hover:text-teal-950 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            >
+              deborah.johnston@unsw.edu.au
+            </a>
+            <a
+              href="tel:+610290659414"
+              className="text-teal-800 underline underline-offset-4 transition hover:text-teal-950 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            >
+              +61 (02) 9065 9414
+            </a>
+            <a
+              href="/feedback"
+              className="text-teal-800 underline underline-offset-4 transition hover:text-teal-950 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            >
+              {t("anonymousFeedback")}
+            </a>
+          </div>
+        </div>
+      </aside>
+        </div>
       </div>
     </section>
   );

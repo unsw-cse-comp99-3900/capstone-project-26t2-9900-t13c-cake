@@ -1,0 +1,34 @@
+# dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# next / build
+.next
+out
+build
+coverage
+
+# git / ide
+.git
+.gitignore
+.vscode
+.idea
+
+# env and local db
+.env
+.env*.local
+prisma/dev.db
+prisma/dev.db-journal
+prisma/test.db
+prisma/test.db-journal
+
+# docs / misc
+docs
+*.md
+!README.md
+Dockerfile*
+docker-compose*.yml
+.github
