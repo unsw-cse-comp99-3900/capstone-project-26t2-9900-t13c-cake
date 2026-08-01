@@ -1,23 +1,34 @@
 import { NextResponse } from "next/server";
 import { authService } from "@/server/services/authService";
+import { backupRecoveryService } from "@/server/services/backupRecoveryService";
+
+function jsonNoStore(body: object, status = 200) {
+  return NextResponse.json(body, {
+    status,
+    headers: { "Cache-Control": "no-store" },
+  });
+}
 
 /** AuthController — GET /api/auth/session (CAKE-10) */
 export async function GET(request: Request) {
   if (!authService.isConfigured()) {
-    return NextResponse.json(
+    return jsonNoStore(
       { authenticated: false, configured: false },
-      { status: 503 },
+      503,
     );
   }
 
   const session = authService.getSessionFromRequest(request);
   if (!session) {
-    return NextResponse.json({ authenticated: false, configured: true });
+    return jsonNoStore({ authenticated: false, configured: true });
   }
 
-  return NextResponse.json({
+  const recoveryStatus = await backupRecoveryService.getStatus();
+
+  return jsonNoStore({
     authenticated: true,
     configured: true,
     username: session.username,
+    backupRecoverySetupRequired: recoveryStatus?.setupRequired ?? true,
   });
 }

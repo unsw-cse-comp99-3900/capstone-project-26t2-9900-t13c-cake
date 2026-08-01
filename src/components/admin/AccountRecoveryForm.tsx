@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ADMIN_HOME_PATH, ADMIN_RESET_MESSAGE_KEY } from "@/lib/admin/adminNavigation";
 
-type RecoveryMethod = "email" | "supervisor";
+type RecoveryMethod = "email" | "supervisor" | "backup";
 
 type RecoveryOptions = {
   email: { available: boolean; masked: string | null };
   supervisorCode: boolean;
+  backupRecoveryCode: boolean;
 };
 
 const inputClassName =
@@ -226,6 +227,13 @@ export function AccountRecoveryForm() {
               newPassword,
               confirmPassword,
             }
+          : method === "backup"
+            ? {
+                backupRecoveryCode: code,
+                newUsername,
+                newPassword,
+                confirmPassword,
+              }
           : {
               verificationCode: code,
               newUsername,
@@ -264,6 +272,17 @@ export function AccountRecoveryForm() {
     setMessage("Enter the recovery code supplied by the system supervisor.");
   }
 
+  function chooseBackupRecoveryCode() {
+    setMethod("backup");
+    setCodeSent(true);
+    setCodeVerified(true);
+    setCode("");
+    setError("");
+    setMessage(
+      "Enter the backup recovery code you saved when administrator access was set up.",
+    );
+  }
+
   function startOver() {
     setMethod(null);
     setCodeSent(false);
@@ -280,7 +299,9 @@ export function AccountRecoveryForm() {
   const showEmailCodeStep = method === "email" && codeSent && !codeVerified;
   const showEmailPasswordStep = method === "email" && codeSent && codeVerified;
   const showSupervisorCodeStep = method === "supervisor" && codeSent && !codeVerified;
-  const showSupervisorAccountStep = method === "supervisor" && codeSent && codeVerified;
+  const showNonEmailAccountStep =
+    (method === "supervisor" && codeSent && codeVerified) ||
+    method === "backup";
   const canResend = !isResending && !isSubmitting && resendCountdown <= 0;
 
   return (
@@ -288,8 +309,8 @@ export function AccountRecoveryForm() {
       <div className="rounded-[8px] border border-[#dce6e4] bg-white p-6 shadow-[0_12px_28px_rgba(15,23,42,0.05)] sm:p-8">
         <h2 className="text-2xl font-bold text-slate-900">Reset administrator password</h2>
         <p id="recovery-help" className="mt-2 text-base leading-7 text-slate-700">
-          Choose email or a supervisor code. Email codes contain 6 digits and expire after 10
-          minutes.
+          Choose a saved backup code, email, or a supervisor code. Email codes
+          contain 6 digits and expire after 10 minutes.
         </p>
 
         {!method ? (
@@ -318,7 +339,19 @@ export function AccountRecoveryForm() {
                   Use supervisor recovery code
                 </button>
               ) : null}
-              {options && !options.email.available && !options.supervisorCode ? (
+              {options?.backupRecoveryCode ? (
+                <button
+                  type="button"
+                  onClick={chooseBackupRecoveryCode}
+                  className="w-full cursor-pointer rounded-lg border border-slate-300 px-4 py-3 text-left font-semibold text-slate-800 hover:bg-slate-50"
+                >
+                  Use saved backup recovery code
+                </button>
+              ) : null}
+              {options &&
+              !options.email.available &&
+              !options.supervisorCode &&
+              !options.backupRecoveryCode ? (
                 <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
                   No password recovery method is configured. Contact the system administrator.
                 </p>
@@ -481,8 +514,32 @@ export function AccountRecoveryForm() {
           </form>
         ) : null}
 
-        {showSupervisorAccountStep ? (
+        {showNonEmailAccountStep ? (
           <form className="mt-6 space-y-4" onSubmit={resetPassword}>
+            {method === "backup" ? (
+              <div>
+                <label
+                  htmlFor="backup-recovery-code"
+                  className="block text-sm font-semibold text-slate-800"
+                >
+                  Backup recovery code
+                </label>
+                <input
+                  id="backup-recovery-code"
+                  type="text"
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  required
+                  maxLength={32}
+                  value={code}
+                  onChange={(event) => setCode(event.target.value)}
+                  className={inputClassName}
+                />
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  This code becomes invalid immediately after a successful reset.
+                </p>
+              </div>
+            ) : null}
             <div>
               <label htmlFor="recovery-new-username" className="block text-sm font-semibold text-slate-800">
                 New username

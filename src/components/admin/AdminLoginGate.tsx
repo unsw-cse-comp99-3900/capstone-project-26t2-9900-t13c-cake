@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ADMIN_FORGOT_PASSWORD_PATH, ADMIN_HOME_PATH, ADMIN_RESET_MESSAGE_KEY } from "@/lib/admin/adminNavigation";
+import { BackupRecoverySetup } from "@/components/admin/BackupRecoverySetup";
 
 function redirectToAdminHome() {
   window.location.assign(ADMIN_HOME_PATH);
@@ -20,7 +21,11 @@ type SessionState =
   | { status: "loading" }
   | { status: "unconfigured" }
   | { status: "guest" }
-  | { status: "authenticated"; username: string };
+  | {
+      status: "authenticated";
+      username: string;
+      backupRecoverySetupRequired: boolean;
+    };
 
 type AdminAuthContextValue = {
   session: SessionState;
@@ -53,6 +58,7 @@ export function AdminAuthProvider({ children }: AdminAuthProviderProps) {
         authenticated?: boolean;
         configured?: boolean;
         username?: string;
+        backupRecoverySetupRequired?: boolean;
       };
 
       if (response.status === 503 || data.configured === false) {
@@ -61,7 +67,12 @@ export function AdminAuthProvider({ children }: AdminAuthProviderProps) {
       }
 
       if (data.authenticated && data.username) {
-        setSession({ status: "authenticated", username: data.username });
+        setSession({
+          status: "authenticated",
+          username: data.username,
+          backupRecoverySetupRequired:
+            data.backupRecoverySetupRequired !== false,
+        });
         return;
       }
 
@@ -92,7 +103,7 @@ type AdminLoginGateProps = {
 
 /** CAKE-10 — AdminLoginGate */
 export function AdminLoginGate({ children }: AdminLoginGateProps) {
-  const { session } = useAdminAuth();
+  const { session, refreshSession } = useAdminAuth();
   const { t } = useLanguage();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -130,7 +141,7 @@ export function AdminLoginGate({ children }: AdminLoginGateProps) {
       }
 
       setPassword("");
-      redirectToAdminHome();
+      await refreshSession();
       return;
     } catch {
       setError(t("signInError"));
@@ -265,6 +276,10 @@ export function AdminLoginGate({ children }: AdminLoginGateProps) {
         </p>
       </div>
     );
+  }
+
+  if (session.status === "authenticated" && session.backupRecoverySetupRequired) {
+    return <BackupRecoverySetup onCompleted={refreshSession} />;
   }
 
   return <>{children}</>;

@@ -6,9 +6,11 @@ import { recoveryDeliveryService } from "@/server/services/recoveryDeliveryServi
 vi.mock("@/server/repositories/adminAccountRepository", () => ({
   adminAccountRepository: {
     getRecoveryContacts: vi.fn(),
+    getBackupRecoveryStatus: vi.fn(),
     getRecoveryRequestState: vi.fn(),
     saveRecoveryCode: vi.fn(),
     resetPasswordWithCode: vi.fn(),
+    resetPasswordWithBackupRecoveryCode: vi.fn(),
   },
 }));
 
@@ -23,9 +25,13 @@ describe("accountRecoveryService", () => {
   beforeEach(() => {
     vi.stubEnv("SESSION_SECRET", "test-session-secret");
     vi.mocked(adminAccountRepository.getRecoveryContacts).mockReset();
+    vi.mocked(adminAccountRepository.getBackupRecoveryStatus).mockReset();
     vi.mocked(adminAccountRepository.getRecoveryRequestState).mockReset();
     vi.mocked(adminAccountRepository.saveRecoveryCode).mockReset();
     vi.mocked(adminAccountRepository.resetPasswordWithCode).mockReset();
+    vi.mocked(
+      adminAccountRepository.resetPasswordWithBackupRecoveryCode,
+    ).mockReset();
     vi.mocked(recoveryDeliveryService.isConfigured).mockReset();
     vi.mocked(recoveryDeliveryService.sendEmail).mockReset();
   });
@@ -34,10 +40,16 @@ describe("accountRecoveryService", () => {
     vi.mocked(adminAccountRepository.getRecoveryContacts).mockResolvedValue({
       email: "admin@example.com",
     });
+    vi.mocked(adminAccountRepository.getBackupRecoveryStatus).mockResolvedValue({
+      setupRequired: false,
+      createdAt: new Date("2026-07-23T10:00:00.000Z"),
+      confirmedAt: new Date("2026-07-23T10:01:00.000Z"),
+    });
     vi.mocked(recoveryDeliveryService.isConfigured).mockReturnValue(true);
 
     await expect(accountRecoveryService.getPublicOptions()).resolves.toMatchObject({
       email: { available: true, masked: "ad***@example.com" },
+      backupRecoveryCode: true,
     });
   });
 
@@ -79,5 +91,39 @@ describe("accountRecoveryService", () => {
       retryAfter: 30,
     });
     expect(recoveryDeliveryService.sendEmail).not.toHaveBeenCalled();
+  });
+
+  it("resets the password through the repository for a valid backup code format", async () => {
+    vi.mocked(
+      adminAccountRepository.resetPasswordWithBackupRecoveryCode,
+    ).mockResolvedValue({ ok: true, username: "new-admin" });
+
+    await expect(
+      accountRecoveryService.resetPasswordWithBackupCode(
+        "abcd efgh jkmn pqrs tvwx",
+        "new-admin",
+        "new-secret-pass",
+      ),
+    ).resolves.toEqual({ ok: true, username: "new-admin" });
+    expect(
+      adminAccountRepository.resetPasswordWithBackupRecoveryCode,
+    ).toHaveBeenCalledWith(
+      "abcd efgh jkmn pqrs tvwx",
+      "new-admin",
+      "new-secret-pass",
+    );
+  });
+
+  it("rejects malformed backup codes before reading the stored hash", async () => {
+    await expect(
+      accountRecoveryService.resetPasswordWithBackupCode(
+        "invalid",
+        "new-admin",
+        "new-secret-pass",
+      ),
+    ).resolves.toEqual({ ok: false, error: "INVALID_RECOVERY_CODE" });
+    expect(
+      adminAccountRepository.resetPasswordWithBackupRecoveryCode,
+    ).not.toHaveBeenCalled();
   });
 });
