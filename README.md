@@ -43,7 +43,7 @@ Requirements: [Docker Desktop](https://www.docker.com/products/docker-desktop/) 
 
 ```bash
 cp .env.example .env
-# Edit ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_SECRET, ADMIN_RECOVERY_CODE
+# Edit ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_SECRET (optional SMTP)
 docker compose up --build
 ```
 
@@ -113,9 +113,10 @@ Copy `.env.example` → `.env`. Do **not** commit real secrets.
 | `ADMIN_USERNAME` | Yes | Initial admin username |
 | `ADMIN_PASSWORD` | Yes | Initial admin password |
 | `SESSION_SECRET` | Yes | Session signing secret (long random string) |
-| `ADMIN_RECOVERY_CODE` | Yes | Offline supervisor recovery code |
-| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_FROM` | Optional | Password / recovery email |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_FROM` | Optional | Email OTP recovery |
 | `RUN_SEED` | Docker | `true` on first boot, then `false` |
+
+Backup recovery codes are generated in-app after the first admin login (hashed in PostgreSQL; single-use after a password reset). They are not set via environment variables.
 
 Docker Compose injects `DATABASE_URL` for the **app** service automatically (`…@db:5432…`).  
 For local Node against Compose Postgres, use `…@localhost:5432…`.
@@ -239,9 +240,9 @@ docker/                  # Container entrypoint
 ## Client handover checklist
 
 1. Install Docker Desktop  
-2. Provide `.env` values (admin credentials, `SESSION_SECRET`, recovery code, optional SMTP)  
+2. Provide `.env` values (admin credentials, `SESSION_SECRET`, optional SMTP)  
 3. Run `docker compose up --build -d`  
-4. Open http://localhost:3000 — verify questionnaire + `/admin` login  
+4. Open http://localhost:3000 — verify questionnaire + `/admin` login (complete backup recovery code setup when prompted)  
 5. Set `RUN_SEED=false` for subsequent restarts  
 6. Back up the `cake_pg_data` volume (or hosted Postgres) for long-term use  
 

@@ -1,15 +1,13 @@
+import { createHmac } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   generateOneTimeRecoveryCode,
   hashOneTimeRecoveryCode,
-  isRecoveryConfigured,
   isValidOneTimeRecoveryCode,
-  verifyRecoveryCode,
 } from "@/server/utils/recoveryCodeUtils";
 
 describe("recoveryCodeUtils (CAKE-10)", () => {
   beforeEach(() => {
-    vi.stubEnv("ADMIN_RECOVERY_CODE", "supervisor-recovery-code");
     vi.stubEnv("SESSION_SECRET", "test-session-secret");
   });
 
@@ -17,25 +15,21 @@ describe("recoveryCodeUtils (CAKE-10)", () => {
     vi.unstubAllEnvs();
   });
 
-  it("reports configured recovery when env var is present", () => {
-    expect(isRecoveryConfigured()).toBe(true);
+  it("generates a 6-digit one-time recovery code", () => {
+    expect(generateOneTimeRecoveryCode()).toMatch(/^\d{6}$/);
   });
 
-  it("verifies the recovery code with a timing-safe comparison", () => {
-    expect(verifyRecoveryCode("supervisor-recovery-code")).toBe(true);
-    expect(verifyRecoveryCode("wrong-code")).toBe(false);
-  });
-
-  it("generates and validates six-digit one-time codes", () => {
-    const code = generateOneTimeRecoveryCode();
-    expect(code).toMatch(/^\d{6}$/);
-    expect(isValidOneTimeRecoveryCode(code)).toBe(true);
+  it("validates one-time recovery code shape", () => {
+    expect(isValidOneTimeRecoveryCode("123456")).toBe(true);
     expect(isValidOneTimeRecoveryCode("12345")).toBe(false);
+    expect(isValidOneTimeRecoveryCode("abcdef")).toBe(false);
   });
 
-  it("hashes one-time codes deterministically without storing plaintext", () => {
+  it("hashes one-time recovery codes with the session secret", () => {
     const hash = hashOneTimeRecoveryCode("123456");
-    expect(hash).toBe(hashOneTimeRecoveryCode("123456"));
-    expect(hash).not.toContain("123456");
+    const expected = createHmac("sha256", "test-session-secret")
+      .update("123456")
+      .digest("hex");
+    expect(hash).toBe(expected);
   });
 });

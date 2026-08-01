@@ -1,4 +1,5 @@
 import { prisma } from "@/server/db/prisma";
+import { verifyBackupRecoveryCode } from "@/server/utils/backupRecoveryCodeUtils";
 import { hashPassword, verifyPassword } from "@/server/utils/passwordUtils";
 
 const SINGLETON_ID = "default";
@@ -17,6 +18,9 @@ export type AdminAccountRecord = {
   recoveryEmailVerificationCodeExpiresAt: Date | null;
   recoveryEmailVerificationCodeSentAt: Date | null;
   recoveryEmailVerificationCodeAttempts: number;
+  backupRecoveryCodeHash: string | null;
+  backupRecoveryCodeCreatedAt: Date | null;
+  backupRecoveryCodeConfirmedAt: Date | null;
 };
 
 export type RecoveryContacts = {
@@ -78,6 +82,27 @@ export type VerifyRecoveryCodeResult =
   | {
       ok: false;
       error: "INVALID_RECOVERY_CODE" | "RECOVERY_CODE_EXPIRED" | "TOO_MANY_ATTEMPTS" | "NOT_CONFIGURED";
+    };
+
+export type BackupRecoveryStatus = {
+  setupRequired: boolean;
+  createdAt: Date | null;
+  confirmedAt: Date | null;
+};
+
+export type ConfirmBackupRecoveryCodeResult =
+  | { ok: true }
+  | { ok: false; error: "RECOVERY_CODE_UNAVAILABLE" };
+
+export type ResetPasswordWithBackupRecoveryCodeResult =
+  | { ok: true; username: string }
+  | {
+      ok: false;
+      error:
+        | "INVALID_USERNAME"
+        | "INVALID_NEW_PASSWORD"
+        | "INVALID_RECOVERY_CODE"
+        | "NOT_CONFIGURED";
     };
 
 function readBootstrapConfig(): { username: string; password: string } | null {
@@ -144,6 +169,105 @@ export const adminAccountRepository = {
       account.username === normalizedUsername &&
       verifyPassword(password, account.passwordHash)
     );
+  },
+
+  async getBackupRecoveryStatus(): Promise<BackupRecoveryStatus | null> {
+    const account = await this.getOrCreate();
+    if (!account) {
+      return null;
+    }
+
+    return {
+      setupRequired: !(
+        account.backupRecoveryCodeHash &&
+        account.backupRecoveryCodeConfirmedAt
+      ),
+      createdAt: account.backupRecoveryCodeCreatedAt ?? null,
+      confirmedAt: account.backupRecoveryCodeConfirmedAt ?? null,
+    };
+  },
+
+  async saveBackupRecoveryCode(codeHash: string, createdAt = new Date()): Promise<void> {
+    await this.getOrCreate();
+    await prisma.adminAccount.update({
+      where: { id: SINGLETON_ID },
+      data: {
+        backupRecoveryCodeHash: codeHash,
+        backupRecoveryCodeCreatedAt: createdAt,
+        backupRecoveryCodeConfirmedAt: null,
+      },
+    });
+  },
+
+  async confirmBackupRecoveryCode(
+    createdAt: Date,
+    confirmedAt = new Date(),
+  ): Promise<ConfirmBackupRecoveryCodeResult> {
+    const result = await prisma.adminAccount.updateMany({
+      where: {
+        id: SINGLETON_ID,
+        backupRecoveryCodeHash: { not: null },
+        backupRecoveryCodeCreatedAt: createdAt,
+      },
+      data: {
+        backupRecoveryCodeConfirmedAt: confirmedAt,
+      },
+    });
+
+    return result.count === 1
+      ? { ok: true }
+      : { ok: false, error: "RECOVERY_CODE_UNAVAILABLE" };
+  },
+
+  async resetPasswordWithBackupRecoveryCode(
+    recoveryCode: string,
+    newUsername: string,
+    newPassword: string,
+  ): Promise<ResetPasswordWithBackupRecoveryCodeResult> {
+    const account = await this.getOrCreate();
+    if (!account) {
+      return { ok: false, error: "NOT_CONFIGURED" };
+    }
+
+    const trimmedUsername = newUsername.trim();
+    if (!isValidAdminUsername(trimmedUsername)) {
+      return { ok: false, error: "INVALID_USERNAME" };
+    }
+
+    if (!isValidAdminPassword(newPassword)) {
+      return { ok: false, error: "INVALID_NEW_PASSWORD" };
+    }
+
+    if (
+      !account.backupRecoveryCodeHash ||
+      !account.backupRecoveryCodeConfirmedAt ||
+      !verifyBackupRecoveryCode(recoveryCode, account.backupRecoveryCodeHash)
+    ) {
+      return { ok: false, error: "INVALID_RECOVERY_CODE" };
+    }
+
+    const updated = await prisma.adminAccount.updateMany({
+      where: {
+        id: SINGLETON_ID,
+        backupRecoveryCodeHash: account.backupRecoveryCodeHash,
+        backupRecoveryCodeConfirmedAt: { not: null },
+      },
+      data: {
+        username: trimmedUsername,
+        passwordHash: hashPassword(newPassword),
+        backupRecoveryCodeHash: null,
+        backupRecoveryCodeCreatedAt: null,
+        backupRecoveryCodeConfirmedAt: null,
+        recoveryCodeHash: null,
+        recoveryCodeExpiresAt: null,
+        recoveryCodeSentAt: null,
+        recoveryCodeAttempts: 0,
+      },
+    });
+
+    return updated.count === 1
+      ? { ok: true, username: trimmedUsername }
+      : { ok: false, error: "INVALID_RECOVERY_CODE" };
   },
 
   async changeUsername(
