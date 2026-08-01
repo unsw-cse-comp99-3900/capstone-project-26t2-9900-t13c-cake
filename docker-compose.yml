@@ -28,7 +28,6 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me}
       SESSION_SECRET: ${SESSION_SECRET:-replace-with-a-long-random-secret}
-      ADMIN_RECOVERY_CODE: ${ADMIN_RECOVERY_CODE:-replace-with-a-supervisor-recovery-code}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
