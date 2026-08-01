@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useBrowserPathname } from "@/hooks/useBrowserPathname";
 
 const routeNames: Record<string, string> = {
   "/": "Home",
@@ -22,7 +22,7 @@ const routeNames: Record<string, string> = {
 
 /** CAKE-8: shared keyboard and screen-reader support on public and admin routes. */
 export function AccessibilityShell() {
-  const pathname = usePathname();
+  const pathname = useBrowserPathname();
   const { language } = useLanguage();
 
   useEffect(() => {
@@ -32,9 +32,6 @@ export function AccessibilityShell() {
       : `${routeName} | Consumer Rep Remuneration Tool`;
   }, [language, pathname]);
 
-  // Keep as a sibling of `{children}` in the root layout — wrapping the
-  // App Router segment tree with a client boundary that reads navigation
-  // state can trigger "invariant expected layout router to be mounted".
   return (
     <>
       <a className="skip-link" href="#main-content">

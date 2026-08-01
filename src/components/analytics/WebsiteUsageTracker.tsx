@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { useBrowserPathname } from "@/hooks/useBrowserPathname";
 import type { WebsiteUsageEventType } from "@/server/services/websiteUsageService";
 
 export function trackWebsiteUsage(
@@ -32,7 +32,7 @@ export function trackWebsiteUsage(
 }
 
 export function WebsiteUsageTracker() {
-  const pathname = usePathname();
+  const pathname = useBrowserPathname();
 
   useEffect(() => {
     if (!pathname || pathname.startsWith("/admin")) {
