@@ -28,8 +28,8 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me}
       SESSION_SECRET: ${SESSION_SECRET:-replace-with-a-long-random-secret}
-      # false = allow admin session cookie over HTTP (Azure cloudapp hostname without TLS)
-      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
+      # true when site is HTTPS (Caddy); set false only for plain-HTTP demos
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-true}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}

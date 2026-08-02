@@ -113,7 +113,7 @@ Copy `.env.example` → `.env`. Do **not** commit real secrets.
 | `ADMIN_USERNAME` | Yes | Initial admin username |
 | `ADMIN_PASSWORD` | Yes | Initial admin password |
 | `SESSION_SECRET` | Yes | Session signing secret (long random string) |
-| `AUTH_COOKIE_SECURE` | Docker | `false` for HTTP demos; `true` when the site is served over HTTPS |
+| `AUTH_COOKIE_SECURE` | Docker | `true` for HTTPS (default); set `false` only for plain-HTTP demos |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_FROM` | Optional | Email OTP recovery |
 | `RUN_SEED` | Docker | `true` on first boot, then `false` |
 
