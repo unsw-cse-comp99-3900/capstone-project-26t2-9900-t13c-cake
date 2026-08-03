@@ -16,6 +16,8 @@ export type PdfPageSlice = {
 };
 
 const EXPORT_WIDTH = 794;
+const EXPORT_BOTTOM_PADDING = 56;
+const NEAR_WHITE_THRESHOLD = 250;
 const MIN_PAGE_FILL_RATIO = 0.35;
 
 export function calculatePdfPageSlices(
@@ -57,6 +59,32 @@ export function calculatePdfPageSlices(
   }
 
   return slices;
+}
+
+export function findRenderedContentBottom(
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+): number {
+  for (let y = height - 1; y >= 0; y -= 1) {
+    const rowStart = y * width * 4;
+
+    for (let x = 0; x < width; x += 1) {
+      const offset = rowStart + x * 4;
+      const alpha = pixels[offset + 3];
+
+      if (
+        alpha > 0 &&
+        (pixels[offset] < NEAR_WHITE_THRESHOLD ||
+          pixels[offset + 1] < NEAR_WHITE_THRESHOLD ||
+          pixels[offset + 2] < NEAR_WHITE_THRESHOLD)
+      ) {
+        return y + 1;
+      }
+    }
+  }
+
+  return 0;
 }
 
 function prepareClone(source: HTMLElement): {
@@ -129,6 +157,36 @@ function createPageImage(
   return page;
 }
 
+function calculateRenderedContentHeight(
+  canvas: HTMLCanvasElement,
+  pixelRatio: number,
+  maxPageHeight: number,
+  fallbackHeight: number,
+): number {
+  const context = canvas.getContext("2d");
+  if (!context || pixelRatio <= 0) {
+    return fallbackHeight;
+  }
+
+  const contentBottom = findRenderedContentBottom(
+    context.getImageData(0, 0, canvas.width, canvas.height).data,
+    canvas.width,
+    canvas.height,
+  );
+  if (contentBottom === 0) {
+    return fallbackHeight;
+  }
+
+  const contentHeight = contentBottom / pixelRatio;
+  const currentPageEnd = Math.ceil(contentHeight / maxPageHeight) * maxPageHeight;
+
+  return Math.min(
+    fallbackHeight,
+    contentHeight + EXPORT_BOTTOM_PADDING,
+    currentPageEnd,
+  );
+}
+
 /** CAKE-14 - download the same results layout used by browser printing. */
 export async function exportResultsPdf({
   generatedAt = new Date(),
@@ -153,11 +211,7 @@ export async function exportResultsPdf({
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const maxPageHeight = clone.offsetWidth * (pageHeight / pageWidth);
-    const slices = calculatePdfPageSlices(
-      clone.scrollHeight,
-      maxPageHeight,
-      collectProtectedBlocks(clone),
-    );
+    const protectedBlocks = collectProtectedBlocks(clone);
 
     const canvas = await html2canvas(clone, {
       backgroundColor: "#ffffff",
@@ -169,6 +223,17 @@ export async function exportResultsPdf({
       windowWidth: EXPORT_WIDTH,
     });
     const pixelRatio = canvas.height / clone.scrollHeight;
+    const renderedContentHeight = calculateRenderedContentHeight(
+      canvas,
+      pixelRatio,
+      maxPageHeight,
+      clone.scrollHeight,
+    );
+    const slices = calculatePdfPageSlices(
+      renderedContentHeight,
+      maxPageHeight,
+      protectedBlocks.filter((block) => block.top < renderedContentHeight),
+    );
 
     slices.forEach((slice, index) => {
       const start = Math.round(slice.start * pixelRatio);
