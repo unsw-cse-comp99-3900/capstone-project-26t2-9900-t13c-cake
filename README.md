@@ -221,6 +221,7 @@ docker/                  # Container entrypoint
 | CAKE-12 Bulk Excel import/export | Yihui Liu |
 | CAKE-14 Print / PDF export | Zeyu Yang |
 | CAKE-15 Anonymous feedback | Zhengqian Zhang |
+| CAKE-16 Auto-Translation Support | Yihui Liu |
 
 ---
 
