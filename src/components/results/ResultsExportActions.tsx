@@ -30,7 +30,8 @@ export function ResultsExportActions({
 
     try {
       await exportResultsPdf();
-    } catch {
+    } catch (error) {
+      console.error("[ResultsExportActions] PDF export failed:", error);
       setExportError(t("exportError"));
     } finally {
       setIsExporting(false);

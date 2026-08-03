@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.9.0",
-    "html2canvas": "^1.4.1",
+    "html2canvas-pro": "^2.3.3",
     "jspdf": "^4.2.1",
     "next": "15.5.22",
     "nodemailer": "^9.0.3",
@@ -36,7 +36,8 @@
   },
   "overrides": {
     "postcss": "^8.5.18",
-    "sharp": "^0.35.3"
+    "sharp": "^0.35.3",
+    "html2canvas": "npm:html2canvas-pro@2.3.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
