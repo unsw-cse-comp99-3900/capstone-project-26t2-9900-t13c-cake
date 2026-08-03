@@ -71,12 +71,13 @@ export function QuizWizard() {
 
   const filters = useMemo<MultiQuizFilters | null>(() => {
     const selections = answers.selections
-      .filter((selection) => selection.engagementLevel)
-      .map((selection) => ({
-        context: selection.context,
-        subCategory: selection.subCategory,
-        engagementLevel: selection.engagementLevel ?? "",
-      }));
+      .flatMap((selection) =>
+        selection.engagementLevels.map((engagementLevel) => ({
+          context: selection.context,
+          subCategory: selection.subCategory,
+          engagementLevel,
+        })),
+      );
 
     if (selections.length === 0) {
       return null;
