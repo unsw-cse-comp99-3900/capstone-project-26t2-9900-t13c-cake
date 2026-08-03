@@ -20,7 +20,7 @@ Administrators maintain the evidence base, review anonymous feedback, and view u
 | Privacy & feedback | Privacy notice + anonymous feedback survey |
 | Admin centre | Login, account recovery, evidence CRUD, Excel import/export |
 | Analytics | Anonymous website usage events for administrators |
-| Accessibility | Keyboard navigation, focus styles, skip link, ARIA support |
+| Accessibility | Public + admin controls for text size, read-aloud speed and highlighting, high contrast, keyboard navigation, focus styles, skip link, ARIA support, and multilingual keyboard hints |
 | Deployment | Docker + PostgreSQL packaging for client handover |
 
 ---

@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { languageLabels, type Language } from "@/i18n/translations";
+import { AccessibilityMenu } from "@/components/accessibility/AccessibilityMenu";
 
 type LanguageSelectorProps = {
   variant?: "default" | "hero" | "questionnaire";
@@ -45,15 +46,16 @@ export function LanguageSelector({ variant = "default" }: LanguageSelectorProps)
   }
 
   return (
-    <div
-      ref={rootRef}
-      className={[
-        "relative flex items-center gap-2 text-sm font-semibold",
-        isHero ? "text-teal-200" : isQuestionnaire ? "text-white/90" : "text-slate-700",
-      ].join(" ")}
-    >
-      <span className={isQuestionnaire ? "sr-only" : undefined}>{t("language")}</span>
-      <div className="relative">
+    <div className="flex flex-wrap items-center justify-end gap-3">
+      <div
+        ref={rootRef}
+        className={[
+          "relative flex items-center gap-2 text-sm font-semibold",
+          isHero ? "text-teal-200" : isQuestionnaire ? "text-white/90" : "text-slate-700",
+        ].join(" ")}
+      >
+        <span className={isQuestionnaire ? "sr-only" : undefined}>{t("language")}</span>
+        <div className="relative">
         {isQuestionnaire ? (
           <svg
             aria-hidden="true"
@@ -125,7 +127,9 @@ export function LanguageSelector({ variant = "default" }: LanguageSelectorProps)
             })}
           </ul>
         ) : null}
+        </div>
       </div>
+      <AccessibilityMenu variant={variant} />
     </div>
   );
 }
