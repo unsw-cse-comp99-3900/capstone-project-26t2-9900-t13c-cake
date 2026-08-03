@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AccountRecoveryForm } from "@/components/admin/AccountRecoveryForm";
+import { LanguageSelector } from "@/components/language/LanguageSelector";
 
 export default function AdminForgotPasswordPage() {
   return (
@@ -14,12 +15,15 @@ export default function AdminForgotPasswordPage() {
               Account recovery
             </h1>
           </div>
-          <Link
-            href="/"
-            className="inline-flex min-h-11 items-center justify-center border border-white/45 bg-transparent px-5 py-2 text-sm font-bold text-white transition hover:border-white/80 hover:bg-white/10 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            Back to public tool
-          </Link>
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <LanguageSelector variant="questionnaire" />
+            <Link
+              href="/"
+              className="inline-flex min-h-11 items-center justify-center border border-white/45 bg-transparent px-5 py-2 text-sm font-bold text-white transition hover:border-white/80 hover:bg-white/10 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Back to public tool
+            </Link>
+          </div>
         </div>
       </header>
 

@@ -8,6 +8,7 @@ import {
   useAdminLogout,
 } from "@/components/admin/AdminLoginGate";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageSelector } from "@/components/language/LanguageSelector";
 
 /** Admin layout shell (CAKE-10) */
 export function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -59,6 +60,7 @@ function AdminHeaderActions() {
 
   return (
     <div className="flex flex-wrap items-center gap-3">
+      <LanguageSelector variant="questionnaire" />
       <Link
         href="/"
         className="inline-flex min-h-11 items-center justify-center border border-white/45 bg-transparent px-5 py-2 text-sm font-bold text-white transition hover:border-white/80 hover:bg-white/10 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-white"
