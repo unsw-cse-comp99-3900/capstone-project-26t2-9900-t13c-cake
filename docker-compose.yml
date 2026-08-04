@@ -1,3 +1,7 @@
+# Local / default handover stack (HTTP on localhost:3000).
+# For public HTTPS behind a reverse proxy, also use:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
+
 services:
   db:
     image: postgres:16-alpine
@@ -28,8 +32,8 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me}
       SESSION_SECRET: ${SESSION_SECRET:-replace-with-a-long-random-secret}
-      # true when site is HTTPS (Caddy); set false only for plain-HTTP demos
-      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-true}
+      # false = works on http://localhost:3000; set true when serving over HTTPS
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
@@ -39,6 +43,18 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
 
 volumes:
   cake_pg_data:

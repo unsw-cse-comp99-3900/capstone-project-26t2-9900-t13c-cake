@@ -113,7 +113,7 @@ Copy `.env.example` → `.env`. Do **not** commit real secrets.
 | `ADMIN_USERNAME` | Yes | Initial admin username |
 | `ADMIN_PASSWORD` | Yes | Initial admin password |
 | `SESSION_SECRET` | Yes | Session signing secret (long random string) |
-| `AUTH_COOKIE_SECURE` | Docker | `true` for HTTPS (default); set `false` only for plain-HTTP demos |
+| `AUTH_COOKIE_SECURE` | Docker | `false` for local HTTP (Compose default); `true` with HTTPS / `docker-compose.prod.yml` |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_FROM` | Optional | Email OTP recovery |
 | `RUN_SEED` | Docker | `true` on first boot, then `false` |
 
@@ -127,9 +127,10 @@ For local Node against Compose Postgres, use `…@localhost:5432…`.
 ## Docker layout
 
 ```
-Dockerfile              # Multi-stage Next.js production image
-docker-compose.yml      # app + postgres:16
-docker/entrypoint.sh    # migrate → optional seed → node server.js
+Dockerfile                 # Multi-stage Next.js production image
+docker-compose.yml         # local/default stack (HTTP :3000 + Postgres :5432)
+docker-compose.prod.yml    # optional HTTPS-behind-proxy overrides
+docker/entrypoint.sh       # migrate → optional seed → node server.js
 .dockerignore
 ```
 
@@ -137,9 +138,23 @@ docker/entrypoint.sh    # migrate → optional seed → node server.js
 
 1. **deps** — `npm ci` (+ Prisma schema for `postinstall`)
 2. **builder** — `prisma generate` + `next build` (`output: "standalone"`)
-3. **runner** — production files, non-root `nextjs` user, entrypoint on port 3000
+3. **runner** — production files, non-root `nextjs` user, healthcheck, entrypoint on port 3000
 
 PostgreSQL is **not** inside the app image; it runs as the `db` Compose service.
+
+**Local (default)**
+
+```bash
+docker compose up --build
+# http://localhost:3000 — AUTH_COOKIE_SECURE defaults to false
+```
+
+**Public HTTPS (reverse proxy on host → 127.0.0.1:3000)**
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
+# App bound to loopback only; Postgres not published; AUTH_COOKIE_SECURE defaults to true
+```
 
 ---
 

@@ -15,6 +15,7 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-c
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Prisma generate needs a syntactically valid URL; runtime URL comes from Compose.
 ENV DATABASE_URL="postgresql://cake:cake@db:5432/cake?schema=public"
 RUN npx prisma generate
 RUN npm run build
@@ -42,10 +43,15 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY docker/entrypoint.sh ./docker/entrypoint.sh
 
-RUN chmod +x ./docker/entrypoint.sh \
+# Force LF shebang/line endings (Windows checkouts can introduce CRLF).
+RUN sed -i 's/\r$//' ./docker/entrypoint.sh \
+  && chmod +x ./docker/entrypoint.sh \
   && chown -R nextjs:nodejs /app
 
 USER nextjs
 EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 ENTRYPOINT ["./docker/entrypoint.sh"]

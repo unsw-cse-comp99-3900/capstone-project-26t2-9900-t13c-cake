@@ -11,24 +11,32 @@ out
 build
 coverage
 
-# git / ide
+# git / ide / ci
 .git
 .gitignore
 .vscode
 .idea
+.github
 
-# env and local db
+# env and local db (never bake secrets into the image)
 .env
-.env*.local
+.env.*
+!.env.example
 prisma/dev.db
 prisma/dev.db-journal
 prisma/test.db
 prisma/test.db-journal
 
-# docs / misc
+# docs / misc (keep README for image metadata if needed)
 docs
+Files
 *.md
 !README.md
 Dockerfile*
 docker-compose*.yml
-.github
+
+# tests and tooling not required at runtime build input size
+**/*.test.ts
+**/*.test.tsx
+**/__tests__
+agent-transcripts
