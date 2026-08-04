@@ -490,7 +490,13 @@ export function AccessibilityMenu({ variant = "default" }: AccessibilityMenuProp
   ];
 
   return (
-    <div className="no-print relative z-40" data-speech-ignore>
+    <div
+      className={[
+        "no-print relative z-40",
+        isHero ? "flex w-full flex-col items-end sm:block sm:w-auto" : "",
+      ].join(" ")}
+      data-speech-ignore
+    >
       <button
         ref={menuButtonRef}
         type="button"
@@ -500,7 +506,7 @@ export function AccessibilityMenu({ variant = "default" }: AccessibilityMenuProp
         className={[
           "inline-flex min-h-10 items-center gap-2 border px-3 py-2 text-sm font-bold transition focus:outline-3 focus:outline-offset-2",
           isHero
-            ? "border-teal-100/85 bg-transparent text-white hover:border-teal-100 hover:bg-white/10 focus:outline-white"
+            ? "w-[10.5rem] min-w-[10.5rem] justify-center border-teal-100/85 bg-transparent text-white hover:border-teal-100 hover:bg-white/10 focus:outline-white sm:w-auto sm:min-w-0"
             : isQuestionnaire
               ? "border-white/45 bg-transparent text-white hover:border-white/80 hover:bg-white/10 focus:outline-white"
               : "rounded-lg border-slate-300 bg-white text-[#004c45] hover:border-[#006b63] hover:bg-[#edf8f5] focus:outline-teal-700",
@@ -520,7 +526,12 @@ export function AccessibilityMenu({ variant = "default" }: AccessibilityMenuProp
         <section
           id="accessibility-settings"
           aria-labelledby="accessibility-settings-heading"
-          className="absolute right-0 top-full z-50 mt-2 rounded-xl border border-[#2d7f78] text-slate-900"
+          className={[
+            "z-50 mt-2 rounded-xl border border-[#2d7f78] text-slate-900",
+            isHero
+              ? "relative right-auto top-auto sm:absolute sm:right-0 sm:top-full"
+              : "absolute right-0 top-full",
+          ].join(" ")}
           style={{
             width: "min(28rem, calc(100vw - 2rem))",
             backgroundColor: "#f3fbf8",
