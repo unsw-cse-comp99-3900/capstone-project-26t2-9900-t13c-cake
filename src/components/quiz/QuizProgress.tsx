@@ -13,7 +13,7 @@ export function QuizProgress({ currentStep }: QuizProgressProps) {
     <nav aria-label={t("questionnaireProgress")} className="w-full">
       <div className="flex flex-wrap items-center gap-4 text-sm">
         <span className="text-xs font-bold uppercase tracking-[0.24em] text-[#006b63]">
-          Questionnaire
+          {t("questionnaireLabel")}
         </span>
         <span aria-hidden="true" className="h-6 w-px bg-[#b8cbc8]" />
         <ol className="flex flex-wrap items-center gap-4">

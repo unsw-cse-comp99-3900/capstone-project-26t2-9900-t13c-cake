@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/i18n/translations";
 
 export function QuestionnaireHeaderText({ homeOnly = false }: { homeOnly?: boolean }) {
   const { t } = useLanguage();
@@ -14,4 +15,10 @@ export function QuestionnaireHeaderText({ homeOnly = false }: { homeOnly?: boole
       {t("toolTitle")}
     </Link>
   );
+}
+
+export function TranslatedText({ translationKey }: { translationKey: TranslationKey }) {
+  const { t } = useLanguage();
+
+  return <>{t(translationKey)}</>;
 }
