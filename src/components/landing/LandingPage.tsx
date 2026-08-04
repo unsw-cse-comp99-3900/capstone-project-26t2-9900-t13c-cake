@@ -77,12 +77,12 @@ export function LandingPage() {
       tabIndex={-1}
       className="min-h-screen overflow-hidden bg-white text-slate-900 outline-none"
     >
-      <section className="relative isolate flex min-h-[520px] border-b border-teal-600 bg-[#115e59] text-white">
+      <section className="relative isolate flex min-h-[520px] flex-col border-b border-teal-600 bg-[#115e59] text-white">
         <div
           aria-hidden="true"
           className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,_rgba(153,246,228,0.22),_transparent_38%),linear-gradient(180deg,_rgba(15,118,110,0.08),_rgba(19,78,74,0.26))]"
         />
-        <div className="absolute right-4 top-4 z-10 sm:right-6 lg:right-8">
+        <div className="relative z-20 mx-auto w-full max-w-5xl px-4 pt-4 sm:absolute sm:right-6 sm:top-4 sm:w-auto sm:max-w-none sm:px-0 sm:pt-0 lg:right-8">
           <LanguageSelector variant="hero" />
         </div>
         <div
@@ -111,7 +111,7 @@ export function LandingPage() {
           <span className="absolute bottom-10 right-108 h-32 w-3 bg-teal-100/12" />
         </div>
 
-        <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center px-4 pb-10 pt-20 text-center sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center px-4 pb-10 pt-8 text-center sm:px-6 sm:pt-20 lg:px-8">
           <p className="landing-rise text-sm font-semibold uppercase tracking-[0.28em] text-teal-200">
             Evidence-informed decision support
           </p>

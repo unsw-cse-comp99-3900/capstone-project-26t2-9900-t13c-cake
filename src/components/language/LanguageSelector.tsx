@@ -46,12 +46,21 @@ export function LanguageSelector({ variant = "default" }: LanguageSelectorProps)
   }
 
   return (
-    <div className="flex flex-wrap items-center justify-end gap-3">
+    <div
+      className={[
+        "flex flex-wrap items-center justify-end gap-3",
+        isHero ? "w-full flex-col items-stretch sm:w-auto sm:flex-row sm:items-center" : "",
+      ].join(" ")}
+    >
       <div
         ref={rootRef}
         className={[
           "relative flex items-center gap-2 text-sm font-semibold",
-          isHero ? "text-teal-200" : isQuestionnaire ? "text-white/90" : "text-slate-700",
+          isHero
+            ? "w-full justify-end text-teal-200 sm:w-auto sm:justify-start"
+            : isQuestionnaire
+              ? "text-white/90"
+              : "text-slate-700",
         ].join(" ")}
       >
         <span className={isQuestionnaire ? "sr-only" : undefined}>{t("language")}</span>
@@ -104,7 +113,7 @@ export function LanguageSelector({ variant = "default" }: LanguageSelectorProps)
             id={listId}
             role="listbox"
             aria-label={t("language")}
-            className="absolute right-0 z-30 mt-1 max-h-72 min-w-full overflow-auto rounded-md border border-slate-200 bg-white py-1 text-slate-900 shadow-lg"
+            className="absolute right-0 z-60 mt-1 max-h-72 min-w-full overflow-auto rounded-md border border-slate-200 bg-white py-1 text-slate-900 shadow-lg"
           >
             {languages.map(([value, label]) => {
               const selected = value === language;
