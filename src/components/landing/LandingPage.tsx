@@ -113,7 +113,7 @@ export function LandingPage() {
 
         <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center px-4 pb-10 pt-8 text-center sm:px-6 sm:pt-20 lg:px-8">
           <p className="landing-rise text-sm font-semibold uppercase tracking-[0.28em] text-teal-200">
-            Evidence-informed decision support
+            {t("landingEyebrow")}
           </p>
           <h1 className="landing-rise landing-rise-delay-1 mt-5 max-w-4xl font-[Georgia,serif] text-5xl font-normal leading-[0.98] tracking-tight text-white sm:text-6xl lg:text-7xl">
             {t("toolTitle")}
@@ -266,7 +266,7 @@ export function LandingPage() {
 
       <footer className="bg-teal-950 text-teal-100/70">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-6 py-6 text-sm sm:px-8 md:flex-row md:items-center md:justify-center md:gap-8">
-          <p>&copy; 2026 Consumer Rep Remuneration Tool</p>
+          <p>{t("copyright")}</p>
           <span aria-hidden="true" className="hidden h-5 w-px bg-slate-700 md:block" />
           <Link href="/questionnaire" className="transition hover:text-white">
             {t("startQuestionnaire")}

@@ -28,66 +28,88 @@ const keyboardHintLabels: Record<Language, {
   navigate: string;
   activate: string;
   dismiss: string;
+  skipMain: string;
+  pageLoaded: string;
 }> = {
   en: {
     heading: "Keyboard shortcuts available.",
     navigate: "Use Tab to navigate between controls.",
     activate: "Press Enter or Space to activate buttons.",
     dismiss: "Got it",
+    skipMain: "Skip to main content",
+    pageLoaded: "Page loaded",
   },
   "zh-CN": {
     heading: "可使用键盘快捷操作",
     navigate: "使用 Tab 键在控件之间移动。",
     activate: "按 Enter 或 Space 键使用按钮。",
     dismiss: "知道了",
+    skipMain: "跳至主要内容",
+    pageLoaded: "页面已加载",
   },
   fr: {
     heading: "Raccourcis clavier disponibles.",
     navigate: "Utilisez Tab pour naviguer entre les commandes.",
     activate: "Appuyez sur Entrée ou Espace pour activer les boutons.",
     dismiss: "Compris",
+    skipMain: "Aller au contenu principal",
+    pageLoaded: "Page chargée",
   },
   es: {
     heading: "Atajos de teclado disponibles.",
     navigate: "Use Tab para desplazarse entre los controles.",
     activate: "Pulse Intro o Espacio para activar los botones.",
     dismiss: "Entendido",
+    skipMain: "Saltar al contenido principal",
+    pageLoaded: "Página cargada",
   },
   it: {
     heading: "Scorciatoie da tastiera disponibili.",
     navigate: "Usa Tab per spostarti tra i controlli.",
     activate: "Premi Invio o Spazio per attivare i pulsanti.",
     dismiss: "Ho capito",
+    skipMain: "Vai al contenuto principale",
+    pageLoaded: "Pagina caricata",
   },
   de: {
     heading: "Tastaturkürzel verfügbar.",
     navigate: "Verwenden Sie Tab, um zwischen Steuerelementen zu wechseln.",
     activate: "Drücken Sie Eingabe oder Leertaste, um Schaltflächen zu aktivieren.",
     dismiss: "Verstanden",
+    skipMain: "Zum Hauptinhalt springen",
+    pageLoaded: "Seite geladen",
   },
   ja: {
     heading: "キーボードショートカットを利用できます。",
     navigate: "Tabキーでコントロール間を移動します。",
     activate: "EnterキーまたはSpaceキーでボタンを操作します。",
     dismiss: "わかりました",
+    skipMain: "メインコンテンツへ移動",
+    pageLoaded: "ページを読み込みました",
   },
   ko: {
     heading: "키보드 단축키를 사용할 수 있습니다.",
     navigate: "Tab 키를 사용해 컨트롤 사이를 이동하세요.",
     activate: "Enter 또는 Space 키를 눌러 버튼을 실행하세요.",
     dismiss: "확인",
+    skipMain: "본문으로 건너뛰기",
+    pageLoaded: "페이지가 로드되었습니다",
   },
   th: {
     heading: "มีแป้นพิมพ์ลัด",
     navigate: "ใช้ปุ่ม Tab เพื่อเลื่อนไประหว่างตัวควบคุม",
     activate: "กด Enter หรือ Space เพื่อใช้งานปุ่ม",
     dismiss: "เข้าใจแล้ว",
+    skipMain: "ข้ามไปยังเนื้อหาหลัก",
+    pageLoaded: "โหลดหน้าแล้ว",
   },
   vi: {
     heading: "Có thể sử dụng phím tắt.",
     navigate: "Dùng phím Tab để di chuyển giữa các điều khiển.",
     activate: "Nhấn Enter hoặc Space để kích hoạt nút.",
     dismiss: "Đã hiểu",
+    skipMain: "Chuyển đến nội dung chính",
+    pageLoaded: "Đã tải trang",
   },
 };
 
@@ -117,7 +139,7 @@ function renderKeyboardHintText(text: string) {
 /** CAKE-8: shared keyboard and screen-reader support on public and admin routes. */
 export function AccessibilityShell() {
   const pathname = useBrowserPathname();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const keyboardHint = keyboardHintLabels[language];
   const [showKeyboardHint, setShowKeyboardHint] = useState(false);
   const previousLanguageRef = useRef<string | null>(null);
@@ -150,11 +172,13 @@ export function AccessibilityShell() {
   }, [language]);
 
   useEffect(() => {
-    const routeName = routeNames[pathname] ?? "Consumer Rep Remuneration Tool";
-    document.title = language === "zh-CN"
-      ? `${pathname === "/questionnaire" ? "问卷" : routeName} | 消费者代表报酬工具`
-      : `${routeName} | Consumer Rep Remuneration Tool`;
-  }, [language, pathname]);
+    const routeName = pathname === "/questionnaire"
+      ? t("questionnaireLabel")
+      : pathname === "/"
+        ? t("toolTitle")
+        : routeNames[pathname] ?? keyboardHint.pageLoaded;
+    document.title = `${routeName} | ${t("toolTitle")}`;
+  }, [keyboardHint.pageLoaded, pathname, t]);
 
   function dismissKeyboardHint() {
     setShowKeyboardHint(false);
@@ -168,10 +192,14 @@ export function AccessibilityShell() {
   return (
     <>
       <a className="skip-link" href="#main-content">
-        {language === "zh-CN" ? "跳至主要内容" : "Skip to main content"}
+        {keyboardHint.skipMain}
       </a>
       <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
-        {language === "zh-CN" ? "页面已加载" : routeNames[pathname] ?? "Page loaded"}
+        {pathname === "/questionnaire"
+          ? t("questionnaireLabel")
+          : pathname === "/"
+            ? t("toolTitle")
+            : keyboardHint.pageLoaded}
       </p>
       {showKeyboardHint ? (
         <aside

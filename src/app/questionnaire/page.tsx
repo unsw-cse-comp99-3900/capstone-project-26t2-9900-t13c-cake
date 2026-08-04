@@ -2,7 +2,10 @@ import Link from "next/link";
 import { QuizWizard } from "@/components/quiz/QuizWizard";
 import { QuizStateProvider } from "@/contexts/QuizStateContext";
 import { LanguageSelector } from "@/components/language/LanguageSelector";
-import { QuestionnaireHeaderText } from "@/components/language/QuestionnaireHeaderText";
+import {
+  QuestionnaireHeaderText,
+  TranslatedText,
+} from "@/components/language/QuestionnaireHeaderText";
 
 export default function QuestionnairePage() {
   return (
@@ -16,7 +19,7 @@ export default function QuestionnairePage() {
               href="/"
               className="min-h-10 px-4 py-2 text-sm font-semibold text-white/80 transition hover:text-white focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
-              Exit
+              <TranslatedText translationKey="exit" />
             </Link>
           </div>
         </div>
