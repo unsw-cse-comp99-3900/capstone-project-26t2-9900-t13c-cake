@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "test:regression": "npm test && npm run test:e2e",
     "test:filter": "vitest run src/lib/filter/filterService.test.ts",
     "translate:public": "python3 scripts/generate-public-translations.py",
     "translate:public:check": "node scripts/check-public-translations.mjs",

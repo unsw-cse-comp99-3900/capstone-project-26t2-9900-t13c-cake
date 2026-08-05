@@ -186,6 +186,7 @@ Main tables: `evidence_records`, `admin_account`, `anonymous_feedback`, `website
 | `npm test` | Vitest unit tests |
 | `npm run test:e2e` | Playwright end-to-end tests (browser) |
 | `npm run test:e2e:ui` | Playwright UI mode |
+| `npm run test:regression` | Unit tests then E2E |
 | `npm run db:migrate` | Prisma migrate (dev) |
 | `npm run db:seed` | Seed evidence data |
 | `npm run db:import-excel` | Rebuild `seed-data.json` from Excel |
@@ -204,12 +205,16 @@ Main tables: `evidence_records`, `admin_account`, `anonymous_feedback`, `website
 npm test
 
 # Browser E2E (Playwright). First time only: npx playwright install chromium
-# Starts `npm run dev` unless a server is already on :3000
+# Seed the app DB used by `npm run dev` so questionnaire results work:
+#   npm run db:seed
 npm run test:e2e
+
+# Full automated regression (unit + E2E)
+npm run test:regression
 npm run build
 ```
 
-E2E coverage (smoke): landing → questionnaire jurisdiction step, admin sign-in / reject invalid credentials (and backup recovery setup when required). Defaults match `.env.example` (`admin` / `change-me`) unless `ADMIN_*` is set.
+E2E coverage: landing → questionnaire → results, feedback form, admin sign-in / hub tools (records, account, usage, surveys). Defaults match `.env.example` (`admin` / `change-me`) unless `ADMIN_*` is set.
 
 Repository integration tests target `postgresql://cake:cake@localhost:5432/cake_test` (override with `TEST_DATABASE_URL`). They do not clear your local `cake` app database.
 

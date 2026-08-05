@@ -1,15 +1,17 @@
+process.env.DATABASE_URL =
+  process.env.TEST_DATABASE_URL ??
+  "postgresql://cake:cake@localhost:5432/cake_test?schema=public";
+
 import { execSync } from "node:child_process";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { PrismaClient } from "@prisma/client";
 import { EXPECTED_SEED_RECORD_COUNT } from "../../../prisma/seed-data.validation";
+import {
+  EvidenceImportConflictError,
+  evidenceRepository,
+} from "@/server/repositories/evidenceRepository";
 
-/**
- * Prefer an isolated test DB so local `docker compose` data on `cake` is not wiped
- * or polluted by soft-delete assertions. Override with TEST_DATABASE_URL when needed.
- */
-const testDbUrl =
-  process.env.TEST_DATABASE_URL ??
-  "postgresql://cake:cake@localhost:5432/cake_test?schema=public";
+const testDbUrl = process.env.DATABASE_URL;
 
 async function ensureTestDatabase(url: string) {
   const match = url.match(/^(postgresql:\/\/[^/]+)\/([^?]+)/);
@@ -39,12 +41,26 @@ async function ensureTestDatabase(url: string) {
   }
 }
 
+const samplePayload = {
+  publisher: "Test Publisher",
+  title: "Test Guidance",
+  year: 2026,
+  link: "https://example.org/test",
+  jurisdictions: "National",
+  context: "Research",
+  subCategory: null,
+  engagementLevel: "2",
+  minHourlyRate: 10,
+  maxHourlyRate: 20,
+  reimbursementGuidance: true,
+  unpaidEngagementGuidance: false,
+  exampleOrganisations: null,
+};
+
 describe("evidence repository and seed migration (CAKE-2)", () => {
   let prisma: PrismaClient;
 
   beforeAll(async () => {
-    process.env.DATABASE_URL = testDbUrl;
-
     await ensureTestDatabase(testDbUrl);
 
     execSync("npx prisma db push --skip-generate --accept-data-loss", {
@@ -56,8 +72,6 @@ describe("evidence repository and seed migration (CAKE-2)", () => {
       datasources: { db: { url: testDbUrl } },
     });
 
-    // Seed skips when rows already exist; clear so soft-deletes from prior runs
-    // cannot leave active count = EXPECTED - 2.
     await prisma.evidenceRecord.deleteMany();
 
     execSync("npx prisma db seed", {
@@ -76,26 +90,68 @@ describe("evidence repository and seed migration (CAKE-2)", () => {
   });
 
   it("excludes soft-deleted records from active queries", async () => {
-    const activeBefore = await prisma.evidenceRecord.count({
-      where: { deletedAt: null },
-    });
-    expect(activeBefore).toBe(EXPECTED_SEED_RECORD_COUNT);
+    const activeBefore = await evidenceRepository.findAllActive();
+    const first = activeBefore[0];
+    expect(first).toBeDefined();
 
-    const first = await prisma.evidenceRecord.findFirst({ where: { deletedAt: null } });
-    expect(first).not.toBeNull();
+    await evidenceRepository.softDelete(first!.id);
 
-    await prisma.evidenceRecord.update({
-      where: { id: first!.id },
-      data: { deletedAt: new Date() },
-    });
-
-    const activeCount = await prisma.evidenceRecord.count({ where: { deletedAt: null } });
-    expect(activeCount).toBe(activeBefore - 1);
+    const activeAfter = await evidenceRepository.findAllActive();
+    expect(activeAfter).toHaveLength(activeBefore.length - 1);
+    expect(activeAfter.find((record) => record.id === first!.id)).toBeUndefined();
   });
 
   it("stores audit timestamps on seeded records", async () => {
     const record = await prisma.evidenceRecord.findFirst({ where: { deletedAt: null } });
     expect(record?.createdAt).toBeInstanceOf(Date);
     expect(record?.updatedAt).toBeInstanceOf(Date);
+  });
+
+  it("creates, updates, finds, and bulk upserts evidence rows", async () => {
+    const created = await evidenceRepository.create(samplePayload);
+    expect(created.id).toBeTruthy();
+    expect(created.title).toBe("Test Guidance");
+
+    const updated = await evidenceRepository.update(created.id, {
+      ...samplePayload,
+      title: "Updated Guidance",
+      minHourlyRate: 15,
+    });
+    expect(updated.title).toBe("Updated Guidance");
+    expect(updated.minHourlyRate).toBe(15);
+
+    await expect(evidenceRepository.findById(created.id)).resolves.toMatchObject({
+      id: created.id,
+      title: "Updated Guidance",
+    });
+
+    const bulk = await evidenceRepository.bulkUpsert([
+      {
+        id: "",
+        ...samplePayload,
+        title: "Bulk Create",
+      },
+      {
+        id: created.id,
+        ...samplePayload,
+        title: "Bulk Update",
+      },
+    ]);
+
+    expect(bulk).toEqual({ createdCount: 1, updatedCount: 1 });
+    await expect(evidenceRepository.findById(created.id)).resolves.toMatchObject({
+      title: "Bulk Update",
+    });
+  });
+
+  it("rejects bulk updates for unknown active ids", async () => {
+    await expect(
+      evidenceRepository.bulkUpsert([
+        {
+          id: "missing-active-id",
+          ...samplePayload,
+        },
+      ]),
+    ).rejects.toBeInstanceOf(EvidenceImportConflictError);
   });
 });
