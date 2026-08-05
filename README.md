@@ -184,6 +184,8 @@ Main tables: `evidence_records`, `admin_account`, `anonymous_feedback`, `website
 | `npm run start` | Start production server (non-Docker) |
 | `npm run lint` | ESLint |
 | `npm test` | Vitest unit tests |
+| `npm run test:e2e` | Playwright end-to-end tests (browser) |
+| `npm run test:e2e:ui` | Playwright UI mode |
 | `npm run db:migrate` | Prisma migrate (dev) |
 | `npm run db:seed` | Seed evidence data |
 | `npm run db:import-excel` | Rebuild `seed-data.json` from Excel |
@@ -198,13 +200,22 @@ Main tables: `evidence_records`, `admin_account`, `anonymous_feedback`, `website
 
 ```bash
 # Needs a reachable Postgres (e.g. docker compose up db -d)
+# Unit/integration tests use cake_test by default (created automatically if missing)
 npm test
+
+# Browser E2E (Playwright). First time only: npx playwright install chromium
+# Starts `npm run dev` unless a server is already on :3000
+npm run test:e2e
 npm run build
 ```
 
+E2E coverage (smoke): landing → questionnaire jurisdiction step, admin sign-in / reject invalid credentials (and backup recovery setup when required). Defaults match `.env.example` (`admin` / `change-me`) unless `ADMIN_*` is set.
+
+Repository integration tests target `postgresql://cake:cake@localhost:5432/cake_test` (override with `TEST_DATABASE_URL`). They do not clear your local `cake` app database.
+
 GitHub Actions (`.github/workflows/ci.yml`) on `main` / `dev`:
 
-- Install → Prisma generate → lint → migrate → seed → test → build  
+- Install → Prisma generate → lint → migrate → seed → unit tests → build → Playwright E2E  
 - Uses a Postgres 16 service container
 
 ---

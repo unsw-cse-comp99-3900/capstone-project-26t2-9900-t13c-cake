@@ -10,6 +10,8 @@
     "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "test:filter": "vitest run src/lib/filter/filterService.test.ts",
     "translate:public": "python3 scripts/generate-public-translations.py",
     "translate:public:check": "node scripts/check-public-translations.mjs",
@@ -41,6 +43,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.1.8",
     "@types/node": "^22.15.29",
     "@types/nodemailer": "^8.0.1",

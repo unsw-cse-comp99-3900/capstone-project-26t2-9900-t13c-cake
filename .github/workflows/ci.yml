@@ -28,6 +28,10 @@ jobs:
     env:
       DATABASE_URL: postgresql://cake:cake@localhost:5432/cake_test?schema=public
       NEXT_TELEMETRY_DISABLED: "1"
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: change-me
+      SESSION_SECRET: ci-e2e-session-secret-at-least-32-chars
+      AUTH_COOKIE_SECURE: "false"
 
     steps:
       - uses: actions/checkout@v4
@@ -59,3 +63,9 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run end-to-end tests
+        run: npm run test:e2e
