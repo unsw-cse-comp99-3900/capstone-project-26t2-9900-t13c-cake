@@ -105,6 +105,7 @@ function validateEventType(value: unknown): WebsiteUsageEventType {
   return value as WebsiteUsageEventType;
 }
 
+/** Parse analytics period query values; unsupported values default to 30 days. */
 export function parseWebsiteUsagePeriodDays(value: unknown): WebsiteUsagePeriodDays {
   const parsed = typeof value === "string" ? Number(value) : value;
 
@@ -238,7 +239,7 @@ async function deleteExpiredUsageEvents({ force = false }: { force?: boolean } =
   lastUsageCleanupAt = now;
 }
 
-/** Website usage metrics use anonymous aggregate events only. */
+/** Layer 3 — anonymous website usage events and admin analytics summaries. */
 export const websiteUsageService = {
   async recordEvent(payload: unknown): Promise<void> {
     if (typeof payload !== "object" || payload === null || Array.isArray(payload)) {

@@ -372,6 +372,7 @@ function PeriodSelector({
   );
 }
 
+/** Admin analytics dashboard for anonymous website usage metrics. */
 export function WebsiteUsagePage() {
   const [selectedPeriod, setSelectedPeriod] = useState<WebsiteUsagePeriodDays>(30);
   const [state, setState] = useState<LoadState>({ status: "loading" });

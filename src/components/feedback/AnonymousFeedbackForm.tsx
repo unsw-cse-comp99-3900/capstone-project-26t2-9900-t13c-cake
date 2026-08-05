@@ -19,6 +19,7 @@ const toolAreas: Array<{ value: string; label: TranslationKey }> = [
   { value: "General experience", label: "areaGeneral" },
 ];
 
+/** CAKE-13 — anonymous feedback survey form submitted to POST /api/feedback. */
 export function AnonymousFeedbackForm() {
   const { t } = useLanguage();
   const router = useRouter();

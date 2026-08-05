@@ -253,6 +253,7 @@ function collectSpeechItems(maximumLength = 220): SpeechItem[] {
       .map((text) => ({ element, text })));
 }
 
+/** Split long text into speech chunks under the browser utterance length limit. */
 export function splitSpeechText(text: string, maximumLength = 220): string[] {
   const sentences = text.match(/[^.!?。！？]+[.!?。！？]*/g) ?? [text];
   const chunks: string[] = [];

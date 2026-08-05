@@ -17,6 +17,7 @@ type LanguageContextValue = {
 const STORAGE_KEY = "cake-language";
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
+/** Provides UI language state and `t()` lookups for public and admin screens. */
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>("en");
 
@@ -46,6 +47,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 
+/** Hook for translated UI strings from LanguageProvider. */
 export function useLanguage(): LanguageContextValue {
   const value = useContext(LanguageContext);
   if (!value) throw new Error("useLanguage must be used within LanguageProvider");

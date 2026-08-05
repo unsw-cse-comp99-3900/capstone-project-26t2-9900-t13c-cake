@@ -6,6 +6,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   NOT_CONFIGURED: "Administrator account is not configured.",
 };
 
+/** AuthController — GET /api/auth/recovery/contacts (recovery email status, CAKE-10). */
 export async function GET(request: Request) {
   const auth = requireAdmin(request);
   if ("response" in auth) {

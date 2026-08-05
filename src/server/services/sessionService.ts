@@ -1,6 +1,8 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
+/** HttpOnly cookie name for administrator sessions (CAKE-10). */
 export const ADMIN_SESSION_COOKIE = "admin_session";
+/** Session lifetime in seconds (8 hours). */
 export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 8;
 
 export type AdminSessionPayload = {
@@ -44,6 +46,7 @@ function sign(encodedPayload: string, secret: string): string {
   return createHmac("sha256", secret).update(encodedPayload).digest("base64url");
 }
 
+/** Layer 3 — HMAC-signed admin session tokens (CAKE-10). */
 export function createSessionToken(username: string): string {
   const payload: AdminSessionPayload = {
     username,
@@ -55,6 +58,7 @@ export function createSessionToken(username: string): string {
   return `${encodedPayload}.${signature}`;
 }
 
+/** Verify a session token signature and expiry; returns null when invalid. */
 export function verifySessionToken(token: string | undefined): AdminSessionPayload | null {
   if (!token) {
     return null;

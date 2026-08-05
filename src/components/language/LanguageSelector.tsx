@@ -11,6 +11,7 @@ type LanguageSelectorProps = {
 
 const languages = Object.entries(languageLabels) as [Language, string][];
 
+/** Language switcher (and accessibility entry) for public/admin chrome. */
 export function LanguageSelector({ variant = "default" }: LanguageSelectorProps) {
   const { language, setLanguage, t } = useLanguage();
   const isHero = variant === "hero";

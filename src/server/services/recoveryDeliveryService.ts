@@ -29,6 +29,7 @@ function readSmtpConfig() {
   return { host, port, user, pass, from };
 }
 
+/** Layer 3 — SMTP delivery for administrator recovery emails (CAKE-10). */
 export const recoveryDeliveryService = {
   isConfigured(): boolean {
     return Boolean(readSmtpConfig());

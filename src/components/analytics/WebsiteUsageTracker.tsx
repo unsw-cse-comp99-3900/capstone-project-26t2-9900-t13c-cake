@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useBrowserPathname } from "@/hooks/useBrowserPathname";
 import type { WebsiteUsageEventType } from "@/server/services/websiteUsageService";
 
+/** Fire-and-forget anonymous usage events (skips /admin paths). */
 export function trackWebsiteUsage(
   eventType: WebsiteUsageEventType,
   metadata?: Record<string, unknown>,
@@ -31,6 +32,7 @@ export function trackWebsiteUsage(
   });
 }
 
+/** Records public page views for anonymous analytics. */
 export function WebsiteUsageTracker() {
   const pathname = useBrowserPathname();
 

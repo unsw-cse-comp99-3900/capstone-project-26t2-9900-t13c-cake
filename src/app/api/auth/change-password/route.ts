@@ -29,6 +29,7 @@ function applySessionCookie(response: NextResponse, username: string) {
 }
 
 /** AuthController — POST /api/auth/change-password (CAKE-10) */
+/** AuthController — POST /api/auth/change-password (CAKE-10) */
 export async function POST(request: Request) {
   const auth = requireAdmin(request);
   if ("response" in auth) {

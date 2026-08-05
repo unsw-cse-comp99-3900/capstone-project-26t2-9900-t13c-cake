@@ -15,6 +15,7 @@ function maskEmail(email: string): string {
   return `${visible}${"*".repeat(Math.max(2, local.length - visible.length))}@${domain}`;
 }
 
+/** Layer 3 — public password recovery via email OTP or backup code (CAKE-10). */
 export const accountRecoveryService = {
   async getPublicOptions() {
     const [contacts, backupStatus] = await Promise.all([

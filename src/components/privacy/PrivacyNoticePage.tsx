@@ -4,6 +4,7 @@ import Link from "next/link";
 import { LanguageSelector } from "@/components/language/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+/** CAKE-9 — privacy and data-scope notice for public users. */
 export function PrivacyNoticePage() {
   const { t } = useLanguage();
   const dataItems = [

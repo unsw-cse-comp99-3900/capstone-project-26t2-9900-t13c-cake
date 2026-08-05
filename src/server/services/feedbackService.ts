@@ -102,6 +102,7 @@ function buildSummary(responses: AnonymousFeedbackDTO[]): AnonymousFeedbackSumma
   };
 }
 
+/** Layer 3 — validate and store anonymous public feedback (CAKE-13). */
 export const feedbackService = {
   FeedbackValidationError,
 

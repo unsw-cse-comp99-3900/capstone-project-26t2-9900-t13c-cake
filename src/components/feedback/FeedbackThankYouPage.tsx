@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FeedbackShell } from "./FeedbackShell";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+/** CAKE-13 — confirmation screen after anonymous feedback is saved. */
 export function FeedbackThankYouPage() {
   const { t } = useLanguage();
 

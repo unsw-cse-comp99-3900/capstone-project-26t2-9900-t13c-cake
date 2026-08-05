@@ -9,6 +9,7 @@ type FeedbackShellProps = {
   children: ReactNode;
 };
 
+/** Shared chrome for feedback routes (header + language controls). */
 export function FeedbackShell({ children }: FeedbackShellProps) {
   const { t } = useLanguage();
 

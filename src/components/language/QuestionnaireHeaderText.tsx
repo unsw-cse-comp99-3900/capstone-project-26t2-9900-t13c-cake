@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { TranslationKey } from "@/i18n/translations";
 
+/** Questionnaire header brand link (or back-home text when homeOnly). */
 export function QuestionnaireHeaderText({ homeOnly = false }: { homeOnly?: boolean }) {
   const { t } = useLanguage();
   if (homeOnly) return <>{t("backHome")}</>;

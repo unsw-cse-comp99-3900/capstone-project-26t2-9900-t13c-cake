@@ -8,6 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const citation =
   "Johnston, D., Nguyen, L., Liu, Y., Wei, X., Dai, J., Li, J., Zhang, Z., & Yang, Z. (2026). Consumer Rep Remuneration Tool [Web application]. i2i, UNSW Population Health and UNSW COMP9900/3900 Team T13C.";
 
+/** CAKE-1 — public landing page with overview, citation, and questionnaire CTA. */
 export function LandingPage() {
   const { t } = useLanguage();
   const [citationStatus, setCitationStatus] = useState<"idle" | "copied" | "failed">("idle");
