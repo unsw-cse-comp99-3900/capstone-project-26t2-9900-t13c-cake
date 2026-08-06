@@ -1,95 +1,138 @@
 # Consumer Rep Remuneration Tool
 
-**UNSW COMP9900/3900 · Capstone 26T2 · Team T13C Cake**  
-**Client:** Deborah Johnston & Loc Nguyen (i2i, UNSW Population Health)
+UNSW COMP9900/3900 Capstone 26T2, Team T13C Cake
 
-Interactive decision-support web app that helps users find evidence-based remuneration guidance for health consumer representatives in Australia.
+## Project Purpose
 
-Public users complete a short questionnaire and compare matched evidence.  
-Administrators maintain the evidence base, review anonymous feedback, and view usage analytics.
+The Consumer Rep Remuneration Tool is an interactive decision-support web application for health consumer representatives in Australia.
 
----
+It helps public users find evidence-based remuneration guidance by completing a short questionnaire and reviewing matched evidence. It also provides an administrator centre for maintaining the evidence base, importing and exporting records, reviewing anonymous feedback, and viewing anonymous usage analytics.
 
-## Features
+## Key Features
 
-| Area | What it does |
-|------|----------------|
-| Public questionnaire | Jurisdiction + multi-context flow, filtered evidence results, side-by-side comparison |
-| Results export | Print / PDF export of matched guidance |
-| Multilingual UI | Language selector for the public interface |
-| Privacy & feedback | Privacy notice + anonymous feedback survey |
-| Admin centre | Login, account recovery, evidence CRUD, Excel import/export |
-| Analytics | Anonymous website usage events for administrators |
-| Accessibility | Public + admin controls for text size, read-aloud speed and highlighting, high contrast, keyboard navigation, focus styles, skip link, ARIA support, and multilingual keyboard hints |
-| Deployment | Docker + PostgreSQL packaging for client handover |
+- Public questionnaire for jurisdiction and engagement context selection
+- Evidence-based results filtered from the remuneration guidance database
+- Side-by-side result comparison
+- Print and PDF export for matched results
+- Multilingual public interface support
+- Privacy notice and anonymous feedback form
+- Administrator login and account recovery
+- Evidence record create, read, update, and soft delete workflows
+- Excel import and export for bulk evidence management
+- Anonymous feedback summary for administrators
+- Anonymous website usage analytics
+- Accessibility support, including high contrast, text controls, keyboard navigation, focus styles, and read-aloud settings
+- Docker-based deployment package with PostgreSQL
 
----
+## Technology Stack
 
-## Tech stack
+| Area | Technology |
+|---|---|
+| Frontend | Next.js 15, React 19, TypeScript, Tailwind CSS |
+| API/backend | Next.js App Router API routes |
+| Database | PostgreSQL |
+| ORM | Prisma |
+| Authentication | Signed cookie session for a single administrator account |
+| Excel handling | SheetJS (`xlsx`) |
+| Email recovery | Nodemailer, optional SMTP configuration |
+| Testing | Vitest |
+| Deployment | Docker, Docker Compose, Node.js 22 |
 
-- **Frontend / API:** Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS  
-- **Data:** Prisma ORM + **PostgreSQL**  
-- **Auth:** Cookie session for a single administrator account  
-- **Excel:** SheetJS (`xlsx`) for admin bulk import/export  
-- **Runtime:** Node.js 22 · Docker Compose (app + Postgres 16)
+## High-Level Architecture
 
----
+The project uses a full-stack Next.js architecture:
 
-## Quick start
+- `src/app` contains App Router pages and API routes.
+- `src/components` contains reusable UI components for public, results, feedback, and admin pages.
+- `src/server/services` contains backend business logic.
+- `src/server/repositories` contains Prisma database access logic.
+- `src/server/middleware` contains reusable admin authentication checks.
+- `src/server/db` contains the shared Prisma client.
+- `src/lib` contains shared client/server utilities, including filtering and result export logic.
+- `prisma` contains the database schema, migrations, seed data, and seed scripts.
+- `docker` contains the container entrypoint used during deployment.
 
-### Option A — Docker (recommended for client handover)
+## Main Data Models
 
-Requirements: [Docker Desktop](https://www.docker.com/products/docker-desktop/) running.
+| Model | Purpose |
+|---|---|
+| `EvidenceRecord` | Stores remuneration evidence records, including jurisdiction, context, engagement level, rates, links, and guidance flags. |
+| `AdminAccount` | Stores the administrator account, password hash, recovery email state, and backup recovery code state. |
+| `AnonymousFeedback` | Stores anonymous feedback responses and ratings. |
+| `WebsiteUsageEvent` | Stores anonymous usage events for analytics. |
+
+## Main Routes
+
+| Route | Purpose |
+|---|---|
+| `/` | Landing page |
+| `/questionnaire` | Public decision questionnaire |
+| `/privacy` | Privacy notice |
+| `/feedback` | Anonymous feedback |
+| `/admin` | Administrator centre |
+| `/api/evidence` | Public evidence API and protected admin evidence creation |
+| `/api/evidence/import` | Protected Excel import |
+| `/api/evidence/export` | Protected Excel export |
+| `/api/auth/*` | Admin login, logout, session, account settings, and recovery |
+| `/api/feedback` | Public anonymous feedback submission |
+| `/api/admin/feedback` | Protected feedback summary |
+| `/api/usage` | Anonymous usage event collection and protected analytics summary |
+
+## Environment Variables
+
+Copy `.env.example` to `.env` and configure the required values.
+
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `ADMIN_USERNAME` | Initial administrator username |
+| `ADMIN_PASSWORD` | Initial administrator password |
+| `SESSION_SECRET` | Secret used to sign admin session tokens |
+| `AUTH_COOKIE_SECURE` | Controls secure cookie behavior |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | Optional email recovery settings |
+| `RUN_SEED` | Enables database seeding on Docker startup |
+
+## Running with Docker
+
+Docker is the recommended handover option.
 
 ```bash
 cp .env.example .env
-# Edit ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_SECRET (optional SMTP)
 docker compose up --build
 ```
 
-| Service | URL / port |
-|---------|------------|
-| Web app | http://localhost:3000 |
-| PostgreSQL | `localhost:5432` — user / password / db: `cake` |
+The application will be available at:
 
-On first boot the app container:
+```text
+http://localhost:3000
+```
 
-1. Runs `prisma migrate deploy`
-2. Seeds **71** evidence records (`RUN_SEED=true`)
-3. Starts Next.js on port **3000**
+On startup, the app container applies Prisma migrations. If `RUN_SEED=true`, it also seeds the evidence database.
 
-After the first successful start, set in `.env`:
+After the first successful seed, set:
 
 ```env
 RUN_SEED=false
 ```
 
-Useful commands:
+## Running Locally
+
+Start PostgreSQL with Docker Compose:
 
 ```bash
-docker compose ps
-docker compose logs -f app
-docker compose down          # stop
-docker compose down -v       # stop and delete DB volume
+docker compose up db -d
 ```
 
-### Option B — Local Node (PostgreSQL required)
+Install dependencies, migrate, seed, and start the development server:
 
 ```bash
-# 1) Start only the database
-docker compose up db -d
-
-# 2) Install and configure
 npm install
-cp .env.example .env
-# DATABASE_URL=postgresql://cake:cake@localhost:5432/cake?schema=public
-
-# 3) Migrate, seed, run
 npx prisma migrate deploy
 npm run db:seed
 npm run dev
 ```
 
+<<<<<<< Updated upstream
 Key routes:
 
 | Route | Description |
@@ -190,16 +233,28 @@ Main tables: `evidence_records`, `admin_account`, `anonymous_feedback`, `website
 | `npm run db:migrate` | Prisma migrate (dev) |
 | `npm run db:seed` | Seed evidence data |
 | `npm run db:import-excel` | Rebuild `seed-data.json` from Excel |
+=======
+## Useful Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start the development server |
+| `npm run build` | Build the production app |
+| `npm run start` | Start the production server |
+| `npm test` | Run Vitest tests |
+| `npm run db:migrate` | Run Prisma migration in development |
+| `npm run db:seed` | Seed database records |
+>>>>>>> Stashed changes
 | `npm run db:studio` | Open Prisma Studio |
-| `npm run reset:next` | Clear Next.js cache |
-| `docker compose up --build` | Build & run app + Postgres |
-| `docker compose up db -d` | Postgres only |
+| `npm run db:import-excel` | Regenerate seed data from Excel |
+| `docker compose up --build` | Build and run the app with PostgreSQL |
 
----
+## Testing
 
-## Testing & CI
+Run the test suite with:
 
 ```bash
+<<<<<<< Updated upstream
 # Needs a reachable Postgres (e.g. docker compose up db -d)
 # Unit/integration tests use cake_test by default (created automatically if missing)
 npm test
@@ -235,63 +290,40 @@ src/lib/                 # Filter engine, PDF export, shared utils
 src/i18n/                # Public UI translations
 prisma/                  # Schema, migrations, seed
 docker/                  # Container entrypoint
+=======
+npm test
 ```
 
-### Story ownership (summary)
+Some backend tests require a reachable PostgreSQL database, for example from:
 
-| Story | Contributors |
-|-------|--------------|
-| CAKE-1 Landing page | Jiawei Dai |
-| CAKE-2 Evidence database | Yihui Liu, Zeyu Yang |
-| CAKE-3 Quiz wizard | Jiawei Dai |
-| CAKE-4 Filter engine | Jialun Li, Zhengqian Zhang |
-| CAKE-5 Results display | Jiawei Dai |
-| CAKE-8 Accessibility | Yihui Liu |
-| CAKE-9 Privacy notice | Zhengqian Zhang |
-| CAKE-10 Admin authentication | Zeyu Yang |
-| CAKE-12 Bulk Excel import/export | Yihui Liu |
-| CAKE-14 Print / PDF export | Zeyu Yang |
-| CAKE-15 Anonymous feedback | Zhengqian Zhang |
-| CAKE-16 Auto-Translation Support | Yihui Liu |
+```bash
+docker compose up db -d
+>>>>>>> Stashed changes
+```
 
----
+## Deployment Notes
 
-## Branch strategy
+The Docker setup contains two services:
 
-| Branch | Role |
-|--------|------|
-| `main` | Stable / release |
-| `dev` | Integration |
-| `feat/*` | Feature work (e.g. `feat/docker`) |
+- `app`: the Next.js production server
+- `db`: PostgreSQL 16
 
-1. Branch from `dev`  
-2. Open PR into `dev`  
-3. Merge `dev` → `main` when ready to release  
+The application image is built with a multi-stage Dockerfile. The runtime container applies database migrations, optionally seeds the database, and starts the standalone Next.js server on port 3000.
 
----
+## Project Structure
 
-## Client handover checklist
+```text
+src/app/                 Next.js pages and API routes
+src/components/          UI components
+src/server/              Backend services, repositories, middleware, and database client
+src/lib/                 Shared utilities and filtering/export logic
+src/i18n/                Translation data
+prisma/                  Prisma schema, migrations, and seed data
+docker/                  Docker entrypoint
+public/                  Static assets
+scripts/                 Maintenance and import/translation scripts
+```
 
-1. Install Docker Desktop  
-2. Provide `.env` values (admin credentials, `SESSION_SECRET`, optional SMTP)  
-3. Run `docker compose up --build -d`  
-4. Open http://localhost:3000 — verify questionnaire + `/admin` login (complete backup recovery code setup when prompted)  
-5. Set `RUN_SEED=false` for subsequent restarts  
-6. Back up the `cake_pg_data` volume (or hosted Postgres) for long-term use  
+## Summary
 
-For hosted Postgres (Neon / Supabase / i2i), point `DATABASE_URL` at that instance and run migrate + seed once before or on first app start.
-
----
-
-## Team
-
-| Name | Role |
-|------|------|
-| Xixi Wei | Project Owner |
-| Zeyu Yang | Scrum Master |
-| Yihui Liu | Test Engineer |
-| Jiawei Dai | Frontend Engineer |
-| Jialun Li | Backend Engineer |
-| Zhengqian Zhang | UI/UX Engineer |
-
-**Repository:** [capstone-project-26t2-9900-t13c-cake](https://github.com/unsw-cse-comp99-3900/capstone-project-26t2-9900-t13c-cake)
+This project delivers a practical, evidence-driven remuneration guidance tool with a public decision workflow and a protected administrator backend. It combines Next.js, Prisma, PostgreSQL, Docker, and focused accessibility support to provide a maintainable client handover package.
