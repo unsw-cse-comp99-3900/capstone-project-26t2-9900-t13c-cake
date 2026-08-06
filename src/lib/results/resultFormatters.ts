@@ -5,7 +5,7 @@ import type { MultiQuizFilters, QuizFilters } from "@/lib/filter/filterService";
 export const RESULTS_DISCLAIMER =
   "This tool provides indicative guidance only. Rates and policies may change. Always confirm with the publishing organisation before budgeting.";
 
-export const TOOL_TITLE = "Consumer Rep Remuneration Tool";
+export const TOOL_TITLE = "Consumer Representative Remuneration Tool";
 
 /** Format an evidence row's hourly rate range for results cards. */
 export function formatRateRange(record: EvidenceRecordDTO): string {

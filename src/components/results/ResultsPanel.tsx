@@ -287,12 +287,6 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
               deborah.johnston@unsw.edu.au
             </a>
             <a
-              href="tel:+610290659414"
-              className="text-teal-800 underline underline-offset-4 transition hover:text-teal-950 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-            >
-              +61 (02) 9065 9414
-            </a>
-            <a
               href="/feedback"
               className="text-teal-800 underline underline-offset-4 transition hover:text-teal-950 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
             >

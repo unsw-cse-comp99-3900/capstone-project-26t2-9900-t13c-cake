@@ -1,4 +1,4 @@
-# Consumer Rep Remuneration Tool
+# Consumer Representative Remuneration Tool
 
 UNSW COMP9900/3900 Capstone 26T2, Team T13C Cake
 

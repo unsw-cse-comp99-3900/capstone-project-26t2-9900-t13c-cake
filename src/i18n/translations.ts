@@ -15,7 +15,7 @@ export const languageLabels: Record<Language, string> = {
 
 const en = {
   language: "Language",
-  toolTitle: "Consumer Rep Remuneration Tool",
+  toolTitle: "Consumer Representative Remuneration Tool",
   backHome: "Back to home",
   exit: "Exit",
   questionnaireProgress: "Questionnaire progress",
@@ -35,7 +35,7 @@ const en = {
   continue: "Continue",
   contextHeading: "What is the research context and evidence coverage?",
   contextHelp:
-    "Choose the area that best describes the work. If more than one area applies, configure each one separately.",
+    "Choose the area that best describes the work. If more than one area applies, select each one separately.",
   loadingOptions: "Loading options from the evidence database...",
   tryAgain: "Try again",
   selectContexts: "Select research contexts",
@@ -143,7 +143,7 @@ const en = {
   cite: "Cite",
   citeThisTool: "Cite this tool",
   administratorCentre: "Administrator centre",
-  copyright: "© 2026 Consumer Rep Remuneration Tool",
+  copyright: "© 2026 Consumer Representative Remuneration Tool",
   resultsSupportHelp: "Need help interpreting results or want to provide feedback?",
   developedWith: "Developed with i2i, UNSW Population Health",
   privacyScope: "Privacy/Data Scope",
@@ -335,7 +335,7 @@ const zh: Record<TranslationKey, string> = {
   clearSelection: "清除选择",
   continue: "继续",
   contextHeading: "研究背景和证据覆盖情况是什么？",
-  contextHelp: "选择最符合该工作的领域。如果适用多个领域，请分别配置每个领域。",
+  contextHelp: "选择最符合该工作的领域。如果适用多个领域，请分别选择每个领域。",
   loadingOptions: "正在从证据数据库加载选项……",
   tryAgain: "重试",
   selectContexts: "选择研究背景",

@@ -7,7 +7,7 @@ test.describe("Landing page", () => {
     await dismissAccessibilityTip(page);
 
     await expect(
-      page.getByRole("heading", { name: "Consumer Rep Remuneration Tool" }),
+      page.getByRole("heading", { name: "Consumer Representative Remuneration Tool" }),
     ).toBeVisible();
 
     await page

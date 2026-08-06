@@ -11,10 +11,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Consumer Rep Remuneration Tool",
+  title: "Consumer Representative Remuneration Tool",
   description:
     "Interactive decision tool to support remuneration for health consumer representatives in Australia.",
-  applicationName: "Consumer Rep Remuneration Tool",
+  applicationName: "Consumer Representative Remuneration Tool",
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     apple: [{ url: "/apple-icon.svg", type: "image/svg+xml" }],

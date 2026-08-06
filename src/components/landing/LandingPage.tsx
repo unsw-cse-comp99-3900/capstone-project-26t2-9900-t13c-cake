@@ -6,7 +6,7 @@ import { LanguageSelector } from "@/components/language/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const citation =
-  "Johnston, D., Nguyen, L., Liu, Y., Wei, X., Dai, J., Li, J., Zhang, Z., & Yang, Z. (2026). Consumer Rep Remuneration Tool [Web application]. i2i, UNSW Population Health and UNSW COMP9900/3900 Team T13C.";
+  "Johnston, D., Nguyen, L., Liu, Y., Wei, X., Dai, J., Li, J., Zhang, Z., & Yang, Z. (2026). Consumer Representative Remuneration Tool [Web application]. i2i, UNSW Population Health and UNSW COMP9900/3900 Team T13C.";
 
 /** CAKE-1 — public landing page with overview, citation, and questionnaire CTA. */
 export function LandingPage() {
@@ -206,7 +206,7 @@ export function LandingPage() {
       </section>
 
       <section className="border-b border-teal-100 bg-teal-50">
-        <div className="mx-auto grid w-full max-w-7xl gap-x-6 gap-y-5 px-6 py-7 sm:px-8 lg:grid-cols-[1.25fr_1.35fr_1.1fr_1.1fr_minmax(150px,0.7fr)] lg:items-center">
+        <div className="mx-auto grid w-full max-w-7xl gap-x-6 gap-y-5 px-6 py-7 sm:px-8 lg:grid-cols-[1.25fr_1.5fr_1.2fr_minmax(150px,0.7fr)] lg:items-center">
           <div>
             <h2 className="whitespace-nowrap font-[Georgia,serif] text-2xl text-teal-950">
               {t("contactSupport")}
@@ -220,15 +220,6 @@ export function LandingPage() {
               className="mt-2 block whitespace-nowrap text-sm font-semibold text-teal-800 transition hover:text-teal-950"
             >
               deborah.johnston@unsw.edu.au
-            </a>
-          </div>
-          <div className="border-slate-400/50 lg:border-l lg:pl-6">
-            <p className="text-sm text-slate-700">{t("phone")}</p>
-            <a
-              href="tel:+610290659414"
-              className="mt-2 block text-sm font-semibold text-teal-800 transition hover:text-teal-950"
-            >
-              +61 (02) 9065 9414
             </a>
           </div>
           <div className="border-slate-400/50 lg:border-l lg:pl-6">
