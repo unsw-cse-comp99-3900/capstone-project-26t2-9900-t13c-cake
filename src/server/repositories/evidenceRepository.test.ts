@@ -25,7 +25,7 @@ async function ensureTestDatabase(url: string) {
   }
 
   const admin = new PrismaClient({
-    datasources: { db: { url: `${base}/cake` } },
+    datasources: { db: { url: `${base}/postgres` } },
   });
 
   try {
