@@ -38,7 +38,7 @@ Public users complete a short questionnaire, select their jurisdiction and engag
 | Excel import/export | SheetJS (`xlsx`) |
 | PDF/print export | jsPDF, browser print helpers |
 | Email recovery | Nodemailer with optional SMTP |
-| Testing | Vitest |
+| Testing | Vitest (unit/API), Playwright (E2E) |
 | Deployment | Docker, Docker Compose, Node.js 22 |
 
 ## Architecture Summary
@@ -170,7 +170,10 @@ npm run dev
 | `npm run dev` | Start development server |
 | `npm run build` | Build production app |
 | `npm run start` | Start production server |
-| `npm test` | Run Vitest tests |
+| `npm test` | Run Vitest unit/API tests |
+| `npm run test:coverage` | Run Vitest with V8 coverage report |
+| `npm run test:e2e` | Run Playwright end-to-end tests |
+| `npm run test:regression` | Run Vitest then Playwright |
 | `npm run db:migrate` | Run Prisma migration in development |
 | `npm run db:seed` | Seed database |
 | `npm run db:studio` | Open Prisma Studio |
@@ -179,17 +182,66 @@ npm run dev
 
 ## Testing
 
-Run:
+The project uses two layers of automated tests:
+
+| Layer | Tool | What it covers |
+|---|---|---|
+| Unit / API | Vitest | Services, repositories, utils, shared `lib` logic, and App Router API routes (`*.test.ts`) |
+| End-to-end | Playwright | Browser flows: landing, questionnaire → results, feedback, admin login and workspace (`e2e/`) |
+
+CI (`.github/workflows/ci.yml`) runs lint, Vitest, production build, and Playwright on Chromium.
+
+### Commands
 
 ```bash
+# Unit / API tests (188 tests across 42 files)
 npm test
+
+# Watch mode while developing
+npm run test:watch
+
+# Unit / API tests with coverage (HTML + terminal report)
+npm run test:coverage
+
+# End-to-end (starts the app automatically unless PLAYWRIGHT_BASE_URL is set)
+npm run test:e2e
+
+# Playwright UI mode
+npm run test:e2e:ui
+
+# Full regression suite
+npm run test:regression
 ```
 
-Some backend tests require PostgreSQL to be running:
+### Prerequisites
+
+Some repository tests use a dedicated Postgres database (`cake_test` by default):
 
 ```bash
 docker compose up db -d
+# Optional override:
+# TEST_DATABASE_URL=postgresql://cake:cake@localhost:5432/cake_test?schema=public
 ```
+
+E2E expects migrations and seeded evidence data. Locally, Playwright boots `npm run dev` (or `npm run start` in CI) and `e2e/global-setup.ts` resets the admin account from `ADMIN_*` env vars. Install the browser once:
+
+```bash
+npx playwright install chromium
+```
+
+### Coverage
+
+Coverage is measured with `@vitest/coverage-v8` over backend and shared logic (`src/server`, `src/app/api`, `src/lib`, `prisma`), not React page components (those are exercised by Playwright).
+
+Approximate Vitest coverage after `npm run test:coverage`:
+
+| Metric | Coverage |
+|---|---|
+| Lines / statements | ~78% |
+| Branches | ~76% |
+| Functions | ~90% |
+
+Open the HTML report at `coverage/index.html` after running `npm run test:coverage`.
 
 ## Deployment Notes
 
