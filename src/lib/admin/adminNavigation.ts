@@ -9,12 +9,15 @@ export type AdminNavItem = {
   story?: string;
 };
 
+/** Administrator hub paths and navigation items (CAKE-10). */
 export const ADMIN_HOME_PATH = "/admin";
 export const ADMIN_FORGOT_PASSWORD_PATH = "/admin/forgot-password";
+/** sessionStorage key for post-reset banner on the login screen. */
 export const ADMIN_RESET_MESSAGE_KEY = "admin-account-reset-message";
 
 export const ADMIN_PUBLIC_PATHS = [ADMIN_FORGOT_PASSWORD_PATH] as const;
 
+/** Available administrator tools shown on the account centre hub. */
 export const adminNavigation: AdminNavItem[] = [
   {
     id: "records",
@@ -50,6 +53,7 @@ export const adminNavigation: AdminNavItem[] = [
   },
 ];
 
+/** Resolve an admin nav item by exact pathname. */
 export function getAdminNavItem(pathname: string): AdminNavItem | undefined {
   return adminNavigation.find((item) => item.href === pathname);
 }

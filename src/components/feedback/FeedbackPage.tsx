@@ -5,6 +5,7 @@ import { AnonymousFeedbackForm } from "./AnonymousFeedbackForm";
 import { LanguageSelector } from "@/components/language/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+/** CAKE-13 — public anonymous feedback page. */
 export function FeedbackPage() {
   const { t } = useLanguage();
   return (

@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import type { TranslationKey } from "@/i18n/translations";
 
+/** Questionnaire header brand link (or back-home text when homeOnly). */
 export function QuestionnaireHeaderText({ homeOnly = false }: { homeOnly?: boolean }) {
   const { t } = useLanguage();
   if (homeOnly) return <>{t("backHome")}</>;
@@ -14,4 +16,10 @@ export function QuestionnaireHeaderText({ homeOnly = false }: { homeOnly?: boole
       {t("toolTitle")}
     </Link>
   );
+}
+
+export function TranslatedText({ translationKey }: { translationKey: TranslationKey }) {
+  const { t } = useLanguage();
+
+  return <>{t(translationKey)}</>;
 }

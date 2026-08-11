@@ -204,7 +204,7 @@ export async function exportResultsPdf({
 
     const [{ jsPDF }, { default: html2canvas }] = await Promise.all([
       import("jspdf"),
-      import("html2canvas"),
+      import("html2canvas-pro"),
     ]);
 
     const doc = new jsPDF({ unit: "pt", format: "a4", orientation: "portrait" });

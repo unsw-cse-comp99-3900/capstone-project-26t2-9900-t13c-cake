@@ -31,7 +31,7 @@ export function ResultsExportActions({
     try {
       await exportResultsPdf();
     } catch (error) {
-      console.error("Unable to export results PDF.", error);
+      console.error("[ResultsExportActions] PDF export failed:", error);
       setExportError(t("exportError"));
     } finally {
       setIsExporting(false);

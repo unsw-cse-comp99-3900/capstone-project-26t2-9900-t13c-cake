@@ -12,6 +12,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   NOT_CONFIGURED: "Administrator account is not configured.",
 };
 
+/** AuthController — POST /api/auth/recovery/verify (email OTP check before reset, CAKE-10). */
 export async function POST(request: Request) {
   let body: VerifyBody;
   try {

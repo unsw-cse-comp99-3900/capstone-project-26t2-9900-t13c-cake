@@ -4,12 +4,9 @@ import { EvidenceImportConflictError } from "@/server/repositories/evidenceRepos
 import { evidenceService } from "@/server/services/evidenceService";
 import {
   ExcelParseError,
-  type ExcelEvidenceRow,
-  type ImportPreviewRow,
-  type ImportPreviewSummary,
   excelParseService,
 } from "@/server/services/excelParseService";
-import { validationService } from "@/server/services/validationService";
+import { buildEvidenceImportPreview } from "@/server/services/evidenceImportPreview";
 
 function isExcelFile(value: FormDataEntryValue): value is File {
   return (
@@ -27,36 +24,6 @@ function findUploadedExcelFile(formData: FormData): File | null {
 function getApplyMode(request: Request, formData: FormData): boolean {
   const { searchParams } = new URL(request.url);
   return searchParams.get("apply") === "true" || formData.get("mode") === "apply";
-}
-
-async function buildPreview(rows: ExcelEvidenceRow[]): Promise<ImportPreviewSummary> {
-  const activeRecords = await evidenceService.listAllActiveEvidence();
-  const activeIds = new Set(activeRecords.map((record) => record.id));
-  const previewRows: ImportPreviewRow[] = rows.map((row, index) => {
-    const errors = validationService.validateExcelEvidenceRow(row);
-    const id = row.id.trim();
-
-    if (id !== "" && !activeIds.has(id)) {
-      errors.push(`No active EvidenceRecord found for id "${id}"`);
-    }
-
-    const action = errors.length > 0 ? "invalid" : id === "" ? "create" : "update";
-
-    return {
-      rowNumber: index + 2,
-      action,
-      data: row,
-      errors,
-    };
-  });
-
-  return {
-    totalRows: previewRows.length,
-    createCount: previewRows.filter((row) => row.action === "create").length,
-    updateCount: previewRows.filter((row) => row.action === "update").length,
-    invalidCount: previewRows.filter((row) => row.action === "invalid").length,
-    rows: previewRows,
-  };
 }
 
 /** ImportExportController — POST /api/evidence/import (CAKE-12) */
@@ -80,7 +47,8 @@ export async function POST(request: Request) {
     const applyMode = getApplyMode(request, formData);
     const workbookBuffer = await file.arrayBuffer();
     const rows = excelParseService.parseWorkbook(workbookBuffer);
-    const summary = await buildPreview(rows);
+    const activeRecords = await evidenceService.listAllActiveEvidence();
+    const summary = buildEvidenceImportPreview(rows, activeRecords);
 
     if (!applyMode) {
       return NextResponse.json(summary);

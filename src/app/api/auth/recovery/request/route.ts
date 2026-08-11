@@ -11,6 +11,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   RATE_LIMITED: "Please wait before requesting another recovery code.",
 };
 
+/** AuthController — POST /api/auth/recovery/request (email OTP for password reset, CAKE-10). */
 export async function POST() {
   try {
     const result = await accountRecoveryService.requestCode();

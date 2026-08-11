@@ -4,6 +4,7 @@ import {
   hashBackupRecoveryCode,
 } from "@/server/utils/backupRecoveryCodeUtils";
 
+/** Layer 3 — post-login backup recovery code setup and confirmation (CAKE-10). */
 export const backupRecoveryService = {
   async getStatus() {
     return adminAccountRepository.getBackupRecoveryStatus();

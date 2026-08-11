@@ -1,264 +1,258 @@
-# Consumer Rep Remuneration Tool
+# Consumer Representative Remuneration Tool
 
-**UNSW COMP9900/3900 · Capstone 26T2 · Team T13C Cake**  
-**Client:** Deborah Johnston & Loc Nguyen (i2i, UNSW Population Health)
+UNSW COMP9900/3900 Capstone 26T2, Team T13C Cake
 
-Interactive decision-support web app that helps users find evidence-based remuneration guidance for health consumer representatives in Australia.
+## Project Overview
 
-Public users complete a short questionnaire and compare matched evidence.  
-Administrators maintain the evidence base, review anonymous feedback, and view usage analytics.
+The Consumer Rep Remuneration Tool is a full-stack web application that helps Australian health consumer representatives find evidence-based remuneration guidance.
 
----
+Public users complete a short questionnaire, select their jurisdiction and engagement context, and receive matched evidence records. Administrators can manage the evidence database, import and export records, review anonymous feedback, and view anonymous usage analytics.
 
-## Features
+## Main Features
 
-| Area | What it does |
-|------|----------------|
-| Public questionnaire | Jurisdiction + multi-context flow, filtered evidence results, side-by-side comparison |
-| Results export | Print / PDF export of matched guidance |
-| Multilingual UI | Language selector for the public interface |
-| Privacy & feedback | Privacy notice + anonymous feedback survey |
-| Admin centre | Login, account recovery, evidence CRUD, Excel import/export |
-| Analytics | Anonymous website usage events for administrators |
-| Accessibility | Keyboard navigation, focus styles, skip link, ARIA support |
-| Deployment | Docker + PostgreSQL packaging for client handover |
+- Public landing page introducing the tool
+- Questionnaire for jurisdiction, context, subcategory, and engagement level selection
+- Evidence matching based on selected questionnaire answers
+- Grouped results with result cards and side-by-side comparison
+- Print and PDF export for results
+- Multilingual public interface
+- Accessibility controls for text, contrast, keyboard use, and read-aloud support
+- Anonymous feedback form
+- Administrator login and session-based access control
+- Evidence record CRUD management
+- Excel import and export for bulk evidence updates
+- Administrator feedback summary
+- Anonymous website usage analytics
+- Docker Compose deployment with PostgreSQL
 
----
+## Technology Stack
 
-## Tech stack
+| Area | Technology |
+|---|---|
+| Frontend | Next.js 15, React 19, TypeScript |
+| Styling | Tailwind CSS, global CSS |
+| Backend/API | Next.js App Router API routes |
+| Database | PostgreSQL |
+| ORM | Prisma |
+| Authentication | Signed admin session cookie |
+| Excel import/export | SheetJS (`xlsx`) |
+| PDF/print export | jsPDF, browser print helpers |
+| Email recovery | Nodemailer with optional SMTP |
+| Testing | Vitest (unit/API), Playwright (E2E) |
+| Deployment | Docker, Docker Compose, Node.js 22 |
 
-- **Frontend / API:** Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS  
-- **Data:** Prisma ORM + **PostgreSQL**  
-- **Auth:** Cookie session for a single administrator account  
-- **Excel:** SheetJS (`xlsx`) for admin bulk import/export  
-- **Runtime:** Node.js 22 · Docker Compose (app + Postgres 16)
+## Architecture Summary
 
----
+The application uses a full-stack Next.js architecture.
 
-## Quick start
+- `src/app` defines pages, layouts, global styles, and API routes.
+- `src/components` contains feature-based React components.
+- `src/contexts` stores shared client state such as questionnaire state and language selection.
+- `src/lib` contains reusable filtering, formatting, export, constants, and API client logic.
+- `src/server` contains backend services, repositories, middleware, utilities, and the Prisma client.
+- `prisma` contains the schema, migrations, seed data, and seed scripts.
+- `docker` contains the production startup entrypoint.
 
-### Option A — Docker (recommended for client handover)
+## Frontend Structure
 
-Requirements: [Docker Desktop](https://www.docker.com/products/docker-desktop/) running.
+| Path | Purpose |
+|---|---|
+| `src/components/landing` | Public landing page components |
+| `src/components/quiz` | Questionnaire wizard, progress, jurisdiction step, and context step |
+| `src/components/results` | Results display, result cards, comparison, disclaimer, print, and PDF export |
+| `src/components/admin` | Admin layout, login gate, records, import/export, analytics, and account pages |
+| `src/components/feedback` | Anonymous feedback UI |
+| `src/components/accessibility` | Accessibility shell and controls |
+| `src/components/language` | Language selector and translated header text |
+| `src/contexts` | Quiz state and language context providers |
+| `src/i18n` | Translation dictionaries and option translations |
+
+## Backend Structure
+
+| Path | Purpose |
+|---|---|
+| `src/app/api` | API route handlers |
+| `src/server/services` | Business logic and validation workflows |
+| `src/server/repositories` | Prisma database access layer |
+| `src/server/middleware` | Admin authentication guard |
+| `src/server/db` | Shared Prisma client |
+| `src/server/utils` | Password and recovery-code helpers |
+| `prisma` | PostgreSQL schema, migrations, and seed data |
+
+## Main Data Models
+
+| Model | Purpose |
+|---|---|
+| `EvidenceRecord` | Stores remuneration evidence records, rates, jurisdictions, contexts, links, and guidance flags |
+| `AdminAccount` | Stores the single admin account, password hash, and recovery state |
+| `AnonymousFeedback` | Stores anonymous feedback ratings and comments |
+| `WebsiteUsageEvent` | Stores anonymous public usage events for analytics |
+
+## Key Routes
+
+| Route | Description |
+|---|---|
+| `/` | Landing page |
+| `/questionnaire` | Public questionnaire |
+| `/privacy` | Privacy notice |
+| `/feedback` | Anonymous feedback form |
+| `/admin` | Admin account centre |
+| `/admin/records` | Evidence record management |
+| `/admin/import-export` | Excel import/export |
+| `/admin/analytics` | Usage analytics |
+| `/api/evidence` | Public evidence API and protected admin create endpoint |
+| `/api/evidence/[id]` | Protected update/delete endpoint |
+| `/api/evidence/import` | Protected Excel import |
+| `/api/evidence/export` | Protected Excel export |
+| `/api/auth/*` | Login, logout, session, account settings, and recovery |
+| `/api/feedback` | Anonymous feedback submission |
+| `/api/admin/feedback` | Protected feedback summary |
+| `/api/usage` | Anonymous usage event collection and protected usage summary |
+
+## Environment Variables
+
+Create `.env` from `.env.example`.
+
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `ADMIN_USERNAME` | Initial administrator username |
+| `ADMIN_PASSWORD` | Initial administrator password |
+| `SESSION_SECRET` | Secret for signing admin sessions |
+| `AUTH_COOKIE_SECURE` | Controls secure cookie behavior |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | Optional email recovery settings |
+| `RUN_SEED` | Enables seed data during Docker startup |
+
+## Run with Docker
+
+Docker Compose is the recommended handover setup.
 
 ```bash
 cp .env.example .env
-# Edit ADMIN_USERNAME, ADMIN_PASSWORD, SESSION_SECRET (optional SMTP)
 docker compose up --build
 ```
 
-| Service | URL / port |
-|---------|------------|
-| Web app | http://localhost:3000 |
-| PostgreSQL | `localhost:5432` — user / password / db: `cake` |
+Open:
 
-On first boot the app container:
+```text
+http://localhost:3000
+```
 
-1. Runs `prisma migrate deploy`
-2. Seeds **71** evidence records (`RUN_SEED=true`)
-3. Starts Next.js on port **3000**
+On startup, the app container runs Prisma migrations. If `RUN_SEED=true`, it also seeds the initial evidence dataset.
 
-After the first successful start, set in `.env`:
+After the first successful seed, set:
 
 ```env
 RUN_SEED=false
 ```
 
-Useful commands:
+## Run Locally
+
+Start PostgreSQL:
 
 ```bash
-docker compose ps
-docker compose logs -f app
-docker compose down          # stop
-docker compose down -v       # stop and delete DB volume
+docker compose up db -d
 ```
 
-### Option B — Local Node (PostgreSQL required)
+Install dependencies and run the app:
 
 ```bash
-# 1) Start only the database
-docker compose up db -d
-
-# 2) Install and configure
 npm install
-cp .env.example .env
-# DATABASE_URL=postgresql://cake:cake@localhost:5432/cake?schema=public
-
-# 3) Migrate, seed, run
 npx prisma migrate deploy
 npm run db:seed
 npm run dev
 ```
 
-Key routes:
-
-| Route | Description |
-|-------|-------------|
-| `/` | Landing page |
-| `/questionnaire` | Decision questionnaire |
-| `/privacy` | Privacy notice |
-| `/feedback` | Anonymous feedback |
-| `/admin` | Administrator account centre |
-| `/api/evidence` | Public evidence JSON API |
-
----
-
-## Environment variables
-
-Copy `.env.example` → `.env`. Do **not** commit real secrets.
-
-| Variable | Required | Purpose |
-|----------|----------|---------|
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `ADMIN_USERNAME` | Yes | Initial admin username |
-| `ADMIN_PASSWORD` | Yes | Initial admin password |
-| `SESSION_SECRET` | Yes | Session signing secret (long random string) |
-| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_FROM` | Optional | Email OTP recovery |
-| `RUN_SEED` | Docker | `true` on first boot, then `false` |
-
-Backup recovery codes are generated in-app after the first admin login (hashed in PostgreSQL; single-use after a password reset). They are not set via environment variables.
-
-Docker Compose injects `DATABASE_URL` for the **app** service automatically (`…@db:5432…`).  
-For local Node against Compose Postgres, use `…@localhost:5432…`.
-
----
-
-## Docker layout
-
-```
-Dockerfile              # Multi-stage Next.js production image
-docker-compose.yml      # app + postgres:16
-docker/entrypoint.sh    # migrate → optional seed → node server.js
-.dockerignore
-```
-
-**Dockerfile stages**
-
-1. **deps** — `npm ci` (+ Prisma schema for `postinstall`)
-2. **builder** — `prisma generate` + `next build` (`output: "standalone"`)
-3. **runner** — production files, non-root `nextjs` user, entrypoint on port 3000
-
-PostgreSQL is **not** inside the app image; it runs as the `db` Compose service.
-
----
-
-## Database
-
-- Provider: **PostgreSQL** (Prisma)
-- Baseline migration: `prisma/migrations/20260802000000_init_postgres`
-- Seed source: `prisma/seed-data.json` (71 supervisor evidence rows)
-
-```bash
-npx prisma migrate deploy   # apply migrations
-npm run db:seed             # import seed data (skips if rows already exist)
-npm run db:studio           # Prisma Studio GUI
-npm run db:import-excel     # regenerate seed JSON from Excel (Python)
-```
-
-Main tables: `evidence_records`, `admin_account`, `anonymous_feedback`, `website_usage_events`.
-
----
-
-## Scripts
+## Useful Commands
 
 | Command | Description |
-|---------|-------------|
-| `npm run dev` | Development server |
-| `npm run build` | Production build |
-| `npm run start` | Start production server (non-Docker) |
-| `npm run lint` | ESLint |
-| `npm test` | Vitest unit tests |
-| `npm run db:migrate` | Prisma migrate (dev) |
-| `npm run db:seed` | Seed evidence data |
-| `npm run db:import-excel` | Rebuild `seed-data.json` from Excel |
+|---|---|
+| `npm run dev` | Start development server |
+| `npm run build` | Build production app |
+| `npm run start` | Start production server |
+| `npm test` | Run Vitest unit/API tests |
+| `npm run test:coverage` | Run Vitest with V8 coverage report |
+| `npm run test:e2e` | Run Playwright end-to-end tests |
+| `npm run test:regression` | Run Vitest then Playwright |
+| `npm run db:migrate` | Run Prisma migration in development |
+| `npm run db:seed` | Seed database |
 | `npm run db:studio` | Open Prisma Studio |
-| `npm run reset:next` | Clear Next.js cache |
-| `docker compose up --build` | Build & run app + Postgres |
-| `docker compose up db -d` | Postgres only |
+| `npm run db:import-excel` | Regenerate seed data from Excel |
+| `docker compose up --build` | Build and run app with PostgreSQL |
 
----
+## Testing
 
-## Testing & CI
+The project uses two layers of automated tests:
+
+| Layer | Tool | What it covers |
+|---|---|---|
+| Unit / API | Vitest | Services, repositories, utils, shared `lib` logic, and App Router API routes (`*.test.ts`) |
+| End-to-end | Playwright | Browser flows: landing, questionnaire → results, feedback, admin login and workspace (`e2e/`) |
+
+CI (`.github/workflows/ci.yml`) runs lint, Vitest, production build, and Playwright on Chromium.
+
+### Commands
 
 ```bash
-# Needs a reachable Postgres (e.g. docker compose up db -d)
+# Unit / API tests (188 tests across 42 files)
 npm test
-npm run build
+
+# Watch mode while developing
+npm run test:watch
+
+# Unit / API tests with coverage (HTML + terminal report)
+npm run test:coverage
+
+# End-to-end (starts the app automatically unless PLAYWRIGHT_BASE_URL is set)
+npm run test:e2e
+
+# Playwright UI mode
+npm run test:e2e:ui
+
+# Full regression suite
+npm run test:regression
 ```
 
-GitHub Actions (`.github/workflows/ci.yml`) on `main` / `dev`:
+### Prerequisites
 
-- Install → Prisma generate → lint → migrate → seed → test → build  
-- Uses a Postgres 16 service container
+Some repository tests use a dedicated Postgres database (`cake_test` by default):
 
----
-
-## Project structure (high level)
-
-```
-src/app/                 # Next.js App Router pages & API routes
-src/components/          # UI (landing, quiz, results, admin, feedback, …)
-src/server/              # Repositories, services, middleware
-src/lib/                 # Filter engine, PDF export, shared utils
-src/i18n/                # Public UI translations
-prisma/                  # Schema, migrations, seed
-docker/                  # Container entrypoint
+```bash
+docker compose up db -d
+# Optional override:
+# TEST_DATABASE_URL=postgresql://cake:cake@localhost:5432/cake_test?schema=public
 ```
 
-### Story ownership (summary)
+E2E expects migrations and seeded evidence data. Locally, Playwright boots `npm run dev` (or `npm run start` in CI) and `e2e/global-setup.ts` resets the admin account from `ADMIN_*` env vars. Install the browser once:
 
-| Story | Contributors |
-|-------|--------------|
-| CAKE-1 Landing page | Jiawei Dai |
-| CAKE-2 Evidence database | Yihui Liu, Zeyu Yang |
-| CAKE-3 Quiz wizard | Jiawei Dai |
-| CAKE-4 Filter engine | Jialun Li, Zhengqian Zhang |
-| CAKE-5 Results display | Jiawei Dai |
-| CAKE-8 Accessibility | Yihui Liu |
-| CAKE-9 Privacy notice | Zhengqian Zhang |
-| CAKE-10 Admin authentication | Zeyu Yang |
-| CAKE-12 Bulk Excel import/export | Yihui Liu |
-| CAKE-14 Print / PDF export | Zeyu Yang |
-| CAKE-15 Anonymous feedback | Zhengqian Zhang |
+```bash
+npx playwright install chromium
+```
 
----
+### Coverage
 
-## Branch strategy
+Coverage is measured with `@vitest/coverage-v8` over backend and shared logic (`src/server`, `src/app/api`, `src/lib`, `prisma`), not React page components (those are exercised by Playwright).
 
-| Branch | Role |
-|--------|------|
-| `main` | Stable / release |
-| `dev` | Integration |
-| `feat/*` | Feature work (e.g. `feat/docker`) |
+Approximate Vitest coverage after `npm run test:coverage`:
 
-1. Branch from `dev`  
-2. Open PR into `dev`  
-3. Merge `dev` → `main` when ready to release  
+| Metric | Coverage |
+|---|---|
+| Lines / statements | ~78% |
+| Branches | ~76% |
+| Functions | ~90% |
 
----
+Open the HTML report at `coverage/index.html` after running `npm run test:coverage`.
 
-## Client handover checklist
+## Deployment Notes
 
-1. Install Docker Desktop  
-2. Provide `.env` values (admin credentials, `SESSION_SECRET`, optional SMTP)  
-3. Run `docker compose up --build -d`  
-4. Open http://localhost:3000 — verify questionnaire + `/admin` login (complete backup recovery code setup when prompted)  
-5. Set `RUN_SEED=false` for subsequent restarts  
-6. Back up the `cake_pg_data` volume (or hosted Postgres) for long-term use  
+The Docker setup contains:
 
-For hosted Postgres (Neon / Supabase / i2i), point `DATABASE_URL` at that instance and run migrate + seed once before or on first app start.
+- `app`: Next.js production server
+- `db`: PostgreSQL 16 database
+- `cake_pg_data`: persistent database volume
 
----
+The application image uses a multi-stage Dockerfile. The runtime entrypoint applies migrations, optionally seeds data, and starts the standalone Next.js server on port 3000.
 
-## Team
+## Summary
 
-| Name | Role |
-|------|------|
-| Xixi Wei | Project Owner |
-| Zeyu Yang | Scrum Master |
-| Yihui Liu | Test Engineer |
-| Jiawei Dai | Frontend Engineer |
-| Jialun Li | Backend Engineer |
-| Zhengqian Zhang | UI/UX Engineer |
-
-**Repository:** [capstone-project-26t2-9900-t13c-cake](https://github.com/unsw-cse-comp99-3900/capstone-project-26t2-9900-t13c-cake)
+The project provides a public evidence-guidance workflow and a protected administrator backend. Its architecture separates frontend components, shared client logic, API routes, backend services, repository/database access, and deployment configuration, making the system easier to maintain and hand over.

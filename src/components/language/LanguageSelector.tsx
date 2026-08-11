@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { languageLabels, type Language } from "@/i18n/translations";
+import { AccessibilityMenu } from "@/components/accessibility/AccessibilityMenu";
 
 type LanguageSelectorProps = {
   variant?: "default" | "hero" | "questionnaire";
@@ -10,6 +11,7 @@ type LanguageSelectorProps = {
 
 const languages = Object.entries(languageLabels) as [Language, string][];
 
+/** Language switcher (and accessibility entry) for public/admin chrome. */
 export function LanguageSelector({ variant = "default" }: LanguageSelectorProps) {
   const { language, setLanguage, t } = useLanguage();
   const isHero = variant === "hero";
@@ -46,14 +48,24 @@ export function LanguageSelector({ variant = "default" }: LanguageSelectorProps)
 
   return (
     <div
-      ref={rootRef}
       className={[
-        "relative flex items-center gap-2 text-sm font-semibold",
-        isHero ? "text-teal-200" : isQuestionnaire ? "text-white/90" : "text-slate-700",
+        "flex flex-wrap items-center justify-end gap-3",
+        isHero ? "w-full flex-col items-stretch sm:w-auto sm:flex-row sm:items-center" : "",
       ].join(" ")}
     >
-      <span className={isQuestionnaire ? "sr-only" : undefined}>{t("language")}</span>
-      <div className="relative">
+      <div
+        ref={rootRef}
+        className={[
+          "relative flex items-center gap-2 text-sm font-semibold",
+          isHero
+            ? "w-full justify-end text-teal-200 sm:w-auto sm:justify-start"
+            : isQuestionnaire
+              ? "text-white/90"
+              : "text-slate-700",
+        ].join(" ")}
+      >
+        <span className={isQuestionnaire ? "sr-only" : undefined}>{t("language")}</span>
+        <div className="relative">
         {isQuestionnaire ? (
           <svg
             aria-hidden="true"
@@ -102,7 +114,7 @@ export function LanguageSelector({ variant = "default" }: LanguageSelectorProps)
             id={listId}
             role="listbox"
             aria-label={t("language")}
-            className="absolute right-0 z-30 mt-1 max-h-72 min-w-full overflow-auto rounded-md border border-slate-200 bg-white py-1 text-slate-900 shadow-lg"
+            className="absolute right-0 z-60 mt-1 max-h-72 min-w-full overflow-auto rounded-md border border-slate-200 bg-white py-1 text-slate-900 shadow-lg"
           >
             {languages.map(([value, label]) => {
               const selected = value === language;
@@ -125,7 +137,9 @@ export function LanguageSelector({ variant = "default" }: LanguageSelectorProps)
             })}
           </ul>
         ) : null}
+        </div>
       </div>
+      <AccessibilityMenu variant={variant} />
     </div>
   );
 }

@@ -12,6 +12,7 @@ async function readJson<T>(response: Response): Promise<T & ErrorResponse> {
   }
 }
 
+/** Client helpers for post-login backup recovery code setup (CAKE-10). */
 export async function generateBackupRecoveryCode(fetcher: Fetcher = fetch) {
   const response = await fetcher("/api/auth/recovery/backup/generate", {
     method: "POST",
@@ -32,6 +33,7 @@ export async function generateBackupRecoveryCode(fetcher: Fetcher = fetch) {
   };
 }
 
+/** Confirm that the generated backup code was saved securely. */
 export async function confirmBackupRecoveryCode(
   createdAt: string,
   fetcher: Fetcher = fetch,

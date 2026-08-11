@@ -34,6 +34,7 @@ type AdminAuthContextValue = {
 
 const AdminAuthContext = createContext<AdminAuthContextValue | null>(null);
 
+/** Read the current administrator session from AdminAuthProvider. */
 export function useAdminAuth() {
   const context = useContext(AdminAuthContext);
   if (!context) {
@@ -46,6 +47,7 @@ type AdminAuthProviderProps = {
   children: React.ReactNode;
 };
 
+/** Loads / refreshes admin session state for authenticated admin routes. */
 export function AdminAuthProvider({ children }: AdminAuthProviderProps) {
   const [session, setSession] = useState<SessionState>({ status: "loading" });
 

@@ -61,6 +61,20 @@ function formatJurisdictions(values: string[], language: ReturnType<typeof useLa
   return values.map((value) => labels.get(value) ?? value).join(", ");
 }
 
+function formatCoverageCount(value: string, language: ReturnType<typeof useLanguage>["language"]): string {
+  const count = Number(value);
+
+  if (!Number.isFinite(count)) {
+    return translateOption(language, value);
+  }
+
+  return `${count} ${count === 1 ? "category" : "categories"}`;
+}
+
+function formatGroupResultCount(count: number): string {
+  return `${count} ${count === 1 ? "result" : "results"}`;
+}
+
 /** CAKE-5 / CAKE-14 — ResultsPanel with grouped filters, print/export, and comparison */
 export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: ResultsPanelProps) {
   const { language, t } = useLanguage();
@@ -227,11 +241,8 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
                   {group.selection.subCategory
                     ? translateOption(language, group.selection.subCategory)
                     : t("noSubCategory")} /{" "}
-                  {t("groupResults", {
-                    context: translateOption(language, group.selection.context),
-                    engagement: translateOption(language, group.selection.engagementLevel),
-                    count: group.records.length,
-                  })}
+                  {formatCoverageCount(group.selection.engagementLevel, language)} /{" "}
+                  {formatGroupResultCount(group.records.length)}
                 </p>
               </div>
 
@@ -277,12 +288,6 @@ export function ResultsPanel({ filters, records, error, onRetry, onStartOver }: 
               className="text-teal-800 underline underline-offset-4 transition hover:text-teal-950 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
             >
               deborah.johnston@unsw.edu.au
-            </a>
-            <a
-              href="tel:+610290659414"
-              className="text-teal-800 underline underline-offset-4 transition hover:text-teal-950 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-            >
-              +61 (02) 9065 9414
             </a>
             <a
               href="/feedback"

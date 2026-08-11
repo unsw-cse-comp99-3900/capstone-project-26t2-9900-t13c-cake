@@ -6,8 +6,9 @@ import { LanguageSelector } from "@/components/language/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const citation =
-  "Johnston, D., Nguyen, L., Liu, Y., Wei, X., Dai, J., Li, J., Zhang, Z., & Yang, Z. (2026). Consumer Rep Remuneration Tool [Web application]. i2i, UNSW Population Health and UNSW COMP9900/3900 Team T13C.";
+  "Johnston, D., Nguyen, L., Liu, Y., Wei, X., Dai, J., Li, J., Zhang, Z., & Yang, Z. (2026). Consumer Representative Remuneration Tool [Web application]. i2i, UNSW Population Health and UNSW COMP9900/3900 Team T13C.";
 
+/** CAKE-1 — public landing page with overview, citation, and questionnaire CTA. */
 export function LandingPage() {
   const { t } = useLanguage();
   const [citationStatus, setCitationStatus] = useState<"idle" | "copied" | "failed">("idle");
@@ -77,12 +78,12 @@ export function LandingPage() {
       tabIndex={-1}
       className="min-h-screen overflow-hidden bg-white text-slate-900 outline-none"
     >
-      <section className="relative isolate flex min-h-[520px] border-b border-teal-600 bg-[#115e59] text-white">
+      <section className="relative isolate flex min-h-[520px] flex-col border-b border-teal-600 bg-[#115e59] text-white">
         <div
           aria-hidden="true"
           className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,_rgba(153,246,228,0.22),_transparent_38%),linear-gradient(180deg,_rgba(15,118,110,0.08),_rgba(19,78,74,0.26))]"
         />
-        <div className="absolute right-4 top-4 z-10 sm:right-6 lg:right-8">
+        <div className="relative z-20 mx-auto w-full max-w-5xl px-4 pt-4 sm:absolute sm:right-6 sm:top-4 sm:w-auto sm:max-w-none sm:px-0 sm:pt-0 lg:right-8">
           <LanguageSelector variant="hero" />
         </div>
         <div
@@ -111,9 +112,9 @@ export function LandingPage() {
           <span className="absolute bottom-10 right-108 h-32 w-3 bg-teal-100/12" />
         </div>
 
-        <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center px-4 pb-10 pt-20 text-center sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center px-4 pb-10 pt-8 text-center sm:px-6 sm:pt-20 lg:px-8">
           <p className="landing-rise text-sm font-semibold uppercase tracking-[0.28em] text-teal-200">
-            Evidence-informed decision support
+            {t("landingEyebrow")}
           </p>
           <h1 className="landing-rise landing-rise-delay-1 mt-5 max-w-4xl font-[Georgia,serif] text-5xl font-normal leading-[0.98] tracking-tight text-white sm:text-6xl lg:text-7xl">
             {t("toolTitle")}
@@ -205,7 +206,7 @@ export function LandingPage() {
       </section>
 
       <section className="border-b border-teal-100 bg-teal-50">
-        <div className="mx-auto grid w-full max-w-7xl gap-x-6 gap-y-5 px-6 py-7 sm:px-8 lg:grid-cols-[1.25fr_1.35fr_1.1fr_1.1fr_minmax(150px,0.7fr)] lg:items-center">
+        <div className="mx-auto grid w-full max-w-7xl gap-x-6 gap-y-5 px-6 py-7 sm:px-8 lg:grid-cols-[1.25fr_1.5fr_1.2fr_minmax(150px,0.7fr)] lg:items-center">
           <div>
             <h2 className="whitespace-nowrap font-[Georgia,serif] text-2xl text-teal-950">
               {t("contactSupport")}
@@ -219,15 +220,6 @@ export function LandingPage() {
               className="mt-2 block whitespace-nowrap text-sm font-semibold text-teal-800 transition hover:text-teal-950"
             >
               deborah.johnston@unsw.edu.au
-            </a>
-          </div>
-          <div className="border-slate-400/50 lg:border-l lg:pl-6">
-            <p className="text-sm text-slate-700">{t("phone")}</p>
-            <a
-              href="tel:+610290659414"
-              className="mt-2 block text-sm font-semibold text-teal-800 transition hover:text-teal-950"
-            >
-              +61 (02) 9065 9414
             </a>
           </div>
           <div className="border-slate-400/50 lg:border-l lg:pl-6">
@@ -266,7 +258,7 @@ export function LandingPage() {
 
       <footer className="bg-teal-950 text-teal-100/70">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-6 py-6 text-sm sm:px-8 md:flex-row md:items-center md:justify-center md:gap-8">
-          <p>&copy; 2026 Consumer Rep Remuneration Tool</p>
+          <p>{t("copyright")}</p>
           <span aria-hidden="true" className="hidden h-5 w-px bg-slate-700 md:block" />
           <Link href="/questionnaire" className="transition hover:text-white">
             {t("startQuestionnaire")}

@@ -17,6 +17,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   RATE_LIMITED: "Please wait before requesting another verification code.",
 };
 
+/** AuthController — POST /api/auth/recovery/contacts/request (send email-change OTP, CAKE-10). */
 export async function POST(request: Request) {
   const auth = requireAdmin(request);
   if ("response" in auth) {

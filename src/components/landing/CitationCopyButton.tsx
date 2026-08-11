@@ -7,6 +7,7 @@ type CitationCopyButtonProps = {
   citation: string;
 };
 
+/** Copy the suggested tool citation to the clipboard (landing page). */
 export function CitationCopyButton({ citation }: CitationCopyButtonProps) {
   const { t } = useLanguage();
   const [status, setStatus] = useState<"idle" | "copied" | "failed">("idle");

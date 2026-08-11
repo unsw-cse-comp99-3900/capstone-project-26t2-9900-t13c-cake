@@ -39,6 +39,7 @@ async function readJsonResponse<T>(response: Response): Promise<T | null> {
   }
 }
 
+/** CAKE-10 — forgot-password flow (email OTP or backup recovery code). */
 export function AccountRecoveryForm() {
   const [options, setOptions] = useState<RecoveryOptions | null>(null);
   const [method, setMethod] = useState<RecoveryMethod | null>(null);

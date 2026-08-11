@@ -6,12 +6,12 @@ const EMAIL_CONTENT: Record<RecoveryEmailPurpose, { subject: string; message: st
   "password-recovery": {
     subject: "Administrator password recovery code",
     message:
-      "Your Consumer Rep Remuneration Tool administrator recovery code is {{CODE}}. It expires in 10 minutes.",
+      "Your Consumer Representative Remuneration Tool administrator recovery code is {{CODE}}. It expires in 10 minutes.",
   },
   "recovery-email-verification": {
     subject: "Verify your administrator recovery email",
     message:
-      "Your Consumer Rep Remuneration Tool recovery email verification code is {{CODE}}. It expires in 10 minutes. If you did not request this change, you can ignore this email.",
+      "Your Consumer Representative Remuneration Tool recovery email verification code is {{CODE}}. It expires in 10 minutes. If you did not request this change, you can ignore this email.",
   },
 };
 
@@ -29,6 +29,7 @@ function readSmtpConfig() {
   return { host, port, user, pass, from };
 }
 
+/** Layer 3 — SMTP delivery for administrator recovery emails (CAKE-10). */
 export const recoveryDeliveryService = {
   isConfigured(): boolean {
     return Boolean(readSmtpConfig());

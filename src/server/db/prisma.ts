@@ -4,6 +4,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+/** Shared Prisma client (dev hot-reload safe singleton). */
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({

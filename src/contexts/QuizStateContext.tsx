@@ -8,7 +8,7 @@ export type QuizStep = 1 | 2;
 export type ContextSelection = {
   context: string;
   subCategory: string | null;
-  engagementLevel: string | null;
+  engagementLevels: string[];
 };
 
 export type QuizAnswers = {
@@ -24,7 +24,7 @@ type QuizStateContextValue = {
   clearJurisdictions: () => void;
   toggleContext: (context: string) => void;
   setSelectionSubCategory: (context: string, subCategory: string | null) => void;
-  setSelectionEngagementLevel: (context: string, engagementLevel: string | null) => void;
+  setSelectionEngagementLevels: (context: string, engagementLevels: string[]) => void;
   resetAnswers: () => void;
 };
 
@@ -75,7 +75,7 @@ export function QuizStateProvider({ children }: { children: ReactNode }) {
                   {
                     context,
                     subCategory: null,
-                    engagementLevel: null,
+                    engagementLevels: [],
                   },
                 ],
           };
@@ -86,17 +86,17 @@ export function QuizStateProvider({ children }: { children: ReactNode }) {
           ...previous,
           selections: previous.selections.map((selection) =>
             selection.context === context
-              ? { ...selection, subCategory, engagementLevel: null }
+              ? { ...selection, subCategory, engagementLevels: [] }
               : selection,
           ),
         }));
       },
-      setSelectionEngagementLevel(context, engagementLevel) {
+      setSelectionEngagementLevels(context, engagementLevels) {
         setAnswers((previous) => ({
           ...previous,
           selections: previous.selections.map((selection) =>
             selection.context === context
-              ? { ...selection, engagementLevel }
+              ? { ...selection, engagementLevels }
               : selection,
           ),
         }));

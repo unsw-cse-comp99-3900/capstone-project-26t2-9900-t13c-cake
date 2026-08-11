@@ -4,6 +4,7 @@ import { hashPassword, verifyPassword } from "@/server/utils/passwordUtils";
 const BACKUP_CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTVWXYZ";
 const BACKUP_CODE_LENGTH = 20;
 
+/** Generate a grouped backup recovery code (XXXX-XXXX-XXXX-XXXX-XXXX). */
 export function generateBackupRecoveryCode(): string {
   const characters = Array.from(
     { length: BACKUP_CODE_LENGTH },
@@ -15,6 +16,7 @@ export function generateBackupRecoveryCode(): string {
   ).join("-");
 }
 
+/** Normalise user input to the canonical backup-code form, or null if invalid. */
 export function normalizeBackupRecoveryCode(input: string): string | null {
   const normalized = input.replace(/[\s-]/g, "").toUpperCase();
   const validPattern = new RegExp(
@@ -24,6 +26,7 @@ export function normalizeBackupRecoveryCode(input: string): string | null {
   return validPattern.test(normalized) ? normalized : null;
 }
 
+/** Persist a scrypt hash of a normalised backup recovery code. */
 export function hashBackupRecoveryCode(code: string): string {
   const normalized = normalizeBackupRecoveryCode(code);
   if (!normalized) {
@@ -33,6 +36,7 @@ export function hashBackupRecoveryCode(code: string): string {
   return hashPassword(normalized);
 }
 
+/** Verify a backup recovery code against its stored hash. */
 export function verifyBackupRecoveryCode(
   code: string,
   storedHash: string,

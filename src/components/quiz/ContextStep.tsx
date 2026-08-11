@@ -106,6 +106,26 @@ function formatCategoryCount(language: string, count: number): string {
   return `${count} ${count === 1 ? "category" : "categories"} covered`;
 }
 
+function getEngagementLevelDetails(engagementLevel: string): {
+  label: string;
+  categoryCount: number;
+} | null {
+  const details = ENGAGEMENT_LEVEL_DETAILS[engagementLevel];
+  if (details) {
+    return details;
+  }
+
+  const categoryCount = Number(engagementLevel);
+  if (Number.isInteger(categoryCount) && categoryCount > 0) {
+    return {
+      label: `Level ${categoryCount}`,
+      categoryCount,
+    };
+  }
+
+  return null;
+}
+
 function slug(value: string): string {
   return value.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
 }
@@ -124,7 +144,7 @@ export function ContextStep({
     answers,
     toggleContext,
     setSelectionSubCategory,
-    setSelectionEngagementLevel,
+    setSelectionEngagementLevels,
     setCurrentStep,
   } = useQuizState();
   const selectedContexts = new Set(
@@ -148,10 +168,13 @@ export function ContextStep({
       const options = selectionOptionsByContext.get(selection.context);
       const engagementLevels =
         options?.engagementLevelsBySubCategory[selection.subCategory ?? ""] ?? [];
+      const availableEngagementLevels = new Set(engagementLevels);
 
       return (
-        selection.engagementLevel !== null &&
-        engagementLevels.includes(selection.engagementLevel)
+        selection.engagementLevels.length > 0 &&
+        selection.engagementLevels.every((engagementLevel) =>
+          availableEngagementLevels.has(engagementLevel),
+        )
       );
     }) &&
     !isLoading &&
@@ -299,6 +322,12 @@ export function ContextStep({
                   const engagementLevels =
                     options?.engagementLevelsBySubCategory[subCategoryKey] ?? [];
                   const selectionId = slug(selection.context);
+                  const selectedEngagementLevels = new Set(selection.engagementLevels);
+                  const hasSelectedAllEngagementLevels =
+                    engagementLevels.length > 0 &&
+                    engagementLevels.every((engagementLevel) =>
+                      selectedEngagementLevels.has(engagementLevel),
+                    );
 
                   return (
                     <section
@@ -372,35 +401,49 @@ export function ContextStep({
                         </div>
                       ) : (
                         <fieldset className="mt-5">
-                          <legend className="flex items-center gap-2 text-sm font-bold text-slate-800">
+                          <legend className="flex flex-wrap items-center gap-2 text-sm font-bold text-slate-800">
                             <span>{t("engagementLevel")}</span>
                             <span
                               tabIndex={0}
-                              aria-label="Engagement level explanation"
+                              aria-label="Evidence coverage explanation"
                               className="group relative inline-grid size-6 place-items-center rounded-full border border-[#cbd8df] bg-white text-sm font-bold text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.05)] focus:outline-2 focus:outline-offset-2 focus:outline-teal-700"
                             >
                               ?
                               <span className="pointer-events-none absolute left-1/2 top-8 z-20 hidden w-72 -translate-x-1/2 rounded-[6px] border border-[#dce6e4] bg-white p-3 text-left text-xs font-medium leading-5 text-slate-700 shadow-lg group-hover:block group-focus-within:block">
-                                Engagement level means the number of categories of
-                                remuneration present within the document.
+                                It means the number of categories of remuneration
+                                present within each document. The larger the number,
+                                the more detailed the level of division in the
+                                document.
                               </span>
                             </span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setSelectionEngagementLevels(
+                                  selection.context,
+                                  hasSelectedAllEngagementLevels ? [] : engagementLevels,
+                                )
+                              }
+                              className="ml-1 rounded-[4px] px-1.5 py-0.5 text-sm font-bold text-[#006b63] transition hover:text-[#004f49] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+                            >
+                              Select all
+                            </button>
                           </legend>
                           <div className="mt-3 grid gap-4 md:grid-cols-2">
                             {engagementLevels.map((engagementLevel) => {
-                              const details = ENGAGEMENT_LEVEL_DETAILS[engagementLevel];
+                              const details = getEngagementLevelDetails(engagementLevel);
                               const engagementId = `engagement-${selection.context}-${engagementLevel}`
                                 .replace(/[^a-z0-9]+/gi, "-")
                                 .toLowerCase();
                               const isSelected =
-                                selection.engagementLevel === engagementLevel;
+                                selectedEngagementLevels.has(engagementLevel);
 
                               return (
                                 <label
                                   key={engagementLevel}
                                   htmlFor={engagementId}
                                   className={[
-                                    "group cursor-pointer rounded-[8px] border px-4 py-4 transition",
+                                    "group cursor-pointer rounded-[8px] border px-4 py-4 transition lg:px-5 lg:py-5",
                                     "focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-teal-700",
                                     isSelected
                                       ? "border-[#006b63] bg-[#e8f7f3]"
@@ -410,14 +453,19 @@ export function ContextStep({
                                   <div className="flex items-start gap-4">
                                     <input
                                       id={engagementId}
-                                      type="radio"
+                                      type="checkbox"
                                       name={`engagement-${selection.context}`}
                                       value={engagementLevel}
                                       checked={isSelected}
-                                      onChange={() =>
-                                        setSelectionEngagementLevel(
+                                      onChange={(event) =>
+                                        setSelectionEngagementLevels(
                                           selection.context,
-                                          engagementLevel,
+                                          event.target.checked
+                                            ? [...selection.engagementLevels, engagementLevel]
+                                            : selection.engagementLevels.filter(
+                                                (selectedLevel) =>
+                                                  selectedLevel !== engagementLevel,
+                                              ),
                                         )
                                       }
                                       className="peer sr-only"
@@ -425,7 +473,7 @@ export function ContextStep({
                                     <span
                                       aria-hidden="true"
                                       className={[
-                                        "mt-1 flex size-5 shrink-0 items-center justify-center rounded-full border text-xs font-bold transition",
+                                        "flex size-5 shrink-0 items-center justify-center rounded-[4px] border text-sm font-bold transition",
                                         isSelected
                                           ? "border-[#006b63] bg-[#006b63] text-white"
                                           : "border-[#cfd9d7] bg-white text-transparent group-hover:border-[#b8d9d4]",
@@ -434,7 +482,7 @@ export function ContextStep({
                                       ✓
                                     </span>
                                     <span>
-                                      <span className="block text-xs font-bold uppercase tracking-[0.16em] text-[#006b63]">
+                                      <span className="mt-1 block text-xs font-bold uppercase tracking-[0.16em] text-[#006b63]">
                                         {details
                                           ? translateLevelLabel(language, details.label)
                                           : t("additionalLevel")}

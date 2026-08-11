@@ -10,6 +10,7 @@ type BackupRecoverySetupProps = {
   onCompleted: () => Promise<void>;
 };
 
+/** CAKE-10 — mandatory backup recovery code capture after first admin login. */
 export function BackupRecoverySetup({
   onCompleted,
 }: BackupRecoverySetupProps) {

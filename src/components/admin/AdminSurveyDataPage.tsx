@@ -35,6 +35,7 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+/** CAKE-13 — admin view of anonymous survey responses and rating summary. */
 export function AdminSurveyDataPage() {
   const { session } = useAdminAuth();
   const [state, setState] = useState<SurveyState>({ status: "loading" });

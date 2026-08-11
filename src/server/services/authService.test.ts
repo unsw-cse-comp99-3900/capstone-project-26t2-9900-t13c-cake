@@ -55,8 +55,7 @@ describe("authService (CAKE-10)", () => {
   });
 
   it("returns false for configuration when session secret is missing", () => {
-    vi.unstubAllEnvs();
-    vi.stubEnv("ADMIN_PASSWORD", "secret-pass");
+    vi.stubEnv("SESSION_SECRET", "");
 
     expect(authService.isConfigured()).toBe(false);
   });

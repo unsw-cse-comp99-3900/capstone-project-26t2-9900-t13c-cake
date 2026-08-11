@@ -14,6 +14,7 @@ function maskEmail(email: string): string {
   return `${visible}${"*".repeat(Math.max(2, local.length - visible.length))}@${domain}`;
 }
 
+/** Layer 3 — verify a new recovery email before it replaces the saved contact (CAKE-10). */
 export const recoveryEmailVerificationService = {
   async getStatus() {
     const state = await adminAccountRepository.getRecoveryEmailVerificationState();

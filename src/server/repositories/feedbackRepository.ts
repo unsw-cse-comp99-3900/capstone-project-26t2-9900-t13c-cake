@@ -18,6 +18,7 @@ function toDTO(record: AnonymousFeedback): AnonymousFeedbackDTO {
   return dto;
 }
 
+/** Layer 4 — persist anonymous feedback without exposing consent in list DTOs (CAKE-13). */
 export const feedbackRepository = {
   async create(data: AnonymousFeedbackCreateInput): Promise<AnonymousFeedbackDTO> {
     const record = await prisma.anonymousFeedback.create({ data });

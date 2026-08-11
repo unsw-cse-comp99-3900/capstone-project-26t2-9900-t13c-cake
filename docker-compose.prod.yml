@@ -1,0 +1,20 @@
+# Production-oriented overrides (HTTPS reverse proxy in front).
+# Requires Docker Compose v2.24+ (!reset / !override merge).
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
+#
+# Put Caddy/Nginx on host ports 80/443 proxying to 127.0.0.1:3000.
+# Do not expose Postgres on the public internet.
+
+services:
+  db:
+    # Drop the default host publishing from docker-compose.yml
+    ports: !reset []
+
+  app:
+    ports: !override
+      - "127.0.0.1:3000:3000"
+    environment:
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-true}
+      RUN_SEED: ${RUN_SEED:-false}
